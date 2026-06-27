@@ -13,7 +13,19 @@ export default defineConfig({
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Use a preinstalled Chromium when provided (e.g. managed environments
+        // that pin a different build); otherwise Playwright's managed browser.
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+          : {},
+      },
+    },
+  ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
