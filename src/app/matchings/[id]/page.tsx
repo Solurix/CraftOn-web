@@ -1,0 +1,241 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+import { RequireAuth } from "@/components/RequireAuth";
+import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { useAuth } from "@/lib/auth/context";
+import type { Matching } from "@/lib/api/models";
+import { formatYen } from "@/lib/format";
+import { useAsync } from "@/lib/useAsync";
+
+function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: string; onChanged: () => void }) {
+  const t = useTranslations("matchings");
+  const { api } = useAuth();
+  const [error, setError] = useState("");
+
+  const act = async (fn: () => Promise<unknown>) => {
+    setError("");
+    try {
+      await fn();
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  const id = matching.id;
+  const isWorker = role === "worker";
+  const isContractor = role === "contractor";
+  const active = matching.status === "confirmed" || matching.status === "checked_in";
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {isWorker && matching.status === "confirmed" && (
+          <button className="btn-primary" onClick={() => act(() => api.checkIn(id))}>
+            {t("checkIn")}
+          </button>
+        )}
+        {isWorker && matching.status === "checked_in" && !matching.completion_requested_at && (
+          <button className="btn-primary" onClick={() => act(() => api.completeRequest(id))}>
+            {t("completeRequest")}
+          </button>
+        )}
+        {isContractor &&
+          matching.status === "checked_in" &&
+          matching.completion_requested_at && (
+            <button className="btn-primary" onClick={() => act(() => api.approveCompletion(id))}>
+              {t("approveCompletion")}
+            </button>
+          )}
+        {active && (
+          <button className="btn-danger" onClick={() => act(() => api.cancelMatching(id))}>
+            {t("cancel")}
+          </button>
+        )}
+      </div>
+      <ErrorText message={error} />
+    </div>
+  );
+}
+
+function ChatPanel({ matchingId }: { matchingId: string }) {
+  const t = useTranslations("chat");
+  const { api, me } = useAuth();
+  const { data, loading, reload } = useAsync(() => api.messages(matchingId), [matchingId]);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setBusy(true);
+    try {
+      await api.sendMessage(matchingId, text);
+      setText("");
+      reload();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="card space-y-3">
+      <h2 className="font-semibold">{t("title")}</h2>
+      {loading ? (
+        <Spinner />
+      ) : !data || data.length === 0 ? (
+        <p className="text-sm text-gray-500">{t("empty")}</p>
+      ) : (
+        <ul className="space-y-2">
+          {data.map((msg) => {
+            const mine = msg.sender_id === me?.user.id;
+            return (
+              <li key={msg.id} className={mine ? "text-right" : "text-left"}>
+                <span
+                  className={`inline-block rounded-lg px-3 py-1 text-sm ${
+                    mine ? "bg-brand text-white" : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {msg.body}
+                </span>
+                {msg.was_filtered && (
+                  <p className="text-[10px] text-amber-600">{t("filteredNotice")}</p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <form onSubmit={send} className="flex gap-2">
+        <input
+          className="field-input"
+          placeholder={t("placeholder")}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button className="btn-primary" disabled={busy}>
+          {t("send")}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ReviewPanel({ matchingId, onDone }: { matchingId: string; onDone: () => void }) {
+  const t = useTranslations("reviews");
+  const { api } = useAuth();
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await api.leaveReview(matchingId, { rating, comment: comment || null, tags: [] });
+      setDone(true);
+      onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  if (done) return <p className="card text-sm text-green-700">{t("submitted")}</p>;
+
+  return (
+    <form onSubmit={submit} className="card space-y-3">
+      <h2 className="font-semibold">{t("leave")}</h2>
+      <div>
+        <label className="field-label">{t("rating")}</label>
+        <select className="field-input" value={rating} onChange={(e) => setRating(Number(e.target.value))}>
+          {[5, 4, 3, 2, 1].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="field-label">{t("comment")}</label>
+        <textarea className="field-input" value={comment} onChange={(e) => setComment(e.target.value)} />
+      </div>
+      <button className="btn-primary w-full">{t("leave")}</button>
+      <ErrorText message={error} />
+    </form>
+  );
+}
+
+function MatchingDetail() {
+  const t = useTranslations("matchings");
+  const { id } = useParams<{ id: string }>();
+  const { api, me } = useAuth();
+  const { data: m, loading, error, reload } = useAsync(() => api.matching(id), [id]);
+  const [showTerms, setShowTerms] = useState(false);
+
+  if (loading) return <Spinner />;
+  if (error || !m) return <ErrorText message={error || "not found"} />;
+
+  const role = me?.user.user_type ?? "";
+
+  return (
+    <div className="space-y-4">
+      <Link href="/matchings" className="text-sm text-gray-500">
+        ← {t("title")}
+      </Link>
+
+      <div className="card space-y-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">{t("detailTitle")}</h1>
+          <StatusBadge status={m.status} />
+        </div>
+        <Row label={t("contractType")} value={m.contract_type} />
+        <Row label="日当 / wage" value={formatYen(m.daily_wage)} />
+        <Row
+          label={t("fee")}
+          value={`${formatYen(m.platform_fee)} (${m.fee_status === "paid" ? t("feePaid") : t("feeUnpaid")})`}
+        />
+        {m.terms && (
+          <div>
+            <button className="text-sm text-brand underline" onClick={() => setShowTerms((v) => !v)}>
+              {t("viewTerms")}
+            </button>
+            {showTerms && (
+              <pre className="mt-2 whitespace-pre-wrap rounded bg-gray-50 p-2 text-xs text-gray-700">
+                {m.terms}
+              </pre>
+            )}
+          </div>
+        )}
+      </div>
+
+      <Lifecycle matching={m} role={role} onChanged={reload} />
+
+      <ChatPanel matchingId={id} />
+
+      {m.status === "completed" && <ReviewPanel matchingId={id} onDone={reload} />}
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-500">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
+  );
+}
+
+export default function MatchingDetailPage() {
+  return (
+    <RequireAuth>
+      <MatchingDetail />
+    </RequireAuth>
+  );
+}
