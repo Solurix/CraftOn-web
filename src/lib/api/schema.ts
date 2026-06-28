@@ -771,6 +771,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Admins */
+        get: operations["list_admins_api_v1_admin_admins_get"];
+        put?: never;
+        /** Create Admin */
+        post: operations["create_admin_api_v1_admin_admins_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/users/{user_id}/approve": {
         parameters: {
             query?: never;
@@ -856,6 +874,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/debug/seed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Debug Seed Data */
+        post: operations["debug_seed_data_api_v1_admin_debug_seed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/config": {
         parameters: {
             query?: never;
@@ -878,6 +913,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AdminCreateIn
+         * @description Create a new admin account by phone number.
+         */
+        AdminCreateIn: {
+            /** Phone Number */
+            phone_number: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Preferred Language
+             * @default ja
+             */
+            preferred_language: string;
+        };
         /**
          * ApplicantOut
          * @description Applicant view for the contractor (worker summary embedded).
@@ -1037,6 +1087,36 @@ export interface components {
             bio: string | null;
             /** Rating */
             rating: string;
+        };
+        /**
+         * DebugSeedIn
+         * @description How many random records to create (debug/non-prod only).
+         */
+        DebugSeedIn: {
+            /**
+             * Workers
+             * @default 5
+             */
+            workers: number;
+            /**
+             * Contractors
+             * @default 3
+             */
+            contractors: number;
+            /**
+             * Jobs
+             * @default 10
+             */
+            jobs: number;
+        };
+        /** DebugSeedOut */
+        DebugSeedOut: {
+            /** Workers */
+            workers: number;
+            /** Contractors */
+            contractors: number;
+            /** Jobs */
+            jobs: number;
         };
         /**
          * DocReviewStatus
@@ -1574,9 +1654,16 @@ export interface components {
         /**
          * WorkHistoryEntry
          * @description A single past job in a worker's 職歴 (career history).
+         *
+         *     Used for both input and output. Kept permissive (no min_length) so a stored
+         *     row never fails OUT-serialization; the web/service drop blank-company rows on
+         *     write.
          */
         WorkHistoryEntry: {
-            /** Company */
+            /**
+             * Company
+             * @default
+             */
             company: string;
             /**
              * Trade
@@ -3726,6 +3813,68 @@ export interface operations {
             };
         };
     };
+    list_admins_api_v1_admin_admins_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"][];
+                };
+            };
+        };
+    };
+    create_admin_api_v1_admin_admins_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     approve_user_api_v1_admin_users__user_id__approve_post: {
         parameters: {
             query?: never;
@@ -3908,6 +4057,48 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    debug_seed_data_api_v1_admin_debug_seed_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DebugSeedIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DebugSeedOut"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

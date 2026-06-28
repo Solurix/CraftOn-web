@@ -2849,6 +2849,90 @@
                 }
             }
         },
+        "/api/v1/admin/admins": {
+            "get": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "List Admins",
+                "operationId": "list_admins_api_v1_admin_admins_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserOut"
+                                    },
+                                    "type": "array",
+                                    "title": "Response List Admins Api V1 Admin Admins Get"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create Admin",
+                "operationId": "create_admin_api_v1_admin_admins_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminCreateIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserOut"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/users/{user_id}/approve": {
             "post": {
                 "tags": [
@@ -3175,6 +3259,62 @@
                 }
             }
         },
+        "/api/v1/admin/debug/seed": {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Debug Seed Data",
+                "operationId": "debug_seed_data_api_v1_admin_debug_seed_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DebugSeedIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DebugSeedOut"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/config": {
             "get": {
                 "tags": [
@@ -3258,6 +3398,36 @@
     },
     "components": {
         "schemas": {
+            "AdminCreateIn": {
+                "properties": {
+                    "phone_number": {
+                        "type": "string",
+                        "maxLength": 32,
+                        "minLength": 5,
+                        "title": "Phone Number"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 1,
+                        "title": "Display Name"
+                    },
+                    "preferred_language": {
+                        "type": "string",
+                        "maxLength": 8,
+                        "minLength": 2,
+                        "title": "Preferred Language",
+                        "default": "ja"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "phone_number",
+                    "display_name"
+                ],
+                "title": "AdminCreateIn",
+                "description": "Create a new admin account by phone number."
+            },
             "ApplicantOut": {
                 "properties": {
                     "id": {
@@ -3638,6 +3808,57 @@
                 ],
                 "title": "ContractorPublicOut",
                 "description": "Public contractor profile (docs/06: rating, reviews)."
+            },
+            "DebugSeedIn": {
+                "properties": {
+                    "workers": {
+                        "type": "integer",
+                        "maximum": 100.0,
+                        "minimum": 0.0,
+                        "title": "Workers",
+                        "default": 5
+                    },
+                    "contractors": {
+                        "type": "integer",
+                        "maximum": 50.0,
+                        "minimum": 0.0,
+                        "title": "Contractors",
+                        "default": 3
+                    },
+                    "jobs": {
+                        "type": "integer",
+                        "maximum": 200.0,
+                        "minimum": 0.0,
+                        "title": "Jobs",
+                        "default": 10
+                    }
+                },
+                "type": "object",
+                "title": "DebugSeedIn",
+                "description": "How many random records to create (debug/non-prod only)."
+            },
+            "DebugSeedOut": {
+                "properties": {
+                    "workers": {
+                        "type": "integer",
+                        "title": "Workers"
+                    },
+                    "contractors": {
+                        "type": "integer",
+                        "title": "Contractors"
+                    },
+                    "jobs": {
+                        "type": "integer",
+                        "title": "Jobs"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "workers",
+                    "contractors",
+                    "jobs"
+                ],
+                "title": "DebugSeedOut"
             },
             "DocReviewStatus": {
                 "type": "string",
@@ -4979,8 +5200,8 @@
                     "company": {
                         "type": "string",
                         "maxLength": 255,
-                        "minLength": 1,
-                        "title": "Company"
+                        "title": "Company",
+                        "default": ""
                     },
                     "trade": {
                         "type": "string",
@@ -4997,11 +5218,8 @@
                     }
                 },
                 "type": "object",
-                "required": [
-                    "company"
-                ],
                 "title": "WorkHistoryEntry",
-                "description": "A single past job in a worker's \u8077\u6b74 (career history)."
+                "description": "A single past job in a worker's \u8077\u6b74 (career history).\n\nUsed for both input and output. Kept permissive (no min_length) so a stored\nrow never fails OUT-serialization; the web/service drop blank-company rows on\nwrite."
             },
             "WorkHistoryOut": {
                 "properties": {

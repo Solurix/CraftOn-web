@@ -20,6 +20,7 @@ import type {
   SessionCreate,
   SessionResult,
   UploadUrl,
+  User,
   VettingQueue,
   WorkerOnboarding,
   WorkerProfile,
@@ -248,6 +249,18 @@ export class ApiClient {
   }
   markFeePaid(matchingId: string) {
     return request<Matching>(`/admin/matchings/${matchingId}/mark-fee-paid`, { method: "POST", token: this.token });
+  }
+  adminAdmins() {
+    return request<User[]>("/admin/admins", { token: this.token });
+  }
+  createAdmin(body: { phone_number: string; display_name: string }) {
+    return request<User>("/admin/admins", { method: "POST", body, token: this.token });
+  }
+  debugSeed(body: { workers: number; contractors: number; jobs: number }) {
+    return request<{ workers: number; contractors: number; jobs: number }>(
+      "/admin/debug/seed",
+      { method: "POST", body, token: this.token },
+    );
   }
   approveUser(id: string) {
     return request<unknown>(`/admin/users/${id}/approve`, { method: "POST", token: this.token });

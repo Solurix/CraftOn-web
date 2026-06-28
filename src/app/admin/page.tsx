@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
-type Tab = "users" | "jobs" | "matchings" | "config";
+type Tab = "users" | "jobs" | "matchings" | "admins" | "debug" | "config";
 
 function profileHref(item: VettingItem): string | null {
   if (item.user.user_type === "worker") return `/workers/${item.user.id}`;
@@ -204,6 +204,136 @@ function MatchingsTab() {
   );
 }
 
+function AdminsTab() {
+  const t = useTranslations("admin");
+  const auth = useTranslations("auth");
+  const { api } = useAuth();
+  const admins = useAsync(() => api.adminAdmins(), []);
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const create = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await api.createAdmin({ phone_number: phone, display_name: name });
+      setPhone("");
+      setName("");
+      admins.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <form onSubmit={create} className="card space-y-2">
+        <h2 className="font-semibold">{t("addAdmin")}</h2>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex-1">
+            <span className="field-label">{auth("displayName")}</span>
+            <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} required />
+          </label>
+          <label className="flex-1">
+            <span className="field-label">{auth("phoneLabel")}</span>
+            <input
+              className="field-input"
+              placeholder={auth("phonePlaceholder")}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </label>
+          <button className="btn-primary" disabled={!phone || !name}>
+            {t("createAdmin")}
+          </button>
+        </div>
+        <ErrorText message={error} />
+      </form>
+      {admins.loading ? (
+        <Spinner />
+      ) : !admins.data || admins.data.length === 0 ? (
+        <p className="py-6 text-center text-sm text-gray-500">{t("noAdmins")}</p>
+      ) : (
+        <ul className="space-y-2">
+          {admins.data.map((a) => (
+            <li key={a.id} className="card flex items-center justify-between">
+              <span className="font-medium">{a.display_name}</span>
+              <span className="text-xs text-gray-500">{a.phone_number}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function DebugTab() {
+  const t = useTranslations("admin");
+  const { api } = useAuth();
+  const [workers, setWorkers] = useState(5);
+  const [contractors, setContractors] = useState(3);
+  const [jobs, setJobs] = useState(10);
+  const [result, setResult] = useState<{ workers: number; contractors: number; jobs: number } | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const seed = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setResult(null);
+    setBusy(true);
+    try {
+      setResult(
+        await api.debugSeed({
+          workers: Number(workers),
+          contractors: Number(contractors),
+          jobs: Number(jobs),
+        }),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={seed} className="card space-y-3">
+      <h2 className="font-semibold">{t("seedTitle")}</h2>
+      <p className="text-xs text-amber-700">{t("seedWarning")}</p>
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex-1">
+          <span className="field-label">{t("seedWorkers")}</span>
+          <input type="number" min={0} className="field-input" value={workers} onChange={(e) => setWorkers(Number(e.target.value))} />
+        </label>
+        <label className="flex-1">
+          <span className="field-label">{t("seedContractors")}</span>
+          <input type="number" min={0} className="field-input" value={contractors} onChange={(e) => setContractors(Number(e.target.value))} />
+        </label>
+        <label className="flex-1">
+          <span className="field-label">{t("seedJobs")}</span>
+          <input type="number" min={0} className="field-input" value={jobs} onChange={(e) => setJobs(Number(e.target.value))} />
+        </label>
+        <button className="btn-primary" disabled={busy}>
+          {t("seedRun")}
+        </button>
+      </div>
+      {result && (
+        <p className="text-sm text-green-700">
+          {t("seedDone", {
+            workers: result.workers,
+            contractors: result.contractors,
+            jobs: result.jobs,
+          })}
+        </p>
+      )}
+      <ErrorText message={error} />
+    </form>
+  );
+}
+
 function ConfigTab() {
   const t = useTranslations("admin");
   const { api } = useAuth();
@@ -260,6 +390,8 @@ function AdminDashboard() {
     { id: "users", label: t("tabUsers") },
     { id: "jobs", label: t("tabJobs") },
     { id: "matchings", label: t("tabMatchings") },
+    { id: "admins", label: t("tabAdmins") },
+    { id: "debug", label: t("tabDebug") },
     { id: "config", label: t("tabConfig") },
   ];
 
@@ -283,6 +415,8 @@ function AdminDashboard() {
       {tab === "users" && <UsersTab />}
       {tab === "jobs" && <JobsTab />}
       {tab === "matchings" && <MatchingsTab />}
+      {tab === "admins" && <AdminsTab />}
+      {tab === "debug" && <DebugTab />}
       {tab === "config" && <ConfigTab />}
     </div>
   );
