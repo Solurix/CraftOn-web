@@ -13,6 +13,7 @@ import { useAsync } from "@/lib/useAsync";
 
 function JobApplicants() {
   const t = useTranslations("applications");
+  const ob = useTranslations("onboarding");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
   const router = useRouter();
@@ -69,7 +70,7 @@ function JobApplicants() {
                   {a.worker_display_name}
                 </Link>
                 <p className="text-xs text-gray-500">
-                  {a.worker_class} · {t("trust")}: {Number(a.worker_trust_score).toFixed(1)}
+                  {ob(a.worker_class)} · {t("trust")}: {Number(a.worker_trust_score).toFixed(1)}
                 </p>
                 <StatusBadge status={a.status} />
               </div>

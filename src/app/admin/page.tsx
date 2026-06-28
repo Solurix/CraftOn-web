@@ -21,6 +21,7 @@ function profileHref(item: VettingItem): string | null {
 
 function UsersTab() {
   const t = useTranslations("admin");
+  const ob = useTranslations("onboarding");
   const { api } = useAuth();
   const [userType, setUserType] = useState("");
   const [status, setStatus] = useState("");
@@ -84,7 +85,7 @@ function UsersTab() {
                 </div>
                 {item.worker_profile && (
                   <p className="text-xs text-gray-600">
-                    {item.worker_profile.nationality} · {item.worker_profile.worker_class} ·{" "}
+                    {item.worker_profile.nationality} · {ob(item.worker_profile.worker_class)} ·{" "}
                     {item.worker_profile.years_experience}y ·{" "}
                     {item.worker_profile.trades?.join(", ")}
                   </p>

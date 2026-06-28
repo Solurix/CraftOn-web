@@ -5,12 +5,13 @@ import { useParams } from "next/navigation";
 
 import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
 
 function WorkerProfileView() {
   const p = useTranslations("profile");
+  const ob = useTranslations("onboarding");
   const rt = useTranslations("reviews");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
@@ -26,7 +27,9 @@ function WorkerProfileView() {
       <div className="card space-y-2">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">{w.display_name}</h1>
-          <StatusBadge status={w.worker_class} />
+          <span className="inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">
+            {ob(w.worker_class)}
+          </span>
         </div>
         <ProfileRow label={p("trust")} value={`★ ${Number(w.trust_score).toFixed(1)}`} />
         <ProfileRow label={p("experience")} value={p("experienceYears", { years: w.years_experience })} />
