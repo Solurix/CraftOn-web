@@ -184,6 +184,14 @@
     "bellUnread": "通知、未読{count}件",
     "unread": "未読"
   },
+  "devices": {
+    "title": "端末",
+    "empty": "端末はありません。",
+    "thisDevice": "この端末",
+    "revoke": "アクセスを取り消す",
+    "revoked": "取り消し済み",
+    "unknownDevice": "不明な端末"
+  },
   "reviews": {
     "title": "レビュー",
     "leave": "レビューを書く",
@@ -228,6 +236,8 @@
     "tabUsers": "ユーザー",
     "tabJobs": "求人",
     "tabMatchings": "マッチング",
+    "tabDevices": "端末",
+    "noDevices": "端末はありません。",
     "tabConfig": "設定",
     "tabAdmins": "管理者",
     "tabDebug": "デバッグ",

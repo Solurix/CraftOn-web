@@ -8,10 +8,10 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
 import type { VettingItem } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
-import { formatTime, formatYen } from "@/lib/format";
+import { formatDate, formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
-type Tab = "users" | "jobs" | "matchings" | "admins" | "debug" | "config";
+type Tab = "users" | "jobs" | "matchings" | "devices" | "admins" | "debug" | "config";
 
 function profileHref(item: VettingItem): string | null {
   if (item.user.user_type === "worker") return `/workers/${item.user.id}`;
@@ -196,6 +196,42 @@ function MatchingsTab() {
                   {t("markFeePaid")}
                 </button>
               )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function DevicesTab() {
+  const t = useTranslations("admin");
+  const dv = useTranslations("devices");
+  const { api } = useAuth();
+  const devices = useAsync(() => api.adminDevices(), []);
+
+  return (
+    <div className="space-y-3">
+      {devices.loading ? (
+        <Spinner />
+      ) : !devices.data || devices.data.length === 0 ? (
+        <p className="py-6 text-center text-sm text-gray-500">{t("noDevices")}</p>
+      ) : (
+        <ul className="space-y-2">
+          {devices.data.map((d) => (
+            <li key={d.id} className="card flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">
+                  {d.user_display_name ?? "—"}
+                  <span className="ml-2 text-xs text-gray-500">
+                    {d.label || dv("unknownDevice")}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-400">
+                  {formatDate(d.last_seen_at)}
+                  {d.revoked && ` · ${dv("revoked")}`}
+                </p>
+              </div>
             </li>
           ))}
         </ul>
@@ -390,6 +426,7 @@ function AdminDashboard() {
     { id: "users", label: t("tabUsers") },
     { id: "jobs", label: t("tabJobs") },
     { id: "matchings", label: t("tabMatchings") },
+    { id: "devices", label: t("tabDevices") },
     { id: "admins", label: t("tabAdmins") },
     { id: "debug", label: t("tabDebug") },
     { id: "config", label: t("tabConfig") },
@@ -415,6 +452,7 @@ function AdminDashboard() {
       {tab === "users" && <UsersTab />}
       {tab === "jobs" && <JobsTab />}
       {tab === "matchings" && <MatchingsTab />}
+      {tab === "devices" && <DevicesTab />}
       {tab === "admins" && <AdminsTab />}
       {tab === "debug" && <DebugTab />}
       {tab === "config" && <ConfigTab />}

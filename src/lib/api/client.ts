@@ -8,6 +8,7 @@ import type {
   ContractorProfile,
   ContractorPublic,
   ContractorUpdate,
+  Device,
   DocumentOut,
   Job,
   JobCreate,
@@ -29,6 +30,7 @@ import type {
   WorkerUpdate,
   WorkHistory,
 } from "./models";
+import { getDeviceId, getDeviceName } from "../device";
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -53,6 +55,13 @@ async function request<T>(path: string, opts: Options = {}): Promise<T> {
   }
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
+  // Identify the device so the API can list/revoke it.
+  const deviceId = getDeviceId();
+  if (deviceId) {
+    headers["X-Device-Id"] = deviceId;
+    const deviceName = getDeviceName();
+    if (deviceName) headers["X-Device-Name"] = deviceName;
+  }
 
   let res: Response;
   try {
@@ -96,6 +105,17 @@ export class ApiClient {
       method: "POST",
       body: { phone_number: phone, password },
     });
+  }
+
+  // devices
+  myDevices() {
+    return request<Device[]>("/me/devices", { token: this.token });
+  }
+  revokeDevice(id: string) {
+    return request<Device>(`/me/devices/${id}/revoke`, { method: "POST", token: this.token });
+  }
+  adminDevices() {
+    return request<Device[]>("/admin/devices", { token: this.token });
   }
 
   // onboarding / profiles

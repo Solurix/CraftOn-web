@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
+import { DevicesCard } from "@/components/DevicesCard";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText } from "@/components/ui";
 import {
@@ -203,6 +204,7 @@ function Settings() {
     <div className="space-y-4">
       {role}
       <SetPasswordCard />
+      <DevicesCard />
     </div>
   );
 }

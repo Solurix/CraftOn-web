@@ -2806,6 +2806,134 @@
                 }
             }
         },
+        "/api/v1/me/devices": {
+            "get": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "My Devices",
+                "operationId": "my_devices_api_v1_me_devices_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/DeviceOut"
+                                    },
+                                    "type": "array",
+                                    "title": "Response My Devices Api V1 Me Devices Get"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/devices/{device_id}/revoke": {
+            "post": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Revoke My Device",
+                "operationId": "revoke_my_device_api_v1_me_devices__device_id__revoke_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Device Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeviceOut"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/devices": {
+            "get": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Admin List Devices",
+                "operationId": "admin_list_devices_api_v1_admin_devices_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/DeviceOut"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Admin List Devices Api V1 Admin Devices Get"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/vetting/queue": {
             "get": {
                 "tags": [
@@ -3971,6 +4099,71 @@
                     "jobs"
                 ],
                 "title": "DebugSeedOut"
+            },
+            "DeviceOut": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    },
+                    "device_id": {
+                        "type": "string",
+                        "title": "Device Id"
+                    },
+                    "label": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Label"
+                    },
+                    "last_seen_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Last Seen At"
+                    },
+                    "revoked": {
+                        "type": "boolean",
+                        "title": "Revoked"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "user_display_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "User Display Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "device_id",
+                    "label",
+                    "last_seen_at",
+                    "revoked",
+                    "created_at"
+                ],
+                "title": "DeviceOut"
             },
             "DocReviewStatus": {
                 "type": "string",

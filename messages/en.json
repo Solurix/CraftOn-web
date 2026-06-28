@@ -184,6 +184,14 @@
     "bellUnread": "Notifications, {count} unread",
     "unread": "Unread"
   },
+  "devices": {
+    "title": "Devices",
+    "empty": "No devices yet.",
+    "thisDevice": "this device",
+    "revoke": "Revoke",
+    "revoked": "Revoked",
+    "unknownDevice": "Unknown device"
+  },
   "reviews": {
     "title": "Reviews",
     "leave": "Write a review",
@@ -228,6 +236,8 @@
     "tabUsers": "Users",
     "tabJobs": "Jobs",
     "tabMatchings": "Matchings",
+    "tabDevices": "Devices",
+    "noDevices": "No devices.",
     "tabConfig": "Config",
     "tabAdmins": "Admins",
     "tabDebug": "Debug",
