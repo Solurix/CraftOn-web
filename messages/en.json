@@ -23,6 +23,7 @@
     "myApplications": "My applications",
     "myJobs": "My jobs",
     "matchings": "Active jobs",
+    "history": "History",
     "postJob": "Post a job",
     "profile": "Profile",
     "vetting": "Vetting",
@@ -129,6 +130,12 @@
     "contractType": "Contract type",
     "terms": "Terms (provisional)",
     "viewTerms": "View terms"
+  },
+  "history": {
+    "title": "Work history",
+    "completedJobs": "Jobs completed",
+    "totalEarned": "Total earned",
+    "empty": "No completed jobs yet."
   },
   "chat": {
     "title": "Chat",

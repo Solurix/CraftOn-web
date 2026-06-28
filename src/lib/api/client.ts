@@ -25,6 +25,7 @@ import type {
   WorkerProfile,
   WorkerPublic,
   WorkerUpdate,
+  WorkHistory,
 } from "./models";
 
 export const API_BASE =
@@ -179,6 +180,9 @@ export class ApiClient {
   // matchings
   myMatchings() {
     return request<Matching[]>("/matchings/mine", { token: this.token });
+  }
+  workHistory() {
+    return request<WorkHistory>("/matchings/history", { token: this.token });
   }
   matching(id: string) {
     return request<Matching>(`/matchings/${id}`, { token: this.token });

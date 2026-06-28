@@ -1743,6 +1743,32 @@
                 ]
             }
         },
+        "/api/v1/matchings/history": {
+            "get": {
+                "tags": [
+                    "matching"
+                ],
+                "summary": "My Work History",
+                "operationId": "my_work_history_api_v1_matchings_history_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkHistoryOut"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
         "/api/v1/matchings/{matching_id}": {
             "get": {
                 "tags": [
@@ -4947,6 +4973,33 @@
                     "items"
                 ],
                 "title": "VettingQueueOut"
+            },
+            "WorkHistoryOut": {
+                "properties": {
+                    "completed_count": {
+                        "type": "integer",
+                        "title": "Completed Count"
+                    },
+                    "total_earned": {
+                        "type": "integer",
+                        "title": "Total Earned"
+                    },
+                    "matchings": {
+                        "items": {
+                            "$ref": "#/components/schemas/MatchingOut"
+                        },
+                        "type": "array",
+                        "title": "Matchings"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "completed_count",
+                    "total_earned",
+                    "matchings"
+                ],
+                "title": "WorkHistoryOut",
+                "description": "A worker's completed-work record + headline totals (informational)."
             },
             "WorkerClass": {
                 "type": "string",

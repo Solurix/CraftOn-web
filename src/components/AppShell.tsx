@@ -48,6 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <NavLink href="/saved" label={nav("saved")} />
               <NavLink href="/applications" label={nav("myApplications")} />
               <NavLink href="/matchings" label={nav("matchings")} />
+              <NavLink href="/history" label={nav("history")} />
               <NavLink href="/profile" label={nav("profile")} />
             </>
           )}

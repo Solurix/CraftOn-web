@@ -478,6 +478,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/matchings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Work History */
+        get: operations["my_work_history_api_v1_matchings_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/matchings/{matching_id}": {
         parameters: {
             query?: never;
@@ -1553,6 +1570,18 @@ export interface components {
         VettingQueueOut: {
             /** Items */
             items: components["schemas"]["VettingItem"][];
+        };
+        /**
+         * WorkHistoryOut
+         * @description A worker's completed-work record + headline totals (informational).
+         */
+        WorkHistoryOut: {
+            /** Completed Count */
+            completed_count: number;
+            /** Total Earned */
+            total_earned: number;
+            /** Matchings */
+            matchings: components["schemas"]["MatchingOut"][];
         };
         /**
          * WorkerClass
@@ -2855,6 +2884,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MatchingOut"][];
+                };
+            };
+        };
+    };
+    my_work_history_api_v1_matchings_history_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkHistoryOut"];
                 };
             };
         };
