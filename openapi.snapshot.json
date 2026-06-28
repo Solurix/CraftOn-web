@@ -2226,6 +2226,135 @@
         ]
       }
     },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Users",
+        "description": "All users with profile + documents (full admin visibility).",
+        "operationId": "list_users_api_v1_admin_users_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VettingQueueOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/jobs": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_api_v1_admin_jobs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/JobStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobOut"
+                  },
+                  "title": "Response List Jobs Api V1 Admin Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/users/{user_id}/approve": {
       "post": {
         "tags": [
@@ -2796,6 +2925,17 @@
             ],
             "title": "Address"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
           "display_name": {
             "anyOf": [
               {
@@ -2853,6 +2993,17 @@
             ],
             "title": "Address"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
           "rating": {
             "type": "string",
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -2868,6 +3019,7 @@
           "contact_person",
           "prefecture",
           "address",
+          "bio",
           "rating"
         ],
         "title": "ContractorProfileOut",
@@ -2919,6 +3071,17 @@
             ],
             "title": "Address"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
           "display_name": {
             "anyOf": [
               {
@@ -2953,6 +3116,17 @@
             "type": "string",
             "title": "Prefecture"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
           "rating": {
             "type": "string",
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -2965,6 +3139,7 @@
           "display_name",
           "company_name",
           "prefecture",
+          "bio",
           "rating"
         ],
         "title": "ContractorPublicOut",
@@ -3598,6 +3773,18 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "contractor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contractor Id"
           },
           "worker_display_name": {
             "anyOf": [
@@ -4265,6 +4452,23 @@
             "title": "Has Insurance",
             "default": false
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "years_experience": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Years Experience",
+            "default": 0
+          },
           "residence_card_front_doc_id": {
             "anyOf": [
               {
@@ -4360,6 +4564,21 @@
             "type": "boolean",
             "title": "Has Insurance"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "years_experience": {
+            "type": "integer",
+            "title": "Years Experience"
+          },
           "trust_score": {
             "type": "string",
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -4423,6 +4642,8 @@
           "trades",
           "tools",
           "has_insurance",
+          "bio",
+          "years_experience",
           "trust_score",
           "visa_expiry_date",
           "work_restriction",
@@ -4483,6 +4704,29 @@
               }
             ],
             "title": "Has Insurance"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "years_experience": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Experience"
           },
           "residence_card_front_doc_id": {
             "anyOf": [
@@ -4564,6 +4808,21 @@
             "type": "array",
             "title": "Tools"
           },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "years_experience": {
+            "type": "integer",
+            "title": "Years Experience"
+          },
           "trust_score": {
             "type": "string",
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -4577,6 +4836,8 @@
           "worker_class",
           "trades",
           "tools",
+          "bio",
+          "years_experience",
           "trust_score"
         ],
         "title": "WorkerPublicOut",

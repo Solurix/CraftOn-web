@@ -49,6 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <NavLink href="/jobs" label={nav("jobs")} />
               <NavLink href="/applications" label={nav("myApplications")} />
               <NavLink href="/matchings" label={nav("matchings")} />
+              <NavLink href="/profile" label={nav("profile")} />
             </>
           )}
           {role === "contractor" && (
@@ -56,6 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <NavLink href="/post-job" label={nav("postJob")} />
               <NavLink href="/my-jobs" label={nav("myJobs")} />
               <NavLink href="/matchings" label={nav("matchings")} />
+              <NavLink href="/profile" label={nav("profile")} />
             </>
           )}
           {role === "admin" && (

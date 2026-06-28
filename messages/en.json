@@ -49,6 +49,9 @@
     "employee": "Employee (side job)",
     "freelance": "Freelance (sole proprietor)",
     "trades": "Trades (comma-separated)",
+    "tools": "Tools (comma-separated)",
+    "bio": "About you",
+    "yearsExperience": "Years of experience",
     "hasInsurance": "Has labor insurance",
     "visaExpiry": "Visa expiry",
     "companyName": "Company name",
@@ -121,6 +124,19 @@
     "empty": "No reviews yet.",
     "submitted": "Review submitted."
   },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit profile",
+    "saved": "Saved.",
+    "view": "View profile",
+    "experience": "Experience",
+    "experienceYears": "{years} yrs",
+    "about": "About",
+    "trades": "Trades",
+    "tools": "Tools",
+    "company": "Company",
+    "trust": "Trust score"
+  },
   "admin": {
     "vettingTitle": "Pending review",
     "vettingEmpty": "No users awaiting review.",
@@ -131,7 +147,18 @@
     "configTitle": "Config & flags",
     "configKey": "Key",
     "configValue": "Value",
-    "saveConfig": "Save config"
+    "saveConfig": "Save config",
+    "tabUsers": "Users",
+    "tabJobs": "Jobs",
+    "tabMatchings": "Matchings",
+    "tabConfig": "Config",
+    "filterAll": "All",
+    "noUsers": "No users.",
+    "noJobs": "No jobs.",
+    "noMatchings": "No matchings.",
+    "markFeePaid": "Mark fee paid",
+    "company": "Company",
+    "worker": "Worker"
   },
   "status": {
     "pending": "Pending",

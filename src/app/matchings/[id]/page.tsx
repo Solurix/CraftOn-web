@@ -194,6 +194,16 @@ function MatchingDetail() {
           <h1 className="text-lg font-bold">{t("detailTitle")}</h1>
           <StatusBadge status={m.status} />
         </div>
+        {role === "contractor" && m.worker_display_name && (
+          <Link href={`/workers/${m.worker_id}`} className="text-sm text-brand underline">
+            {m.worker_display_name}
+          </Link>
+        )}
+        {role === "worker" && m.contractor_id && (
+          <Link href={`/contractors/${m.contractor_id}`} className="text-sm text-brand underline">
+            {m.contractor_company_name}
+          </Link>
+        )}
         <Row label={t("contractType")} value={m.contract_type} />
         <Row label="日当 / wage" value={formatYen(m.daily_wage)} />
         <Row

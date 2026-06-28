@@ -49,6 +49,9 @@
     "employee": "勤め人（副業）",
     "freelance": "一人親方",
     "trades": "職種（カンマ区切り）",
+    "tools": "保有工具（カンマ区切り）",
+    "bio": "自己紹介",
+    "yearsExperience": "経験年数",
     "hasInsurance": "労災保険に加入済み",
     "visaExpiry": "在留期限",
     "companyName": "会社名",
@@ -121,6 +124,19 @@
     "empty": "レビューはまだありません。",
     "submitted": "レビューを投稿しました。"
   },
+  "profile": {
+    "title": "プロフィール",
+    "edit": "プロフィールを編集",
+    "saved": "保存しました。",
+    "view": "プロフィールを見る",
+    "experience": "経験年数",
+    "experienceYears": "{years}年",
+    "about": "自己紹介",
+    "trades": "職種",
+    "tools": "保有工具",
+    "company": "会社",
+    "trust": "信頼スコア"
+  },
   "admin": {
     "vettingTitle": "審査待ち",
     "vettingEmpty": "審査待ちのユーザーはいません。",
@@ -131,7 +147,18 @@
     "configTitle": "設定とフラグ",
     "configKey": "キー",
     "configValue": "値",
-    "saveConfig": "設定を保存"
+    "saveConfig": "設定を保存",
+    "tabUsers": "ユーザー",
+    "tabJobs": "求人",
+    "tabMatchings": "マッチング",
+    "tabConfig": "設定",
+    "filterAll": "すべて",
+    "noUsers": "ユーザーはいません。",
+    "noJobs": "求人はありません。",
+    "noMatchings": "マッチングはありません。",
+    "markFeePaid": "手数料を受領済みに",
+    "company": "会社",
+    "worker": "職人"
   },
   "status": {
     "pending": "審査中",

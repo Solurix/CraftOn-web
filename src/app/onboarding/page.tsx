@@ -41,6 +41,8 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
   const [nationality, setNationality] = useState("JP");
   const [workerClass, setWorkerClass] = useState<"employee" | "freelance">("employee");
   const [trades, setTrades] = useState("");
+  const [bio, setBio] = useState("");
+  const [yearsExperience, setYearsExperience] = useState(0);
   const [hasInsurance, setHasInsurance] = useState(false);
   const [visaExpiry, setVisaExpiry] = useState("");
   const [frontId, setFrontId] = useState<string | null>(null);
@@ -67,6 +69,8 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
         nationality: nationality.toUpperCase(),
         worker_class: workerClass,
         trades: trades.split(",").map((s) => s.trim()).filter(Boolean),
+        bio: bio || null,
+        years_experience: Number(yearsExperience),
         has_insurance: hasInsurance,
         visa_expiry_date: nonJp && visaExpiry ? visaExpiry : null,
         residence_card_front_doc_id: frontId,
@@ -101,6 +105,20 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
       <div>
         <label className="field-label">{t("trades")}</label>
         <input className="field-input" value={trades} onChange={(e) => setTrades(e.target.value)} />
+      </div>
+      <div>
+        <label className="field-label">{t("yearsExperience")}</label>
+        <input
+          type="number"
+          min={0}
+          className="field-input"
+          value={yearsExperience}
+          onChange={(e) => setYearsExperience(Number(e.target.value))}
+        />
+      </div>
+      <div>
+        <label className="field-label">{t("bio")}</label>
+        <textarea className="field-input" value={bio} onChange={(e) => setBio(e.target.value)} />
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={hasInsurance} onChange={(e) => setHasInsurance(e.target.checked)} />
@@ -145,6 +163,7 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
   const [contactPerson, setContactPerson] = useState("");
   const [prefecture, setPrefecture] = useState("Tokyo");
   const [address, setAddress] = useState("");
+  const [bio, setBio] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -158,6 +177,7 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
         contact_person: contactPerson,
         prefecture,
         address: address || null,
+        bio: bio || null,
       });
       onDone();
     } catch (err) {
@@ -185,6 +205,10 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
       <div>
         <label className="field-label">{t("address")}</label>
         <input className="field-input" value={address} onChange={(e) => setAddress(e.target.value)} />
+      </div>
+      <div>
+        <label className="field-label">{t("bio")}</label>
+        <textarea className="field-input" value={bio} onChange={(e) => setBio(e.target.value)} />
       </div>
       <button type="submit" className="btn-primary w-full" disabled={busy}>
         {busy ? common("loading") : common("submit")}

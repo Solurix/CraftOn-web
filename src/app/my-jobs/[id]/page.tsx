@@ -65,7 +65,9 @@ function JobApplicants() {
           {apps.data.map((a) => (
             <li key={a.id} className="card flex items-center justify-between">
               <div>
-                <p className="font-medium">{a.worker_display_name}</p>
+                <Link href={`/workers/${a.worker_id}`} className="font-medium text-brand underline">
+                  {a.worker_display_name}
+                </Link>
                 <p className="text-xs text-gray-500">
                   {a.worker_class} · {t("trust")}: {Number(a.worker_trust_score).toFixed(1)}
                 </p>

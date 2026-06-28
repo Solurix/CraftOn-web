@@ -7,6 +7,7 @@ import type {
   ContractorOnboarding,
   ContractorProfile,
   ContractorPublic,
+  ContractorUpdate,
   DocumentOut,
   Job,
   JobCreate,
@@ -22,6 +23,7 @@ import type {
   WorkerOnboarding,
   WorkerProfile,
   WorkerPublic,
+  WorkerUpdate,
 } from "./models";
 
 export const API_BASE =
@@ -89,6 +91,12 @@ export class ApiClient {
   }
   onboardContractor(body: ContractorOnboarding) {
     return request<ContractorProfile>("/onboarding/contractor", { method: "POST", body, token: this.token });
+  }
+  updateWorker(body: WorkerUpdate) {
+    return request<WorkerProfile>("/workers/me", { method: "PATCH", body, token: this.token });
+  }
+  updateContractor(body: ContractorUpdate) {
+    return request<ContractorProfile>("/contractors/me", { method: "PATCH", body, token: this.token });
   }
   worker(id: string) {
     return request<WorkerPublic>(`/workers/${id}`, { token: this.token });
@@ -188,6 +196,18 @@ export class ApiClient {
   // admin
   vettingQueue() {
     return request<VettingQueue>("/admin/vetting/queue", { token: this.token });
+  }
+  adminUsers(query?: { user_type?: string; status?: string }) {
+    return request<VettingQueue>("/admin/users", { token: this.token, query });
+  }
+  adminJobs(query?: { status?: string }) {
+    return request<Job[]>("/admin/jobs", { token: this.token, query });
+  }
+  adminMatchings(query?: { status?: string; fee_status?: string }) {
+    return request<Matching[]>("/admin/matchings", { token: this.token, query });
+  }
+  markFeePaid(matchingId: string) {
+    return request<Matching>(`/admin/matchings/${matchingId}/mark-fee-paid`, { method: "POST", token: this.token });
   }
   approveUser(id: string) {
     return request<unknown>(`/admin/users/${id}/approve`, { method: "POST", token: this.token });

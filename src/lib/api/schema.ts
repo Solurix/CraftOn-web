@@ -597,6 +597,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Users
+         * @description All users with profile + documents (full admin visibility).
+         */
+        get: operations["list_users_api_v1_admin_users_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Jobs */
+        get: operations["list_jobs_api_v1_admin_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/users/{user_id}/approve": {
         parameters: {
             query?: never;
@@ -797,6 +834,8 @@ export interface components {
             prefecture: string;
             /** Address */
             address?: string | null;
+            /** Bio */
+            bio?: string | null;
             /** Display Name */
             display_name?: string | null;
         };
@@ -821,6 +860,8 @@ export interface components {
             prefecture: string;
             /** Address */
             address: string | null;
+            /** Bio */
+            bio: string | null;
             /** Rating */
             rating: string;
         };
@@ -834,6 +875,8 @@ export interface components {
             prefecture?: string | null;
             /** Address */
             address?: string | null;
+            /** Bio */
+            bio?: string | null;
             /** Display Name */
             display_name?: string | null;
         };
@@ -853,6 +896,8 @@ export interface components {
             company_name: string;
             /** Prefecture */
             prefecture: string;
+            /** Bio */
+            bio: string | null;
             /** Rating */
             rating: string;
         };
@@ -1110,6 +1155,8 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+            /** Contractor Id */
+            contractor_id?: string | null;
             /** Worker Display Name */
             worker_display_name?: string | null;
             /** Contractor Company Name */
@@ -1381,6 +1428,13 @@ export interface components {
              * @default false
              */
             has_insurance: boolean;
+            /** Bio */
+            bio?: string | null;
+            /**
+             * Years Experience
+             * @default 0
+             */
+            years_experience: number;
             /** Residence Card Front Doc Id */
             residence_card_front_doc_id?: string | null;
             /** Residence Card Back Doc Id */
@@ -1412,6 +1466,10 @@ export interface components {
             tools: string[];
             /** Has Insurance */
             has_insurance: boolean;
+            /** Bio */
+            bio: string | null;
+            /** Years Experience */
+            years_experience: number;
             /** Trust Score */
             trust_score: string;
             /** Visa Expiry Date */
@@ -1436,6 +1494,10 @@ export interface components {
             tools?: string[] | null;
             /** Has Insurance */
             has_insurance?: boolean | null;
+            /** Bio */
+            bio?: string | null;
+            /** Years Experience */
+            years_experience?: number | null;
             /** Residence Card Front Doc Id */
             residence_card_front_doc_id?: string | null;
             /** Residence Card Back Doc Id */
@@ -1462,6 +1524,10 @@ export interface components {
             trades: string[];
             /** Tools */
             tools: string[];
+            /** Bio */
+            bio: string | null;
+            /** Years Experience */
+            years_experience: number;
             /** Trust Score */
             trust_score: string;
         };
@@ -3029,6 +3095,69 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VettingQueueOut"];
+                };
+            };
+        };
+    };
+    list_users_api_v1_admin_users_get: {
+        parameters: {
+            query?: {
+                user_type?: components["schemas"]["UserType"] | null;
+                status?: components["schemas"]["UserStatus"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VettingQueueOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_jobs_api_v1_admin_jobs_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["JobStatus"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
