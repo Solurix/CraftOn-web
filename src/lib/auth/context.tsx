@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { ApiClient, ApiError } from "@/lib/api/client";
+import { ApiClient, ApiError, AUTH_EXPIRED_EVENT } from "@/lib/api/client";
 import type { Me, SessionCreate } from "@/lib/api/models";
 import {
   ACCOUNTS_STORAGE_KEY,
@@ -117,6 +117,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", onStorage);
   }, [fetchMe]);
 
+  // The API client fires this on a 401 to an authenticated request (e.g. this
+  // device was revoked) — drop the session so the app falls back to /login.
+  useEffect(() => {
+    const onExpired = () => {
+      localStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+      setMe(null);
+    };
+    window.addEventListener(AUTH_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired);
+  }, []);
+
   const loginWithPhone = useCallback(
     async (phone: string, code: string) => {
       const prevToken =
@@ -155,10 +167,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Returning login without OTP: phone + password → the API mints a bearer token.
   const loginWithPassword = useCallback(
     async (phone: string, password: string) => {
+      const prevToken =
+        typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
       const { token: t } = await new ApiClient(null).passwordLogin(phone, password);
       localStorage.setItem(TOKEN_KEY, t);
       setToken(t);
-      await fetchMe(t);
+      const m = await fetchMe(t);
+      if (!m) {
+        // /me failed under the new token → roll back rather than sit on a token
+        // with no identity.
+        if (prevToken) {
+          localStorage.setItem(TOKEN_KEY, prevToken);
+          setToken(prevToken);
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+          setToken(null);
+        }
+        throw new ApiError(0, "login_failed", "login_failed");
+      }
     },
     [fetchMe],
   );

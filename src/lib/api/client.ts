@@ -30,7 +30,11 @@ import type {
   WorkerUpdate,
   WorkHistory,
 } from "./models";
-import { getDeviceId, getDeviceName } from "../device";
+import { getDeviceId, getDeviceName, rotateDeviceId } from "../device";
+
+// Dispatched on a 401 to an authenticated request so AuthProvider can drop the
+// session immediately (revoked device / invalid token).
+export const AUTH_EXPIRED_EVENT = "crafton:auth-expired";
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -78,6 +82,17 @@ async function request<T>(path: string, opts: Options = {}): Promise<T> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const err = (data as { error?: { code?: string; message?: string } }).error;
+    // This device was revoked → drop auth state app-wide and rotate the device id
+    // so a later legitimate login enrolls a fresh (non-revoked) device. Scoped to
+    // this exact code so ordinary 401s (e.g. needs-signup on /me) don't log out.
+    if (
+      res.status === 401 &&
+      err?.code === "device_revoked" &&
+      typeof window !== "undefined"
+    ) {
+      rotateDeviceId();
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+    }
     throw new ApiError(res.status, err?.code ?? "error", err?.message ?? "error");
   }
   return data as T;

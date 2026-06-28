@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
@@ -15,16 +16,26 @@ export function DevicesCard() {
   const { api } = useAuth();
   const { data, loading, error, reload } = useAsync(() => api.myDevices(), []);
   const current = getDeviceId();
+  const [revokeError, setRevokeError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const revoke = async (id: string) => {
-    await api.revokeDevice(id);
-    reload();
+    setRevokeError("");
+    setBusy(true);
+    try {
+      await api.revokeDevice(id);
+      reload();
+    } catch (e) {
+      setRevokeError(e instanceof Error ? e.message : "error");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <div className="card space-y-2">
       <h2 className="font-semibold">{t("title")}</h2>
-      <ErrorText message={error} />
+      <ErrorText message={error || revokeError} />
       {loading ? (
         <Spinner />
       ) : !data || data.length === 0 ? (
@@ -50,7 +61,11 @@ export function DevicesCard() {
                   </p>
                 </div>
                 {!d.revoked && !isCurrent && (
-                  <button className="btn-danger" onClick={() => revoke(d.id)}>
+                  <button
+                    className="btn-danger"
+                    disabled={busy}
+                    onClick={() => revoke(d.id)}
+                  >
                     {t("revoke")}
                   </button>
                 )}

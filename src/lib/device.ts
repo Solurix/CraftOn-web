@@ -16,6 +16,13 @@ export function getDeviceId(): string | null {
   return id;
 }
 
+// Forget the current device id so the next request enrolls a fresh device.
+// Used after a device_revoked response: a later legitimate login then gets a new
+// (non-revoked) device record, while the revoked one stays revoked.
+export function rotateDeviceId(): void {
+  if (typeof window !== "undefined") localStorage.removeItem(KEY);
+}
+
 export function getDeviceName(): string | null {
   if (typeof navigator === "undefined") return null;
   const ua = navigator.userAgent;
