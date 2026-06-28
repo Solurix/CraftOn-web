@@ -31,3 +31,4 @@ export type VettingQueue = S["VettingQueueOut"];
 export type VettingItem = S["VettingItem"];
 export type Notification = S["NotificationOut"];
 export type WorkHistory = S["WorkHistoryOut"];
+export type PasswordLogin = S["PasswordLoginOut"];

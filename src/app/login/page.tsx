@@ -16,6 +16,7 @@ export default function LoginPage() {
   const common = useTranslations("common");
   const {
     loginWithPhone,
+    loginWithPassword,
     switchAccount,
     forgetAccount,
     completeSignup,
@@ -31,6 +32,8 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -43,6 +46,8 @@ export default function LoginPage() {
     setPhone("");
     setCode("");
     setCodeSent(false);
+    setUsePassword(false);
+    setPassword("");
     setError("");
   };
 
@@ -75,6 +80,11 @@ export default function LoginPage() {
     setBusy(true);
     setError("");
     try {
+      if (mode === "login" && usePassword) {
+        await loginWithPassword(phone, password);
+        router.replace("/");
+        return;
+      }
       const { needsSignup } = await loginWithPhone(phone, code);
       if (mode === "signup" && needsSignup && role) {
         // Role was chosen up front; create the account, then go finish the profile.
@@ -186,7 +196,30 @@ export default function LoginPage() {
                 />
               </div>
 
-              {!codeSent ? (
+              {mode === "login" && usePassword ? (
+                <>
+                  <div>
+                    <label className="field-label" htmlFor="password">
+                      {t("passwordLabel")}
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      className="field-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn-primary w-full"
+                    disabled={busy || !phone || !password}
+                  >
+                    {busy ? common("loading") : t("verify")}
+                  </button>
+                </>
+              ) : !codeSent ? (
                 <button
                   type="button"
                   className="btn-primary w-full"
@@ -223,6 +256,22 @@ export default function LoginPage() {
                         : t("verify")}
                   </button>
                 </>
+              )}
+              {/* Toggle OTP ⇄ password for returning logins. */}
+              {mode === "login" && (
+                <button
+                  type="button"
+                  className="text-xs text-brand underline"
+                  onClick={() => {
+                    setUsePassword((v) => !v);
+                    setCode("");
+                    setCodeSent(false);
+                    setPassword("");
+                    setError("");
+                  }}
+                >
+                  {usePassword ? t("useSmsCode") : t("usePassword")}
+                </button>
               )}
               <ErrorText message={error} />
             </form>

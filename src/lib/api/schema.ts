@@ -64,6 +64,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set Password
+         * @description Set/replace the caller's password (used for OTP-free returning logins).
+         */
+        post: operations["set_password_api_v1_auth_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Password Login
+         * @description Phone + password → a bearer token, skipping OTP. Returns the same token
+         *     format the API verifier accepts. (Real Firebase password exchange is a later
+         *     GCP concern; only the fake/dev verifier can mint tokens here.)
+         */
+        post: operations["password_login_api_v1_auth_password_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -1408,6 +1450,11 @@ export interface components {
              * @default false
              */
             has_contractor_profile: boolean;
+            /**
+             * Has Password
+             * @default false
+             */
+            has_password: boolean;
             worker_profile?: components["schemas"]["WorkerProfileOut"] | null;
             contractor_profile?: components["schemas"]["ContractorProfileOut"] | null;
         };
@@ -1465,6 +1512,22 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** PasswordLoginIn */
+        PasswordLoginIn: {
+            /** Phone Number */
+            phone_number: string;
+            /** Password */
+            password: string;
+        };
+        /**
+         * PasswordLoginOut
+         * @description A bearer token (accepted by the API verifier) + the signed-in user.
+         */
+        PasswordLoginOut: {
+            /** Token */
+            token: string;
+            user: components["schemas"]["UserOut"];
         };
         /** ReadyResponse */
         ReadyResponse: {
@@ -1548,6 +1611,14 @@ export interface components {
             user: components["schemas"]["UserOut"];
             /** Created */
             created: boolean;
+        };
+        /**
+         * SetPasswordIn
+         * @description Set/replace the current user's password (for OTP-free returning logins).
+         */
+        SetPasswordIn: {
+            /** Password */
+            password: string;
         };
         /** SuspendIn */
         SuspendIn: {
@@ -1966,6 +2037,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SessionOut"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_password_api_v1_auth_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPasswordIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    password_login_api_v1_auth_password_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordLoginIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasswordLoginOut"];
                 };
             };
             /** @description Bad Request */

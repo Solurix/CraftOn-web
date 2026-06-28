@@ -15,6 +15,7 @@ import type {
   Me,
   Message,
   Notification,
+  PasswordLogin,
   Review,
   ReviewCreate,
   SessionCreate,
@@ -86,6 +87,15 @@ export class ApiClient {
   }
   me() {
     return request<Me>("/me", { token: this.token });
+  }
+  setPassword(password: string) {
+    return request<void>("/auth/password", { method: "POST", body: { password }, token: this.token });
+  }
+  passwordLogin(phone: string, password: string) {
+    return request<PasswordLogin>("/auth/password-login", {
+      method: "POST",
+      body: { phone_number: phone, password },
+    });
   }
 
   // onboarding / profiles

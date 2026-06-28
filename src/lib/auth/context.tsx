@@ -32,6 +32,7 @@ type AuthContextValue = {
   authMode: string;
   accounts: RememberedAccount[];
   loginWithPhone: (phone: string, code: string) => Promise<{ needsSignup: boolean }>;
+  loginWithPassword: (phone: string, password: string) => Promise<void>;
   switchAccount: (phone: string) => Promise<{ needsSignup: boolean }>;
   forgetAccount: (phone: string) => void;
   completeSignup: (body: SessionCreate) => Promise<void>;
@@ -151,6 +152,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [remember],
   );
 
+  // Returning login without OTP: phone + password → the API mints a bearer token.
+  const loginWithPassword = useCallback(
+    async (phone: string, password: string) => {
+      const { token: t } = await new ApiClient(null).passwordLogin(phone, password);
+      localStorage.setItem(TOKEN_KEY, t);
+      setToken(t);
+      await fetchMe(t);
+    },
+    [fetchMe],
+  );
+
   // Switch to a remembered account. In fake mode this is a no-OTP re-login; in
   // firebase mode obtainToken throws and the caller falls back to the phone form.
   const switchAccount = useCallback(
@@ -205,6 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authMode: AUTH_MODE,
     accounts,
     loginWithPhone,
+    loginWithPassword,
     switchAccount,
     forgetAccount,
     completeSignup,

@@ -147,12 +147,64 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function SetPasswordCard() {
+  const p = useTranslations("profile");
+  const auth = useTranslations("auth");
+  const { api, refresh } = useAuth();
+  const [password, setPassword] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaved(false);
+    setError("");
+    try {
+      await api.setPassword(password);
+      setPassword("");
+      await refresh();
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="card space-y-2">
+      <h2 className="font-semibold">{p("setPassword")}</h2>
+      <p className="text-xs text-gray-500">{p("setPasswordHint")}</p>
+      <input
+        type="password"
+        className="field-input"
+        minLength={8}
+        aria-label={auth("passwordLabel")}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button className="btn-primary w-full" disabled={password.length < 8}>
+        {p("setPassword")}
+      </button>
+      {saved && <p className="text-sm text-green-700">{p("passwordSaved")}</p>}
+      <ErrorText message={error} />
+    </form>
+  );
+}
+
 function Settings() {
   const { me } = useAuth();
   if (!me) return null;
-  if (me.user.user_type === "worker" && me.worker_profile) return <WorkerSettings me={me} />;
-  if (me.user.user_type === "contractor" && me.contractor_profile) return <ContractorSettings me={me} />;
-  return null;
+  const role =
+    me.user.user_type === "worker" && me.worker_profile ? (
+      <WorkerSettings me={me} />
+    ) : me.user.user_type === "contractor" && me.contractor_profile ? (
+      <ContractorSettings me={me} />
+    ) : null;
+  return (
+    <div className="space-y-4">
+      {role}
+      <SetPasswordCard />
+    </div>
+  );
 }
 
 export default function ProfilePage() {

@@ -117,6 +117,118 @@
                 ]
             }
         },
+        "/api/v1/auth/password": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Set Password",
+                "description": "Set/replace the caller's password (used for OTP-free returning logins).",
+                "operationId": "set_password_api_v1_auth_password_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPasswordIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/password-login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Password Login",
+                "description": "Phone + password \u2192 a bearer token, skipping OTP. Returns the same token\nformat the API verifier accepts. (Real Firebase password exchange is a later\nGCP concern; only the fake/dev verifier can mint tokens here.)",
+                "operationId": "password_login_api_v1_auth_password_login_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordLoginIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PasswordLoginOut"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/me": {
             "get": {
                 "tags": [
@@ -4616,6 +4728,11 @@
                         "title": "Has Contractor Profile",
                         "default": false
                     },
+                    "has_password": {
+                        "type": "boolean",
+                        "title": "Has Password",
+                        "default": false
+                    },
                     "worker_profile": {
                         "anyOf": [
                             {
@@ -4751,6 +4868,42 @@
                     "created_at"
                 ],
                 "title": "NotificationOut"
+            },
+            "PasswordLoginIn": {
+                "properties": {
+                    "phone_number": {
+                        "type": "string",
+                        "title": "Phone Number"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "phone_number",
+                    "password"
+                ],
+                "title": "PasswordLoginIn"
+            },
+            "PasswordLoginOut": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "title": "Token"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserOut"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token",
+                    "user"
+                ],
+                "title": "PasswordLoginOut",
+                "description": "A bearer token (accepted by the API verifier) + the signed-in user."
             },
             "ReadyResponse": {
                 "properties": {
@@ -4954,6 +5107,22 @@
                     "created"
                 ],
                 "title": "SessionOut"
+            },
+            "SetPasswordIn": {
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 8,
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "password"
+                ],
+                "title": "SetPasswordIn",
+                "description": "Set/replace the current user's password (for OTP-free returning logins)."
             },
             "SuspendIn": {
                 "properties": {
