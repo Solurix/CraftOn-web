@@ -122,6 +122,14 @@
     "filteredNotice": "Suspected contact info was masked.",
     "empty": "No messages yet."
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications.",
+    "markAllRead": "Mark all read",
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {count} unread",
+    "unread": "Unread"
+  },
   "reviews": {
     "title": "Reviews",
     "leave": "Write a review",

@@ -14,6 +14,7 @@ import type {
   Matching,
   Me,
   Message,
+  Notification,
   Review,
   ReviewCreate,
   SessionCreate,
@@ -191,6 +192,20 @@ export class ApiClient {
   }
   contractorReviews(id: string) {
     return request<Review[]>(`/contractors/${id}/reviews`, { token: this.token });
+  }
+
+  // notifications
+  notifications(query?: { unread_only?: string }) {
+    return request<Notification[]>("/notifications", { token: this.token, query });
+  }
+  unreadCount() {
+    return request<{ count: number }>("/notifications/unread-count", { token: this.token });
+  }
+  markNotificationRead(id: string) {
+    return request<Notification>(`/notifications/${id}/read`, { method: "POST", token: this.token });
+  }
+  markAllNotificationsRead() {
+    return request<{ updated: number }>("/notifications/read-all", { method: "POST", token: this.token });
   }
 
   // admin

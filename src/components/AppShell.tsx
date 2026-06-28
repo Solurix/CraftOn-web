@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth/context";
 import { AccountMenu } from "./AccountMenu";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { NotificationBell } from "./NotificationBell";
 
 function NavLink({ href, label }: { href: string; label: string }) {
   return (
@@ -34,6 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
+          {me && <NotificationBell />}
           {me && <AccountMenu />}
         </div>
       </header>
