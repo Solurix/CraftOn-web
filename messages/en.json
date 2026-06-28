@@ -45,7 +45,7 @@
     "switchAccount": "Switch account",
     "addAccount": "Add account",
     "forget": "Remove",
-    "loggedInAs": "Signed in"
+    "forgetNamed": "Remove {name} from this device"
   },
   "onboarding": {
     "workerTitle": "Worker profile",

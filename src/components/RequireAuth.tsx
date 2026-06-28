@@ -25,9 +25,15 @@ export function RequireAuth({
   const router = useRouter();
   const t = useTranslations("onboarding");
 
+  const roleMismatch = !!me && !!role && me.user.user_type !== role;
+
   useEffect(() => {
-    if (!loading && !me) router.replace("/login");
-  }, [loading, me, router]);
+    if (loading) return;
+    if (!me) router.replace("/login");
+    // Role changed under us (e.g. switched accounts in another tab) → route home,
+    // which redirects to the new role's landing instead of stranding on a 403.
+    else if (roleMismatch) router.replace("/");
+  }, [loading, me, roleMismatch, router]);
 
   if (loading) {
     return (
@@ -36,12 +42,10 @@ export function RequireAuth({
       </AppShell>
     );
   }
-  if (!me) return null;
-
-  if (role && me.user.user_type !== role) {
+  if (!me || roleMismatch) {
     return (
       <AppShell>
-        <p className="text-sm text-gray-600">403</p>
+        <Spinner />
       </AppShell>
     );
   }

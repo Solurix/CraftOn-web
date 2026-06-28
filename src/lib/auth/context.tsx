@@ -118,14 +118,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithPhone = useCallback(
     async (phone: string, code: string) => {
+      const prevToken =
+        typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
       const t = await obtainToken(phone, code);
       localStorage.setItem(TOKEN_KEY, t);
       setToken(t);
-      const m = await new ApiClient(t).me().catch((e: unknown) => {
-        if (e instanceof ApiError && e.status === 401) return null;
+      let m: Me;
+      try {
+        m = await new ApiClient(t).me();
+      } catch (e) {
+        // Valid token but no app user yet → needs signup. Keep the new token (the
+        // onboarding step uses it) but clear any stale identity from a prior account.
+        if (e instanceof ApiError && e.status === 401) {
+          setMe(null);
+          return { needsSignup: true };
+        }
+        // Unexpected failure (network/5xx): roll back so a failed switch doesn't
+        // strand the app with a new token but the previous account's `me`.
+        if (prevToken) {
+          localStorage.setItem(TOKEN_KEY, prevToken);
+          setToken(prevToken);
+        } else {
+          localStorage.removeItem(TOKEN_KEY);
+          setToken(null);
+        }
         throw e;
-      });
-      if (m === null) return { needsSignup: true };
+      }
       setMe(m);
       remember(m);
       return { needsSignup: false };
@@ -140,9 +158,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [loginWithPhone],
   );
 
-  const forgetAccount = useCallback((phone: string) => {
-    setAccounts(forgetAccountStore(phone));
-  }, []);
+  const forgetAccount = useCallback(
+    (phone: string) => {
+      setAccounts(forgetAccountStore(phone));
+      // Forgetting the active account also ends its session — otherwise the next
+      // /me fetch would silently re-add it and the device would stay signed in.
+      if (me?.user.phone_number === phone) {
+        localStorage.removeItem(TOKEN_KEY);
+        setToken(null);
+        setMe(null);
+      }
+    },
+    [me],
+  );
 
   const completeSignup = useCallback(
     async (body: SessionCreate) => {

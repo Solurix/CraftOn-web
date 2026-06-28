@@ -16,6 +16,10 @@ export type RememberedAccount = {
 export const ACCOUNTS_STORAGE_KEY = "crafton.accounts";
 const KEY = ACCOUNTS_STORAGE_KEY;
 
+// Cap the remembered list — it holds PII (phone + name), so don't let it grow
+// unbounded on a shared device; keep only the most-recently-used few.
+const MAX_ACCOUNTS = 8;
+
 function hasStorage(): boolean {
   return typeof window !== "undefined" && !!window.localStorage;
 }
@@ -46,9 +50,9 @@ export function rememberAccount(
   now: number = Date.now(),
 ): RememberedAccount[] {
   const others = loadAccounts().filter((a) => a.phone !== account.phone);
-  const next = [{ ...account, lastUsedAt: now }, ...others].sort(
-    (a, b) => b.lastUsedAt - a.lastUsedAt,
-  );
+  const next = [{ ...account, lastUsedAt: now }, ...others]
+    .sort((a, b) => b.lastUsedAt - a.lastUsedAt)
+    .slice(0, MAX_ACCOUNTS);
   save(next);
   return next;
 }

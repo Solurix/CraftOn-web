@@ -29,13 +29,14 @@ test("remembers the account and re-logs-in with one tap", async ({ page, context
   await page.getByRole("button", { name: "Submit" }).click();
   await expect(page.getByText("Under review. Please wait for approval.")).toBeVisible();
 
-  // Log out via the account menu.
+  // Log out via the account menu (items are ARIA menuitems).
   await page.getByRole("button", { name: new RegExp(name) }).click();
-  await page.getByRole("button", { name: "Log out" }).click();
+  await page.getByRole("menuitem", { name: "Log out" }).click();
 
   // The login page now offers the remembered account — no phone retyping.
   await expect(page.getByText("Recent accounts")).toBeVisible();
-  const recent = page.getByRole("button", { name: new RegExp(name) });
+  // Anchor on the name start so the "Remove <name>" button isn't also matched.
+  const recent = page.getByRole("button", { name: new RegExp("^" + name) });
   await expect(recent).toBeVisible();
   await recent.click();
 

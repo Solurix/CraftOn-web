@@ -34,4 +34,14 @@ describe("remembered accounts", () => {
     localStorage.setItem("crafton.accounts", "not json");
     expect(loadAccounts()).toEqual([]);
   });
+
+  it("caps the remembered list at the most-recent few (PII hygiene)", () => {
+    for (let i = 0; i < 12; i++) {
+      rememberAccount({ phone: `+8190${i}`, displayName: `U${i}`, role: "worker" }, 100 + i);
+    }
+    const list = loadAccounts();
+    expect(list).toHaveLength(8);
+    expect(list[0].phone).toBe("+819011"); // newest first
+    expect(list.map((a) => a.phone)).not.toContain("+81900"); // oldest evicted
+  });
 });

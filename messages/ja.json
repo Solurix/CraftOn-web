@@ -45,7 +45,7 @@
     "switchAccount": "アカウントを切り替え",
     "addAccount": "アカウントを追加",
     "forget": "削除",
-    "loggedInAs": "ログイン中"
+    "forgetNamed": "{name} を端末から削除"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",

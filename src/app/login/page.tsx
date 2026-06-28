@@ -77,8 +77,8 @@ export default function LoginPage() {
                 </button>
                 <button
                   onClick={() => forgetAccount(a.phone)}
-                  aria-label={t("forget")}
-                  className="px-2 text-gray-400 hover:text-red-600"
+                  aria-label={t("forgetNamed", { name: a.displayName })}
+                  className="px-3 py-2 text-gray-400 hover:text-red-600"
                 >
                   ×
                 </button>
