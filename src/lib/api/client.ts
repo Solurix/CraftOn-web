@@ -119,7 +119,16 @@ export class ApiClient {
   }
 
   // jobs
-  jobs(query?: { trade?: string; prefecture?: string; work_date?: string }) {
+  jobs(query?: {
+    trade?: string;
+    prefecture?: string;
+    work_date?: string;
+    wage_min?: string;
+    wage_max?: string;
+    date_from?: string;
+    date_to?: string;
+    sort?: string;
+  }) {
     return request<Job[]>("/jobs", { token: this.token, query });
   }
   job(id: string) {

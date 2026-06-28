@@ -2135,6 +2135,15 @@ export interface operations {
                 trade?: string | null;
                 work_date?: string | null;
                 prefecture?: string | null;
+                /** @description JPY, inclusive */
+                wage_min?: number | null;
+                /** @description JPY, inclusive */
+                wage_max?: number | null;
+                /** @description work_date >=  */
+                date_from?: string | null;
+                /** @description work_date <=  */
+                date_to?: string | null;
+                sort?: "date" | "wage_high" | "wage_low" | "new";
                 limit?: number;
                 offset?: number;
             };

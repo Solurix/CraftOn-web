@@ -723,6 +723,98 @@
                         }
                     },
                     {
+                        "name": "wage_min",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "JPY, inclusive",
+                            "title": "Wage Min"
+                        },
+                        "description": "JPY, inclusive"
+                    },
+                    {
+                        "name": "wage_max",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "JPY, inclusive",
+                            "title": "Wage Max"
+                        },
+                        "description": "JPY, inclusive"
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "work_date >= ",
+                            "title": "Date From"
+                        },
+                        "description": "work_date >= "
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "work_date <= ",
+                            "title": "Date To"
+                        },
+                        "description": "work_date <= "
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "enum": [
+                                "date",
+                                "wage_high",
+                                "wage_low",
+                                "new"
+                            ],
+                            "type": "string",
+                            "default": "date",
+                            "title": "Sort"
+                        }
+                    },
+                    {
                         "name": "limit",
                         "in": "query",
                         "required": false,
