@@ -17,7 +17,8 @@ export type WorkerFormValue = {
   email: string;
   nationality: string; // "JP" or another 2-letter code
   worker_class: "employee" | "freelance";
-  trades: string[];
+  trades: string[]; // selected common-trade chips only
+  trades_other: string; // raw free-text for custom trades (merged on submit)
   tools: string;
   current_employer: string;
   current_employer_public: boolean;
@@ -41,6 +42,7 @@ export function emptyWorkerForm(displayName = ""): WorkerFormValue {
     nationality: "JP",
     worker_class: "employee",
     trades: [],
+    trades_other: "",
     tools: "",
     current_employer: "",
     current_employer_public: false,
@@ -68,7 +70,12 @@ export function workerFormFromProfile(
     email: wp.email ?? "",
     nationality: wp.nationality ?? "JP",
     worker_class: wp.worker_class as "employee" | "freelance",
-    trades: wp.trades ?? [],
+    trades: (wp.trades ?? []).filter((t) =>
+      (COMMON_TRADES as readonly string[]).includes(t),
+    ),
+    trades_other: (wp.trades ?? [])
+      .filter((t) => !(COMMON_TRADES as readonly string[]).includes(t))
+      .join(", "),
     tools: csv(wp.tools),
     current_employer: wp.current_employer ?? "",
     current_employer_public: wp.current_employer_public ?? false,
@@ -90,15 +97,27 @@ export function workerFormFromProfile(
 
 // Build the API payload from the form. Shared by onboarding (WorkerOnboarding)
 // and PATCH (WorkerUpdate) — both accept this superset of keys.
+// True when the nationality choice is complete: Japan, or a non-JP 2-letter code.
+export function isWorkerFormValid(v: WorkerFormValue): boolean {
+  return (
+    v.nationality.toUpperCase() === "JP" || v.nationality.trim().length === 2
+  );
+}
+
 export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
   const csv = (s: string) =>
     s.split(",").map((x) => x.trim()).filter(Boolean);
   const isJp = v.nationality.toUpperCase() === "JP";
+  // Merge chip-selected common trades with the free-text custom ones (deduped).
+  const trades = [...new Set([...v.trades, ...csv(v.trades_other)])];
   return {
     display_name: v.display_name,
-    nationality: (v.nationality.toUpperCase().slice(0, 2) || "JP") as string,
+    // Never coerce a blank "Other" nationality to JP — the form blocks submit
+    // until a 2-letter code is entered (isWorkerFormValid), so the visa gate
+    // can't be bypassed.
+    nationality: isJp ? "JP" : v.nationality.toUpperCase().slice(0, 2),
     worker_class: v.worker_class,
-    trades: v.trades,
+    trades,
     tools: csv(v.tools),
     full_name: v.full_name || null,
     name_kana: v.name_kana || null,
@@ -152,9 +171,6 @@ export function WorkerProfileFields({
       trades: has ? v.trades.filter((x) => x !== trade) : [...v.trades, trade],
     });
   };
-  const customTrades = v.trades.filter(
-    (x) => !(COMMON_TRADES as readonly string[]).includes(x),
-  );
   const setWorkRow = (i: number, patch: Partial<WorkHistoryRow>) =>
     onChange({
       work_history: v.work_history.map((w, j) => (j === i ? { ...w, ...patch } : w)),
@@ -217,6 +233,9 @@ export function WorkerProfileFields({
             onChange={(e) => onChange({ nationality: e.target.value.toUpperCase() })}
           />
         )}
+        {!isJp && v.nationality.trim().length !== 2 && (
+          <p className="mt-1 text-xs text-red-600">{t("nationalityInvalid")}</p>
+        )}
       </fieldset>
 
       {!isJp && (
@@ -274,17 +293,8 @@ export function WorkerProfileFields({
         <input
           className="field-input mt-2"
           placeholder={t("otherTrade")}
-          value={customTrades.join(", ")}
-          onChange={(e) =>
-            onChange({
-              trades: [
-                ...v.trades.filter((x) =>
-                  (COMMON_TRADES as readonly string[]).includes(x),
-                ),
-                ...e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-              ],
-            })
-          }
+          value={v.trades_other}
+          onChange={(e) => onChange({ trades_other: e.target.value })}
         />
       </fieldset>
 

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText } from "@/components/ui";
 import {
+  isWorkerFormValid,
   WorkerProfileFields,
   workerFormFromProfile,
   workerFormToPayload,
@@ -56,7 +57,9 @@ function WorkerSettings({ me }: { me: Me }) {
         />
       </Field>
       <WorkerProfileFields value={form} onChange={patch} />
-      <button className="btn-primary w-full">{common("save")}</button>
+      <button className="btn-primary w-full" disabled={!isWorkerFormValid(form)}>
+        {common("save")}
+      </button>
       {saved && <p className="text-sm text-green-700">{p("saved")}</p>}
       <ErrorText message={error} />
     </form>

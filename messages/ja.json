@@ -62,6 +62,7 @@
     "nationalityJp": "日本",
     "nationalityOther": "その他",
     "nationalityCode": "国コード（例: VN, ID）",
+    "nationalityInvalid": "2文字の国コードを入力してください。",
     "workerClass": "就業区分",
     "employee": "勤め人（副業）",
     "freelance": "一人親方",

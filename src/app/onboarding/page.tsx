@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { ErrorText, Spinner } from "@/components/ui";
 import {
   emptyWorkerForm,
+  isWorkerFormValid,
   WorkerProfileFields,
   workerFormToPayload,
   type WorkerFormValue,
@@ -97,7 +98,11 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
           </button>
         </div>
       )}
-      <button type="submit" className="btn-primary w-full" disabled={busy}>
+      <button
+        type="submit"
+        className="btn-primary w-full"
+        disabled={busy || !isWorkerFormValid(form)}
+      >
         {busy ? common("loading") : common("submit")}
       </button>
       <ErrorText message={error} />

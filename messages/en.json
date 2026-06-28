@@ -62,6 +62,7 @@
     "nationalityJp": "Japan",
     "nationalityOther": "Other",
     "nationalityCode": "Country code (e.g. VN, ID)",
+    "nationalityInvalid": "Enter a 2-letter country code.",
     "workerClass": "Worker class",
     "employee": "Employee (side job)",
     "freelance": "Freelance (sole proprietor)",
