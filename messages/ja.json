@@ -39,7 +39,13 @@
     "chooseRole": "ご利用区分を選択",
     "roleWorker": "職人として登録",
     "roleContractor": "工務店として登録",
-    "displayName": "表示名"
+    "displayName": "表示名",
+    "recentAccounts": "最近のアカウント",
+    "useAnotherNumber": "別の番号でログイン",
+    "switchAccount": "アカウントを切り替え",
+    "addAccount": "アカウントを追加",
+    "forget": "削除",
+    "loggedInAs": "ログイン中"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",

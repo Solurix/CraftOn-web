@@ -39,7 +39,13 @@
     "chooseRole": "Choose your role",
     "roleWorker": "Sign up as a worker",
     "roleContractor": "Sign up as a contractor",
-    "displayName": "Display name"
+    "displayName": "Display name",
+    "recentAccounts": "Recent accounts",
+    "useAnotherNumber": "Use another number",
+    "switchAccount": "Switch account",
+    "addAccount": "Add account",
+    "forget": "Remove",
+    "loggedInAs": "Signed in"
   },
   "onboarding": {
     "workerTitle": "Worker profile",

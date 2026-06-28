@@ -12,6 +12,13 @@ import {
 
 import { ApiClient, ApiError } from "@/lib/api/client";
 import type { Me, SessionCreate } from "@/lib/api/models";
+import {
+  ACCOUNTS_STORAGE_KEY,
+  forgetAccount as forgetAccountStore,
+  loadAccounts,
+  rememberAccount,
+  type RememberedAccount,
+} from "./accounts";
 import { makeFakeToken } from "./fakeToken";
 
 const TOKEN_KEY = "crafton.token";
@@ -22,7 +29,11 @@ type AuthContextValue = {
   me: Me | null;
   loading: boolean;
   api: ApiClient;
+  authMode: string;
+  accounts: RememberedAccount[];
   loginWithPhone: (phone: string, code: string) => Promise<{ needsSignup: boolean }>;
+  switchAccount: (phone: string) => Promise<{ needsSignup: boolean }>;
+  forgetAccount: (phone: string) => void;
   completeSignup: (body: SessionCreate) => Promise<void>;
   refresh: () => Promise<void>;
   logout: () => void;
@@ -43,18 +54,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<RememberedAccount[]>([]);
 
   const api = useMemo(() => new ApiClient(token), [token]);
 
-  const fetchMe = useCallback(async (t: string) => {
-    try {
-      setMe(await new ApiClient(t).me());
-    } catch {
-      setMe(null);
-    }
+  // Record the signed-in identity (non-secret) so it can be re-used later.
+  const remember = useCallback((m: Me) => {
+    setAccounts(
+      rememberAccount({
+        phone: m.user.phone_number,
+        displayName: m.user.display_name,
+        role: m.user.user_type,
+      }),
+    );
   }, []);
 
+  const fetchMe = useCallback(
+    async (t: string): Promise<Me | null> => {
+      try {
+        const m = await new ApiClient(t).me();
+        setMe(m);
+        remember(m);
+        return m;
+      } catch {
+        setMe(null);
+        return null;
+      }
+    },
+    [remember],
+  );
+
+  // Hydrate from localStorage on mount.
   useEffect(() => {
+    setAccounts(loadAccounts());
     const stored = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
     if (!stored) {
       setLoading(false);
@@ -64,21 +96,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void fetchMe(stored).finally(() => setLoading(false));
   }, [fetchMe]);
 
+  // Keep tabs in sync (login/logout/account changes in another tab).
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === TOKEN_KEY) {
+        const next = e.newValue;
+        if (!next) {
+          setToken(null);
+          setMe(null);
+        } else {
+          setToken(next);
+          void fetchMe(next);
+        }
+      } else if (e.key === ACCOUNTS_STORAGE_KEY) {
+        setAccounts(loadAccounts());
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [fetchMe]);
+
   const loginWithPhone = useCallback(
     async (phone: string, code: string) => {
       const t = await obtainToken(phone, code);
       localStorage.setItem(TOKEN_KEY, t);
       setToken(t);
-      try {
-        setMe(await new ApiClient(t).me());
-        return { needsSignup: false };
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return { needsSignup: true };
+      const m = await new ApiClient(t).me().catch((e: unknown) => {
+        if (e instanceof ApiError && e.status === 401) return null;
         throw e;
-      }
+      });
+      if (m === null) return { needsSignup: true };
+      setMe(m);
+      remember(m);
+      return { needsSignup: false };
     },
-    [],
+    [remember],
   );
+
+  // Switch to a remembered account. In fake mode this is a no-OTP re-login; in
+  // firebase mode obtainToken throws and the caller falls back to the phone form.
+  const switchAccount = useCallback(
+    (phone: string) => loginWithPhone(phone, ""),
+    [loginWithPhone],
+  );
+
+  const forgetAccount = useCallback((phone: string) => {
+    setAccounts(forgetAccountStore(phone));
+  }, []);
 
   const completeSignup = useCallback(
     async (body: SessionCreate) => {
@@ -93,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) await fetchMe(token);
   }, [token, fetchMe]);
 
+  // Ends the active session; keeps the remembered-accounts list for quick re-login.
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -104,7 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     me,
     loading,
     api,
+    authMode: AUTH_MODE,
+    accounts,
     loginWithPhone,
+    switchAccount,
+    forgetAccount,
     completeSignup,
     refresh,
     logout,

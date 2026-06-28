@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { useAuth } from "@/lib/auth/context";
+import { AccountMenu } from "./AccountMenu";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 function NavLink({ href, label }: { href: string; label: string }) {
@@ -19,9 +20,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { me, logout } = useAuth();
+  const { me } = useAuth();
   const nav = useTranslations("nav");
-  const common = useTranslations("common");
   const app = useTranslations("app");
   const role = me?.user.user_type;
 
@@ -34,11 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          {me && (
-            <button onClick={logout} className="text-xs text-gray-500 hover:text-gray-800">
-              {common("logout")}
-            </button>
-          )}
+          {me && <AccountMenu />}
         </div>
       </header>
 
