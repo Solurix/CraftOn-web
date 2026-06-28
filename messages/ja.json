@@ -95,7 +95,8 @@
     "residenceCardBack": "在留カード（裏）",
     "photoId": "顔写真付き身分証",
     "submitted": "登録しました。審査をお待ちください。",
-    "pendingReview": "審査中です。承認までお待ちください。"
+    "pendingReview": "審査中です。承認までお待ちください。",
+    "yourSubmission": "登録内容の確認"
   },
   "jobs": {
     "listTitle": "募集中の求人",

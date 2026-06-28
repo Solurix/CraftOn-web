@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { ProfileSubmissionSummary } from "@/components/ProfileSubmissionSummary";
 import { Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 
@@ -36,9 +37,12 @@ export default function Home() {
 
   return (
     <AppShell>
-      {pending ? (
-        <div className="card">
-          <p className="text-sm text-gray-700">{t("pendingReview")}</p>
+      {pending && me ? (
+        <div className="space-y-4">
+          <div className="card">
+            <p className="text-sm text-gray-700">{t("pendingReview")}</p>
+          </div>
+          <ProfileSubmissionSummary me={me} />
         </div>
       ) : (
         <Spinner />

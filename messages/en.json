@@ -95,7 +95,8 @@
     "residenceCardBack": "Residence card (back)",
     "photoId": "Photo ID",
     "submitted": "Submitted. Please wait for review.",
-    "pendingReview": "Under review. Please wait for approval."
+    "pendingReview": "Under review. Please wait for approval.",
+    "yourSubmission": "Your submitted details"
   },
   "jobs": {
     "listTitle": "Open jobs",
