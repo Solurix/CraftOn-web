@@ -1,13 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useState } from "react";
 
+import { JobCard } from "@/components/JobCard";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
-import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
 function JobsList() {
@@ -16,10 +15,22 @@ function JobsList() {
   const [trade, setTrade] = useState("");
   const [prefecture, setPrefecture] = useState("");
 
-  const { data, loading, error } = useAsync(
-    () => api.jobs({ trade: trade || undefined, prefecture: prefecture || undefined }),
-    [trade, prefecture],
-  );
+  // Load jobs, then the worker's saved-job ids. Saved state is non-essential
+  // decoration, so a failure there must not block browsing jobs — fall back to
+  // empty stars rather than failing the whole list.
+  const { data, loading, error } = useAsync(async () => {
+    const jobs = await api.jobs({
+      trade: trade || undefined,
+      prefecture: prefecture || undefined,
+    });
+    let saved = new Set<string>();
+    try {
+      saved = new Set(await api.savedJobIds());
+    } catch {
+      /* leave stars unfilled */
+    }
+    return { jobs, saved };
+  }, [trade, prefecture]);
 
   return (
     <div className="space-y-4">
@@ -41,27 +52,12 @@ function JobsList() {
       <ErrorText message={error} />
       {loading ? (
         <Spinner />
-      ) : !data || data.length === 0 ? (
+      ) : error ? null : !data || data.jobs.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
       ) : (
         <ul className="space-y-3">
-          {data.map((job) => (
-            <li key={job.id}>
-              <Link href={`/jobs/${job.id}`} className="card block hover:border-brand">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{job.trades.join(", ")}</span>
-                  <StatusBadge status={job.status} />
-                </div>
-                <p className="mt-1 text-sm text-gray-600">
-                  {job.prefecture} · {job.work_date} · {formatTime(job.start_time)}–
-                  {formatTime(job.end_time)}
-                </p>
-                <p className="mt-1 text-sm font-semibold text-brand">{formatYen(job.daily_wage)}</p>
-                {job.contractor_company_name && (
-                  <p className="text-xs text-gray-400">{job.contractor_company_name}</p>
-                )}
-              </Link>
-            </li>
+          {data.jobs.map((job) => (
+            <JobCard key={job.id} job={job} saved={data.saved.has(job.id)} />
           ))}
         </ul>
       )}

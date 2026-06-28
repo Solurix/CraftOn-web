@@ -19,6 +19,7 @@
   },
   "nav": {
     "jobs": "Jobs",
+    "saved": "Saved",
     "myApplications": "My applications",
     "myJobs": "My jobs",
     "matchings": "Active jobs",
@@ -88,7 +89,11 @@
     "postTitle": "Post a job",
     "create": "Post",
     "outOfArea": "Outside the service area. Please join the waitlist.",
-    "detailTitle": "Job detail"
+    "detailTitle": "Job detail",
+    "save": "Save job",
+    "unsave": "Remove from saved",
+    "savedTitle": "Saved jobs",
+    "savedEmpty": "You haven't saved any jobs yet."
   },
   "applications": {
     "title": "My applications",

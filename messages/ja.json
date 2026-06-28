@@ -19,6 +19,7 @@
   },
   "nav": {
     "jobs": "求人",
+    "saved": "保存済み",
     "myApplications": "応募状況",
     "myJobs": "自分の求人",
     "matchings": "進行中の仕事",
@@ -88,7 +89,11 @@
     "postTitle": "求人を投稿",
     "create": "投稿する",
     "outOfArea": "対象エリア外です。順番待ちにご登録ください。",
-    "detailTitle": "求人詳細"
+    "detailTitle": "求人詳細",
+    "save": "求人を保存",
+    "unsave": "保存を解除",
+    "savedTitle": "保存した求人",
+    "savedEmpty": "保存した求人はまだありません。"
   },
   "applications": {
     "title": "応募状況",

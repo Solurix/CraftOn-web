@@ -45,6 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {role === "worker" && (
             <>
               <NavLink href="/jobs" label={nav("jobs")} />
+              <NavLink href="/saved" label={nav("saved")} />
               <NavLink href="/applications" label={nav("myApplications")} />
               <NavLink href="/matchings" label={nav("matchings")} />
               <NavLink href="/profile" label={nav("profile")} />

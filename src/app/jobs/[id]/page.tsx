@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { RequireAuth } from "@/components/RequireAuth";
+import { SaveJobButton } from "@/components/SaveJobButton";
 import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
@@ -16,7 +17,17 @@ function JobDetail() {
   const nav = useTranslations("nav");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
-  const { data: job, loading, error } = useAsync(() => api.job(id), [id]);
+  const { data, loading, error } = useAsync(async () => {
+    const job = await api.job(id);
+    let saved = false;
+    try {
+      saved = (await api.savedJobIds()).includes(id);
+    } catch {
+      /* bookmark state is non-essential; show the job regardless */
+    }
+    return { job, saved };
+  }, [id]);
+  const job = data?.job;
   const [applied, setApplied] = useState(false);
   const [applyError, setApplyError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,9 +54,16 @@ function JobDetail() {
         ← {t("listTitle")}
       </Link>
       <div className="card space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h1 className="text-lg font-bold">{job.trades.join(", ")}</h1>
-          <StatusBadge status={job.status} />
+          <div className="flex items-center gap-2">
+            <StatusBadge status={job.status} />
+            <SaveJobButton
+              key={String(data?.saved)}
+              jobId={job.id}
+              saved={data?.saved ?? false}
+            />
+          </div>
         </div>
         <Row label={t("date")} value={job.work_date} />
         <Row label={t("time")} value={`${formatTime(job.start_time)}–${formatTime(job.end_time)}`} />

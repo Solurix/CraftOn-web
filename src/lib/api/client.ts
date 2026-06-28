@@ -128,6 +128,18 @@ export class ApiClient {
   myJobs() {
     return request<Job[]>("/jobs/mine", { token: this.token });
   }
+  savedJobs() {
+    return request<Job[]>("/jobs/saved", { token: this.token });
+  }
+  savedJobIds() {
+    return request<string[]>("/jobs/saved-ids", { token: this.token });
+  }
+  saveJob(id: string) {
+    return request<void>(`/jobs/${id}/save`, { method: "PUT", token: this.token });
+  }
+  unsaveJob(id: string) {
+    return request<void>(`/jobs/${id}/save`, { method: "DELETE", token: this.token });
+  }
   createJob(body: JobCreate) {
     return request<Job>("/jobs", { method: "POST", body, token: this.token });
   }
