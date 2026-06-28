@@ -174,9 +174,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeSignup = useCallback(
     async (body: SessionCreate) => {
-      if (!token) throw new Error("no token");
-      await new ApiClient(token).createSession(body);
-      await fetchMe(token);
+      // Fall back to the freshly-stored token: when signup runs right after
+      // loginWithPhone in the same handler, the `token` state hasn't re-rendered
+      // yet, but localStorage was already set synchronously.
+      const t =
+        token ?? (typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null);
+      if (!t) throw new Error("no token");
+      await new ApiClient(t).createSession(body);
+      await fetchMe(t);
     },
     [token, fetchMe],
   );

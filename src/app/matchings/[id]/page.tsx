@@ -205,7 +205,7 @@ function MatchingDetail() {
           </Link>
         )}
         <Row label={t("contractType")} value={m.contract_type} />
-        <Row label="日当 / wage" value={formatYen(m.daily_wage)} />
+        <Row label={t("wage")} value={formatYen(m.daily_wage)} />
         <Row
           label={t("fee")}
           value={`${formatYen(m.platform_fee)} (${m.fee_status === "paid" ? t("feePaid") : t("feeUnpaid")})`}

@@ -31,6 +31,10 @@
   },
   "auth": {
     "loginTitle": "ログイン",
+    "signupTab": "新規登録",
+    "createAccount": "アカウントを作成",
+    "noAccount": "アカウントをお持ちでない方",
+    "haveAccount": "すでにアカウントをお持ちの方",
     "phoneLabel": "電話番号",
     "phonePlaceholder": "+8190…",
     "sendCode": "確認コードを送信",
@@ -92,6 +96,8 @@
     "trade": "職種",
     "date": "作業日",
     "time": "時間",
+    "startTime": "開始",
+    "endTime": "終了",
     "wage": "日当",
     "headcount": "募集人数",
     "notes": "備考",
@@ -128,6 +134,7 @@
     "feeUnpaid": "未収",
     "feePaid": "受領済み",
     "contractType": "契約区分",
+    "wage": "日当",
     "terms": "契約条件（暫定）",
     "viewTerms": "契約条件を表示"
   },

@@ -68,10 +68,10 @@ function PostJobForm() {
         <input type="date" className="field-input" value={form.work_date} onChange={(e) => set("work_date", e.target.value)} required />
       </Field>
       <div className="flex gap-2">
-        <Field label="開始 / start">
+        <Field label={t("startTime")}>
           <input type="time" className="field-input" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} />
         </Field>
-        <Field label="終了 / end">
+        <Field label={t("endTime")}>
           <input type="time" className="field-input" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} />
         </Field>
       </div>

@@ -31,6 +31,10 @@
   },
   "auth": {
     "loginTitle": "Log in",
+    "signupTab": "Sign up",
+    "createAccount": "Create account",
+    "noAccount": "New here?",
+    "haveAccount": "Already have an account?",
     "phoneLabel": "Phone number",
     "phonePlaceholder": "+8190…",
     "sendCode": "Send verification code",
@@ -92,6 +96,8 @@
     "trade": "Trade",
     "date": "Work date",
     "time": "Time",
+    "startTime": "Start",
+    "endTime": "End",
     "wage": "Daily wage",
     "headcount": "Headcount",
     "notes": "Notes",
@@ -128,6 +134,7 @@
     "feeUnpaid": "Unpaid",
     "feePaid": "Paid",
     "contractType": "Contract type",
+    "wage": "Daily wage",
     "terms": "Terms (provisional)",
     "viewTerms": "View terms"
   },
