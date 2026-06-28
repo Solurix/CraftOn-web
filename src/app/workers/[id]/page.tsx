@@ -30,7 +30,20 @@ function WorkerProfileView() {
         </div>
         <ProfileRow label={p("trust")} value={`★ ${Number(w.trust_score).toFixed(1)}`} />
         <ProfileRow label={p("experience")} value={p("experienceYears", { years: w.years_experience })} />
+        {(w.prefecture || w.area) && (
+          <ProfileRow
+            label={p("region")}
+            value={[w.prefecture, w.area].filter(Boolean).join(" / ")}
+          />
+        )}
+        {w.current_employer && (
+          <ProfileRow label={p("employer")} value={w.current_employer} />
+        )}
         {w.trades?.length > 0 && <ProfileRow label={p("trades")} value={w.trades.join(", ")} />}
+        {w.qualifications?.length > 0 && (
+          <ProfileRow label={p("qualifications")} value={w.qualifications.join(", ")} />
+        )}
+        {w.skills?.length > 0 && <ProfileRow label={p("skills")} value={w.skills.join(", ")} />}
         {w.tools?.length > 0 && <ProfileRow label={p("tools")} value={w.tools.join(", ")} />}
         {w.bio && (
           <div>
@@ -39,6 +52,23 @@ function WorkerProfileView() {
           </div>
         )}
       </div>
+
+      {w.work_history?.length > 0 && (
+        <div className="card space-y-1">
+          <h2 className="font-semibold">{p("career")}</h2>
+          <ul className="space-y-1 text-sm text-gray-700">
+            {w.work_history.map((h, i) => (
+              <li key={i}>
+                {p("careerEntry", {
+                  company: h.company,
+                  trade: h.trade || "—",
+                  years: h.years,
+                })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="card space-y-2">
         <h2 className="font-semibold">{rt("title")}</h2>

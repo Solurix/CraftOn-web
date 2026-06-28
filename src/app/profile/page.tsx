@@ -6,44 +6,33 @@ import { useState } from "react";
 
 import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText } from "@/components/ui";
+import {
+  WorkerProfileFields,
+  workerFormFromProfile,
+  workerFormToPayload,
+  type WorkerFormValue,
+} from "@/components/WorkerProfileFields";
 import type { Me } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
 
 function WorkerSettings({ me }: { me: Me }) {
-  const t = useTranslations("onboarding");
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
   const common = useTranslations("common");
   const { api, refresh } = useAuth();
-  const wp = me.worker_profile!;
-  const [form, setForm] = useState({
-    display_name: me.user.display_name,
-    trades: (wp.trades ?? []).join(", "),
-    tools: (wp.tools ?? []).join(", "),
-    bio: wp.bio ?? "",
-    years_experience: wp.years_experience ?? 0,
-    has_insurance: wp.has_insurance,
-    visa_expiry_date: wp.visa_expiry_date ?? "",
-  });
+  const [form, setForm] = useState<WorkerFormValue>(() =>
+    workerFormFromProfile(me.user.display_name, me.worker_profile!),
+  );
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
-  const set = (k: string, v: string | number | boolean) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const patch = (pp: Partial<WorkerFormValue>) => setForm((f) => ({ ...f, ...pp }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(false);
     setError("");
     try {
-      await api.updateWorker({
-        display_name: form.display_name,
-        trades: form.trades.split(",").map((s) => s.trim()).filter(Boolean),
-        tools: form.tools.split(",").map((s) => s.trim()).filter(Boolean),
-        bio: form.bio || null,
-        years_experience: Number(form.years_experience),
-        has_insurance: form.has_insurance,
-        visa_expiry_date: form.visa_expiry_date || null,
-      });
+      await api.updateWorker(workerFormToPayload(form));
       await refresh();
       setSaved(true);
     } catch (e) {
@@ -60,29 +49,13 @@ function WorkerSettings({ me }: { me: Me }) {
         </Link>
       </div>
       <Field label={auth("displayName")}>
-        <input className="field-input" value={form.display_name} onChange={(e) => set("display_name", e.target.value)} />
+        <input
+          className="field-input"
+          value={form.display_name}
+          onChange={(e) => patch({ display_name: e.target.value })}
+        />
       </Field>
-      <Field label={t("trades")}>
-        <input className="field-input" value={form.trades} onChange={(e) => set("trades", e.target.value)} />
-      </Field>
-      <Field label={t("tools")}>
-        <input className="field-input" value={form.tools} onChange={(e) => set("tools", e.target.value)} />
-      </Field>
-      <Field label={t("yearsExperience")}>
-        <input type="number" min={0} className="field-input" value={form.years_experience} onChange={(e) => set("years_experience", e.target.value)} />
-      </Field>
-      <Field label={t("bio")}>
-        <textarea className="field-input" value={form.bio} onChange={(e) => set("bio", e.target.value)} />
-      </Field>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={form.has_insurance} onChange={(e) => set("has_insurance", e.target.checked)} />
-        {t("hasInsurance")}
-      </label>
-      {wp.nationality !== "JP" && (
-        <Field label={t("visaExpiry")}>
-          <input type="date" className="field-input" value={form.visa_expiry_date} onChange={(e) => set("visa_expiry_date", e.target.value)} />
-        </Field>
-      )}
+      <WorkerProfileFields value={form} onChange={patch} />
       <button className="btn-primary w-full">{common("save")}</button>
       {saved && <p className="text-sm text-green-700">{p("saved")}</p>}
       <ErrorText message={error} />

@@ -4974,6 +4974,35 @@
                 ],
                 "title": "VettingQueueOut"
             },
+            "WorkHistoryEntry": {
+                "properties": {
+                    "company": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 1,
+                        "title": "Company"
+                    },
+                    "trade": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "title": "Trade",
+                        "default": ""
+                    },
+                    "years": {
+                        "type": "integer",
+                        "maximum": 80.0,
+                        "minimum": 0.0,
+                        "title": "Years",
+                        "default": 0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "company"
+                ],
+                "title": "WorkHistoryEntry",
+                "description": "A single past job in a worker's \u8077\u6b74 (career history)."
+            },
             "WorkHistoryOut": {
                 "properties": {
                     "completed_count": {
@@ -5067,6 +5096,98 @@
                         "minimum": 0.0,
                         "title": "Years Experience",
                         "default": 0
+                    },
+                    "full_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Full Name"
+                    },
+                    "name_kana": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name Kana"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "current_employer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Employer"
+                    },
+                    "current_employer_public": {
+                        "type": "boolean",
+                        "title": "Current Employer Public",
+                        "default": false
+                    },
+                    "prefecture": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prefecture"
+                    },
+                    "area": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area"
+                    },
+                    "work_history": {
+                        "items": {
+                            "$ref": "#/components/schemas/WorkHistoryEntry"
+                        },
+                        "type": "array",
+                        "title": "Work History"
+                    },
+                    "qualifications": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Qualifications"
+                    },
+                    "skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Skills"
                     },
                     "residence_card_front_doc_id": {
                         "anyOf": [
@@ -5178,6 +5299,97 @@
                         "type": "integer",
                         "title": "Years Experience"
                     },
+                    "full_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Full Name"
+                    },
+                    "name_kana": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name Kana"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "current_employer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Employer"
+                    },
+                    "current_employer_public": {
+                        "type": "boolean",
+                        "title": "Current Employer Public"
+                    },
+                    "prefecture": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prefecture"
+                    },
+                    "area": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area"
+                    },
+                    "work_history": {
+                        "items": {
+                            "$ref": "#/components/schemas/WorkHistoryEntry"
+                        },
+                        "type": "array",
+                        "title": "Work History"
+                    },
+                    "qualifications": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Qualifications"
+                    },
+                    "skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Skills"
+                    },
                     "trust_score": {
                         "type": "string",
                         "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -5243,6 +5455,16 @@
                     "has_insurance",
                     "bio",
                     "years_experience",
+                    "full_name",
+                    "name_kana",
+                    "email",
+                    "current_employer",
+                    "current_employer_public",
+                    "prefecture",
+                    "area",
+                    "work_history",
+                    "qualifications",
+                    "skills",
                     "trust_score",
                     "visa_expiry_date",
                     "work_restriction",
@@ -5250,7 +5472,7 @@
                     "residence_card_back_doc_id"
                 ],
                 "title": "WorkerProfileOut",
-                "description": "Self/admin view (includes compliance-sensitive fields)."
+                "description": "Self/admin view (includes compliance-sensitive + PII fields)."
             },
             "WorkerProfileUpdate": {
                 "properties": {
@@ -5264,6 +5486,29 @@
                             }
                         ],
                         "title": "Display Name"
+                    },
+                    "nationality": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 2,
+                                "minLength": 2
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Nationality"
+                    },
+                    "worker_class": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/WorkerClass"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     },
                     "trades": {
                         "anyOf": [
@@ -5326,6 +5571,125 @@
                             }
                         ],
                         "title": "Years Experience"
+                    },
+                    "full_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Full Name"
+                    },
+                    "name_kana": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name Kana"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "current_employer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Employer"
+                    },
+                    "current_employer_public": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Employer Public"
+                    },
+                    "prefecture": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prefecture"
+                    },
+                    "area": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area"
+                    },
+                    "work_history": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/WorkHistoryEntry"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Work History"
+                    },
+                    "qualifications": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Qualifications"
+                    },
+                    "skills": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Skills"
                     },
                     "residence_card_front_doc_id": {
                         "anyOf": [
@@ -5422,6 +5786,60 @@
                         "type": "integer",
                         "title": "Years Experience"
                     },
+                    "prefecture": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prefecture"
+                    },
+                    "area": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area"
+                    },
+                    "current_employer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Employer"
+                    },
+                    "work_history": {
+                        "items": {
+                            "$ref": "#/components/schemas/WorkHistoryEntry"
+                        },
+                        "type": "array",
+                        "title": "Work History"
+                    },
+                    "qualifications": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Qualifications"
+                    },
+                    "skills": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Skills"
+                    },
                     "trust_score": {
                         "type": "string",
                         "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
@@ -5437,10 +5855,16 @@
                     "tools",
                     "bio",
                     "years_experience",
+                    "prefecture",
+                    "area",
+                    "current_employer",
+                    "work_history",
+                    "qualifications",
+                    "skills",
                     "trust_score"
                 ],
                 "title": "WorkerPublicOut",
-                "description": "Public worker profile (docs/06: reviews, trust, trades)."
+                "description": "Public worker profile (docs/06). Excludes PII (legal name, kana, email);\ncurrent employer appears only when the worker opted to make it public."
             }
         },
         "securitySchemes": {

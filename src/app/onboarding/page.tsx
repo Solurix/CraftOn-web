@@ -6,6 +6,12 @@ import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { ErrorText, Spinner } from "@/components/ui";
+import {
+  emptyWorkerForm,
+  WorkerProfileFields,
+  workerFormToPayload,
+  type WorkerFormValue,
+} from "@/components/WorkerProfileFields";
 import { useAuth } from "@/lib/auth/context";
 
 function RoleChooser({ onChoose }: { onChoose: (role: "worker" | "contractor", name: string) => void }) {
@@ -37,20 +43,17 @@ function RoleChooser({ onChoose }: { onChoose: (role: "worker" | "contractor", n
 function WorkerForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
-  const { api } = useAuth();
-  const [nationality, setNationality] = useState("JP");
-  const [workerClass, setWorkerClass] = useState<"employee" | "freelance">("employee");
-  const [trades, setTrades] = useState("");
-  const [bio, setBio] = useState("");
-  const [yearsExperience, setYearsExperience] = useState(0);
-  const [hasInsurance, setHasInsurance] = useState(false);
-  const [visaExpiry, setVisaExpiry] = useState("");
+  const { api, me } = useAuth();
+  const [form, setForm] = useState<WorkerFormValue>(() =>
+    emptyWorkerForm(me?.user.display_name ?? ""),
+  );
   const [frontId, setFrontId] = useState<string | null>(null);
   const [backId, setBackId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const nonJp = nationality.toUpperCase() !== "JP";
+  const nonJp = form.nationality.toUpperCase() !== "JP";
+  const patch = (p: Partial<WorkerFormValue>) => setForm((f) => ({ ...f, ...p }));
 
   const uploadCard = async (side: "residence_card_front" | "residence_card_back") => {
     const ticket = await api.uploadUrl(side);
@@ -66,13 +69,7 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
     setError("");
     try {
       await api.onboardWorker({
-        nationality: nationality.toUpperCase(),
-        worker_class: workerClass,
-        trades: trades.split(",").map((s) => s.trim()).filter(Boolean),
-        bio: bio || null,
-        years_experience: Number(yearsExperience),
-        has_insurance: hasInsurance,
-        visa_expiry_date: nonJp && visaExpiry ? visaExpiry : null,
+        ...workerFormToPayload(form),
         residence_card_front_doc_id: frontId,
         residence_card_back_doc_id: backId,
       });
@@ -87,64 +84,17 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} className="card space-y-4">
       <h1 className="text-lg font-bold">{t("workerTitle")}</h1>
-      <div>
-        <label className="field-label">{t("nationality")}</label>
-        <input className="field-input" value={nationality} onChange={(e) => setNationality(e.target.value)} />
-      </div>
-      <div>
-        <label className="field-label">{t("workerClass")}</label>
-        <select
-          className="field-input"
-          value={workerClass}
-          onChange={(e) => setWorkerClass(e.target.value as "employee" | "freelance")}
-        >
-          <option value="employee">{t("employee")}</option>
-          <option value="freelance">{t("freelance")}</option>
-        </select>
-      </div>
-      <div>
-        <label className="field-label">{t("trades")}</label>
-        <input className="field-input" value={trades} onChange={(e) => setTrades(e.target.value)} />
-      </div>
-      <div>
-        <label className="field-label">{t("yearsExperience")}</label>
-        <input
-          type="number"
-          min={0}
-          className="field-input"
-          value={yearsExperience}
-          onChange={(e) => setYearsExperience(Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <label className="field-label">{t("bio")}</label>
-        <textarea className="field-input" value={bio} onChange={(e) => setBio(e.target.value)} />
-      </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={hasInsurance} onChange={(e) => setHasInsurance(e.target.checked)} />
-        {t("hasInsurance")}
-      </label>
+      <WorkerProfileFields value={form} onChange={patch} />
       {nonJp && (
-        <div className="space-y-2 rounded-md bg-amber-50 p-3">
-          <div>
-            <label className="field-label">{t("visaExpiry")}</label>
-            <input
-              type="date"
-              className="field-input"
-              value={visaExpiry}
-              onChange={(e) => setVisaExpiry(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_front")}>
-              {frontId ? "✓ " : ""}
-              {t("residenceCardFront")}
-            </button>
-            <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_back")}>
-              {backId ? "✓ " : ""}
-              {t("residenceCardBack")}
-            </button>
-          </div>
+        <div className="flex gap-2 rounded-md bg-amber-50 p-3">
+          <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_front")}>
+            {frontId ? "✓ " : ""}
+            {t("residenceCardFront")}
+          </button>
+          <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_back")}>
+            {backId ? "✓ " : ""}
+            {t("residenceCardBack")}
+          </button>
         </div>
       )}
       <button type="submit" className="btn-primary w-full" disabled={busy}>

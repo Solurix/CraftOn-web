@@ -1572,6 +1572,24 @@ export interface components {
             items: components["schemas"]["VettingItem"][];
         };
         /**
+         * WorkHistoryEntry
+         * @description A single past job in a worker's 職歴 (career history).
+         */
+        WorkHistoryEntry: {
+            /** Company */
+            company: string;
+            /**
+             * Trade
+             * @default
+             */
+            trade: string;
+            /**
+             * Years
+             * @default 0
+             */
+            years: number;
+        };
+        /**
          * WorkHistoryOut
          * @description A worker's completed-work record + headline totals (informational).
          */
@@ -1617,6 +1635,29 @@ export interface components {
              * @default 0
              */
             years_experience: number;
+            /** Full Name */
+            full_name?: string | null;
+            /** Name Kana */
+            name_kana?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Current Employer */
+            current_employer?: string | null;
+            /**
+             * Current Employer Public
+             * @default false
+             */
+            current_employer_public: boolean;
+            /** Prefecture */
+            prefecture?: string | null;
+            /** Area */
+            area?: string | null;
+            /** Work History */
+            work_history?: components["schemas"]["WorkHistoryEntry"][];
+            /** Qualifications */
+            qualifications?: string[];
+            /** Skills */
+            skills?: string[];
             /** Residence Card Front Doc Id */
             residence_card_front_doc_id?: string | null;
             /** Residence Card Back Doc Id */
@@ -1628,7 +1669,7 @@ export interface components {
         };
         /**
          * WorkerProfileOut
-         * @description Self/admin view (includes compliance-sensitive fields).
+         * @description Self/admin view (includes compliance-sensitive + PII fields).
          */
         WorkerProfileOut: {
             /**
@@ -1652,6 +1693,26 @@ export interface components {
             bio: string | null;
             /** Years Experience */
             years_experience: number;
+            /** Full Name */
+            full_name: string | null;
+            /** Name Kana */
+            name_kana: string | null;
+            /** Email */
+            email: string | null;
+            /** Current Employer */
+            current_employer: string | null;
+            /** Current Employer Public */
+            current_employer_public: boolean;
+            /** Prefecture */
+            prefecture: string | null;
+            /** Area */
+            area: string | null;
+            /** Work History */
+            work_history: components["schemas"]["WorkHistoryEntry"][];
+            /** Qualifications */
+            qualifications: string[];
+            /** Skills */
+            skills: string[];
             /** Trust Score */
             trust_score: string;
             /** Visa Expiry Date */
@@ -1670,6 +1731,9 @@ export interface components {
         WorkerProfileUpdate: {
             /** Display Name */
             display_name?: string | null;
+            /** Nationality */
+            nationality?: string | null;
+            worker_class?: components["schemas"]["WorkerClass"] | null;
             /** Trades */
             trades?: string[] | null;
             /** Tools */
@@ -1680,6 +1744,26 @@ export interface components {
             bio?: string | null;
             /** Years Experience */
             years_experience?: number | null;
+            /** Full Name */
+            full_name?: string | null;
+            /** Name Kana */
+            name_kana?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Current Employer */
+            current_employer?: string | null;
+            /** Current Employer Public */
+            current_employer_public?: boolean | null;
+            /** Prefecture */
+            prefecture?: string | null;
+            /** Area */
+            area?: string | null;
+            /** Work History */
+            work_history?: components["schemas"]["WorkHistoryEntry"][] | null;
+            /** Qualifications */
+            qualifications?: string[] | null;
+            /** Skills */
+            skills?: string[] | null;
             /** Residence Card Front Doc Id */
             residence_card_front_doc_id?: string | null;
             /** Residence Card Back Doc Id */
@@ -1691,7 +1775,8 @@ export interface components {
         };
         /**
          * WorkerPublicOut
-         * @description Public worker profile (docs/06: reviews, trust, trades).
+         * @description Public worker profile (docs/06). Excludes PII (legal name, kana, email);
+         *     current employer appears only when the worker opted to make it public.
          */
         WorkerPublicOut: {
             /**
@@ -1710,6 +1795,18 @@ export interface components {
             bio: string | null;
             /** Years Experience */
             years_experience: number;
+            /** Prefecture */
+            prefecture: string | null;
+            /** Area */
+            area: string | null;
+            /** Current Employer */
+            current_employer: string | null;
+            /** Work History */
+            work_history: components["schemas"]["WorkHistoryEntry"][];
+            /** Qualifications */
+            qualifications: string[];
+            /** Skills */
+            skills: string[];
             /** Trust Score */
             trust_score: string;
         };
