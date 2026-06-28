@@ -66,6 +66,13 @@ function UsersTab() {
         <ul className="space-y-3">
           {users.data.items.map((item) => {
             const href = profileHref(item);
+            // A non-admin with neither profile signed up but never finished the
+            // onboarding form — the backend approve gate would reject it, so
+            // surface that here instead of offering an action that 400s.
+            const awaitingOnboarding =
+              item.user.user_type !== "admin" &&
+              !item.worker_profile &&
+              !item.contractor_profile;
             return (
               <li key={item.user.id} className="card space-y-2">
                 <div className="flex items-center justify-between">
@@ -98,9 +105,16 @@ function UsersTab() {
                 <p className="text-xs text-gray-400">
                   {t("documents")}: {item.documents.length}
                 </p>
+                {awaitingOnboarding && (
+                  <p className="text-xs text-amber-700">{t("awaitingOnboarding")}</p>
+                )}
                 {item.user.user_type !== "admin" && (
                   <div className="flex gap-2">
-                    <button className="btn-primary" onClick={() => run(() => api.approveUser(item.user.id))}>
+                    <button
+                      className="btn-primary"
+                      disabled={awaitingOnboarding}
+                      onClick={() => run(() => api.approveUser(item.user.id))}
+                    >
                       {t("approve")}
                     </button>
                     <button className="btn-danger" onClick={() => run(() => api.rejectUser(item.user.id, "rejected"))}>
@@ -393,8 +407,57 @@ function ConfigTab() {
     }
   };
 
+  const toggleFlag = async (flag: string, next: boolean) => {
+    setError("");
+    try {
+      await api.updateConfig({ [flag]: next });
+      config.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  // Every boolean config value is exposed as a quick on/off toggle.
+  const flags = Object.entries(config.data?.config ?? {}).filter(
+    ([, v]) => typeof v === "boolean",
+  ) as [string, boolean][];
+
   return (
     <div className="space-y-3">
+      {flags.length > 0 && (
+        <div className="card space-y-2">
+          <h3 className="font-semibold">{t("flags")}</h3>
+          <ul className="space-y-1">
+            {flags.map(([flag, on]) => (
+              <li key={flag} className="flex items-center justify-between gap-2">
+                <span className="text-sm">
+                  {flag === "auto_approve_users" ? (
+                    <span className="font-medium">{t("autoApproveUsers")}</span>
+                  ) : (
+                    <code className="text-xs text-gray-600">{flag}</code>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={on}
+                  aria-label={flag}
+                  onClick={() => toggleFlag(flag, !on)}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${
+                    on ? "bg-brand" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                      on ? "translate-x-5" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <form onSubmit={save} className="card flex flex-wrap items-end gap-2">
         <div className="flex-1">
           <label className="field-label">{t("configKey")}</label>
