@@ -142,7 +142,10 @@
     "emptyHint": "求人は毎日追加されます。条件を変えるか、しばらくしてからご確認ください。",
     "savedEmptyHint": "気になる求人の星をタップすると、ここに保存されます。",
     "myEmpty": "まだ求人を投稿していません。",
-    "myEmptyHint": "最初の求人を投稿して、応募を受け付けましょう。"
+    "myEmptyHint": "最初の求人を投稿して、応募を受け付けましょう。",
+    "recommendedTitle": "あなたへのおすすめ",
+    "allJobsTitle": "すべての求人",
+    "loadMore": "もっと見る（{count}）"
   },
   "applications": {
     "title": "応募状況",
@@ -177,7 +180,10 @@
     "completedJobs": "完了した仕事",
     "totalEarned": "獲得総額",
     "empty": "完了した仕事はまだありません。",
-    "emptyHint": "完了した仕事と収入がここに記録されます。"
+    "emptyHint": "完了した仕事と収入がここに記録されます。",
+    "byMonth": "月別の収入",
+    "jobsCount": "{count}件",
+    "workAgain": "似た求人を探す"
   },
   "chat": {
     "title": "チャット",
@@ -317,5 +323,34 @@
     "pointCompliance": "就労資格を確認",
     "pointFees": "手数料が明確",
     "pointPrivacy": "連絡先を保護"
+  },
+  "savedSearch": {
+    "title": "保存した検索",
+    "save": "検索を保存",
+    "all": "すべての求人"
+  },
+  "completeness": {
+    "title": "プロフィール完成度",
+    "hint": "プロフィールを充実させると、上位に表示され仕事が増えます。",
+    "fields": {
+      "fullName": "氏名",
+      "trades": "職種",
+      "experience": "経験",
+      "location": "勤務地",
+      "skills": "スキル",
+      "qualifications": "資格",
+      "tools": "道具",
+      "bio": "自己紹介",
+      "workHistory": "職歴",
+      "companyName": "会社名",
+      "contactPerson": "担当者",
+      "address": "住所"
+    }
+  },
+  "visa": {
+    "expiringTitle": "在留資格の有効期限が近づいています",
+    "expiringBody": "就労資格の有効期限まであと{days}日です（{date}）。応募を続けるには更新してください。",
+    "expiredTitle": "在留資格の有効期限が切れています",
+    "expiredBody": "就労資格の有効期限は{date}で切れています。求人に応募するには更新してください。"
   }
 }

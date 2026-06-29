@@ -5,8 +5,14 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { DevicesCard } from "@/components/DevicesCard";
+import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
+import { VisaStatusBanner } from "@/components/VisaStatusBanner";
 import { ErrorText } from "@/components/ui";
+import {
+  contractorCompleteness,
+  workerCompleteness,
+} from "@/lib/completeness";
 import {
   isWorkerFormValid,
   WorkerProfileFields,
@@ -194,15 +200,22 @@ function SetPasswordCard() {
 function Settings() {
   const { me } = useAuth();
   if (!me) return null;
-  const role =
-    me.user.user_type === "worker" && me.worker_profile ? (
-      <WorkerSettings me={me} />
-    ) : me.user.user_type === "contractor" && me.contractor_profile ? (
-      <ContractorSettings me={me} />
-    ) : null;
+  const isWorker = me.user.user_type === "worker" && me.worker_profile;
+  const isContractor = me.user.user_type === "contractor" && me.contractor_profile;
+  const completeness = isWorker
+    ? workerCompleteness(me.worker_profile!)
+    : isContractor
+      ? contractorCompleteness(me.contractor_profile!)
+      : null;
   return (
     <div className="space-y-4">
-      {role}
+      {isWorker && <VisaStatusBanner profile={me.worker_profile} />}
+      {completeness && <ProfileCompleteness data={completeness} />}
+      {isWorker ? (
+        <WorkerSettings me={me} />
+      ) : isContractor ? (
+        <ContractorSettings me={me} />
+      ) : null}
       <SetPasswordCard />
       <DevicesCard />
     </div>
