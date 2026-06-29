@@ -1,17 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
-import { ErrorText } from "@/components/ui";
+import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 
 type Mode = "login" | "signup";
 type Role = "worker" | "contractor";
 
-export default function LoginPage() {
+function LoginPage() {
+  // Landing-page CTAs link to /login?mode=signup to open the sign-up flow directly.
+  const searchParams = useSearchParams();
+  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "login";
   const t = useTranslations("auth");
   const common = useTranslations("common");
   const {
@@ -25,7 +28,7 @@ export default function LoginPage() {
   } = useAuth();
   const router = useRouter();
 
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(initialMode);
   // Signup starts by choosing a role — that is the first decision, before phone.
   const [role, setRole] = useState<Role | null>(null);
   const [name, setName] = useState("");
@@ -290,5 +293,14 @@ export default function LoginPage() {
         </p>
       </div>
     </AppShell>
+  );
+}
+
+// useSearchParams() requires a Suspense boundary under the App Router.
+export default function LoginPageRoute() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <LoginPage />
+    </Suspense>
   );
 }
