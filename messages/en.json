@@ -163,7 +163,8 @@
     "sortTrust": "Highest rated",
     "sortRecent": "Most recent",
     "sortFavorites": "Favourites first",
-    "confirmed": "Worker confirmed"
+    "confirmed": "Worker confirmed",
+    "withdrawn": "Application withdrawn"
   },
   "matchings": {
     "title": "Active jobs",
@@ -217,7 +218,8 @@
     "bell": "Notifications",
     "bellUnread": "Notifications, {count} unread",
     "unread": "Unread",
-    "emptyHint": "Updates about jobs, applications, and messages will appear here."
+    "emptyHint": "Updates about jobs, applications, and messages will appear here.",
+    "allRead": "All notifications marked read"
   },
   "devices": {
     "title": "Devices",

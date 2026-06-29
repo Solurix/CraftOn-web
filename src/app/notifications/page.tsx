@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { RequireAuth } from "@/components/RequireAuth";
+import { useToast } from "@/components/Toast";
 import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import type { Notification } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
@@ -14,6 +15,7 @@ import { useAsync } from "@/lib/useAsync";
 function Inbox() {
   const t = useTranslations("notifications");
   const { api } = useAuth();
+  const toast = useToast();
   const router = useRouter();
   const { data, loading, error, reload, setData } = useAsync(
     () => api.notifications(),
@@ -38,9 +40,14 @@ function Inbox() {
   };
 
   const markAll = async () => {
-    await api.markAllNotificationsRead();
-    emitNotificationsChanged();
-    reload();
+    try {
+      await api.markAllNotificationsRead();
+      emitNotificationsChanged();
+      toast.success(t("allRead"));
+      reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "error");
+    }
   };
 
   const hasUnread = (data ?? []).some((n) => !n.is_read);

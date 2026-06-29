@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { RequireAuth } from "@/components/RequireAuth";
+import { useToast } from "@/components/Toast";
 import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
@@ -12,11 +13,17 @@ function MyApplications() {
   const t = useTranslations("applications");
   const jobs = useTranslations("jobs");
   const { api } = useAuth();
+  const toast = useToast();
   const { data, loading, error, reload } = useAsync(() => api.myApplications(), []);
 
   const withdraw = async (id: string) => {
-    await api.withdraw(id);
-    reload();
+    try {
+      await api.withdraw(id);
+      toast.success(t("withdrawn"));
+      reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "error");
+    }
   };
 
   return (

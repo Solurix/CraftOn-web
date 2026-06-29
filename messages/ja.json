@@ -163,7 +163,8 @@
     "sortTrust": "評価が高い順",
     "sortRecent": "新着順",
     "sortFavorites": "お気に入り優先",
-    "confirmed": "職人を確定しました"
+    "confirmed": "職人を確定しました",
+    "withdrawn": "応募を取り下げました"
   },
   "matchings": {
     "title": "進行中の仕事",
@@ -217,7 +218,8 @@
     "bell": "通知",
     "bellUnread": "通知、未読{count}件",
     "unread": "未読",
-    "emptyHint": "求人・応募・メッセージのお知らせがここに表示されます。"
+    "emptyHint": "求人・応募・メッセージのお知らせがここに表示されます。",
+    "allRead": "すべて既読にしました"
   },
   "devices": {
     "title": "端末",

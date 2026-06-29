@@ -7,6 +7,7 @@ import { useState } from "react";
 import { DevicesCard } from "@/components/DevicesCard";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
+import { useToast } from "@/components/Toast";
 import { VisaStatusBanner } from "@/components/VisaStatusBanner";
 import { ErrorText } from "@/components/ui";
 import {
@@ -28,6 +29,7 @@ function WorkerSettings({ me }: { me: Me }) {
   const auth = useTranslations("auth");
   const common = useTranslations("common");
   const { api, refresh } = useAuth();
+  const toast = useToast();
   const [form, setForm] = useState<WorkerFormValue>(() =>
     workerFormFromProfile(me.user.display_name, me.worker_profile!),
   );
@@ -43,8 +45,11 @@ function WorkerSettings({ me }: { me: Me }) {
       await api.updateWorker(workerFormToPayload(form));
       await refresh();
       setSaved(true);
+      toast.success(p("saved"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -79,6 +84,7 @@ function ContractorSettings({ me }: { me: Me }) {
   const auth = useTranslations("auth");
   const common = useTranslations("common");
   const { api, refresh } = useAuth();
+  const toast = useToast();
   const cp = me.contractor_profile!;
   const [form, setForm] = useState({
     display_name: me.user.display_name,
@@ -107,8 +113,11 @@ function ContractorSettings({ me }: { me: Me }) {
       });
       await refresh();
       setSaved(true);
+      toast.success(p("saved"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -158,6 +167,7 @@ function SetPasswordCard() {
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
   const { api, refresh } = useAuth();
+  const toast = useToast();
   const [password, setPassword] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -171,8 +181,11 @@ function SetPasswordCard() {
       setPassword("");
       await refresh();
       setSaved(true);
+      toast.success(p("passwordSaved"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
