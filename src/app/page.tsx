@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { Landing } from "@/components/Landing";
 import { ProfileSubmissionSummary } from "@/components/ProfileSubmissionSummary";
 import { Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
@@ -15,11 +16,7 @@ export default function Home() {
   const t = useTranslations("onboarding");
 
   useEffect(() => {
-    if (loading) return;
-    if (!me) {
-      router.replace("/login");
-      return;
-    }
+    if (loading || !me) return;
     const role = me.user.user_type;
     const onboarded =
       role === "admin" || me.has_worker_profile || me.has_contractor_profile;
@@ -31,6 +28,12 @@ export default function Home() {
       router.replace(role === "worker" ? "/jobs" : role === "contractor" ? "/my-jobs" : "/admin");
     }
   }, [loading, me, router]);
+
+  // Logged-out visitors get the public landing page (what CRAFT-ON is, before
+  // they register) rather than being bounced straight to /login.
+  if (!loading && !me) {
+    return <Landing />;
+  }
 
   const pending =
     me && me.user.status !== "approved" && (me.has_worker_profile || me.has_contractor_profile);
