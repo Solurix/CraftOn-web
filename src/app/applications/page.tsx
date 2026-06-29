@@ -46,18 +46,26 @@ function MyApplications() {
       ) : (
         <ul className="space-y-3">
           {data.map((a) => (
-            <li key={a.id} className="card flex items-center justify-between">
-              <Link href={`/jobs/${a.job_id}`} className="text-sm text-brand underline">
-                {jobs("detailTitle")}
+            // Whole row navigates to the job; the withdraw action sits on top as
+            // a sibling overlay (interactive controls can't nest inside <a>).
+            <li key={a.id} className="relative">
+              <Link
+                href={`/jobs/${a.job_id}`}
+                className="card card-hover block pr-28"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{jobs("detailTitle")}</span>
+                  <StatusBadge status={a.status} />
+                </div>
               </Link>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={a.status} />
-                {a.status === "applied" && (
-                  <button className="btn-danger" onClick={() => withdraw(a.id)}>
-                    {t("withdraw")}
-                  </button>
-                )}
-              </div>
+              {a.status === "applied" && (
+                <button
+                  className="btn-danger btn-sm absolute right-3 top-1/2 -translate-y-1/2"
+                  onClick={() => withdraw(a.id)}
+                >
+                  {t("withdraw")}
+                </button>
+              )}
             </li>
           ))}
         </ul>

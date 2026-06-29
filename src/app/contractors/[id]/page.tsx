@@ -28,7 +28,9 @@ function ContractorProfileView() {
       <div className="card space-y-2">
         <div className="flex items-center gap-3">
           <Avatar name={c.company_name || c.display_name} size="lg" />
-          <h1 className="text-xl font-bold">{c.display_name}</h1>
+          <h1 className="text-lg font-bold tracking-tight [overflow-wrap:anywhere] sm:text-xl">
+            {c.display_name}
+          </h1>
         </div>
         <ProfileRow label={p("company")} value={c.company_name} />
         <ProfileRow label={ob("prefecture")} value={c.prefecture} />

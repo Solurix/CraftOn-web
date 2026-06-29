@@ -1,19 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ErrorText, Spinner } from "@/components/ui";
+import { useToast } from "@/components/Toast";
 import { useAuth } from "@/lib/auth/context";
 import { getDeviceId } from "@/lib/device";
 import { formatDate } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
-// Lists the devices the user has signed in from and lets them revoke any device
-// other than the current one (to drop a lost/old device's access).
+// Lists the devices/sessions the user is signed in from. They can end the
+// session on any other device (sign it out), end every other session at once,
+// or end the session on this device (log out here).
 export function DevicesCard() {
   const t = useTranslations("devices");
-  const { api } = useAuth();
+  const { api, logout } = useAuth();
+  const toast = useToast();
+  const router = useRouter();
   const { data, loading, error, reload } = useAsync(() => api.myDevices(), []);
   const current = getDeviceId();
   const [revokeError, setRevokeError] = useState("");
@@ -24,17 +29,60 @@ export function DevicesCard() {
     setBusy(true);
     try {
       await api.revokeDevice(id);
+      toast.success(t("ended"));
       reload();
     } catch (e) {
-      setRevokeError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setRevokeError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   };
 
+  const others = (data ?? []).filter(
+    (d) => !d.revoked && d.device_id !== current,
+  );
+
+  const endAllOthers = async () => {
+    if (typeof window !== "undefined" && !window.confirm(t("endAllOthersConfirm"))) {
+      return;
+    }
+    setRevokeError("");
+    setBusy(true);
+    try {
+      for (const d of others) await api.revokeDevice(d.id);
+      toast.success(t("ended"));
+      reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "error";
+      setRevokeError(msg);
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const endThisSession = () => {
+    logout();
+    router.replace("/login");
+  };
+
   return (
     <div className="card space-y-2">
-      <h2 className="font-semibold">{t("title")}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-semibold">{t("title")}</h2>
+        {others.length > 0 && (
+          <button
+            type="button"
+            className="btn-ghost btn-sm"
+            disabled={busy}
+            onClick={endAllOthers}
+          >
+            {t("endAllOthers")}
+          </button>
+        )}
+      </div>
       <ErrorText message={error || revokeError} />
       {loading ? (
         <Spinner />
@@ -60,13 +108,21 @@ export function DevicesCard() {
                     {d.revoked && ` · ${t("revoked")}`}
                   </p>
                 </div>
-                {!d.revoked && !isCurrent && (
+                {d.revoked ? null : isCurrent ? (
                   <button
-                    className="btn-danger"
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={endThisSession}
+                  >
+                    {t("endThisSession")}
+                  </button>
+                ) : (
+                  <button
+                    className="btn-danger btn-sm"
                     disabled={busy}
                     onClick={() => revoke(d.id)}
                   >
-                    {t("revoke")}
+                    {t("endSession")}
                   </button>
                 )}
               </li>

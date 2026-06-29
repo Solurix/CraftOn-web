@@ -97,7 +97,7 @@ function LoginPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-sm space-y-4">
-        <h1 className="text-xl font-bold">
+        <h1 className="text-lg font-bold tracking-tight sm:text-xl">
           {mode === "login" ? t("loginTitle") : t("signupTab")}
         </h1>
 
@@ -307,7 +307,7 @@ function LoginPage() {
           {mode === "login" ? t("noAccount") : t("haveAccount")}{" "}
           <button
             type="button"
-            className="font-medium text-brand underline"
+            className="link"
             onClick={() => switchMode(mode === "login" ? "signup" : "login")}
           >
             {mode === "login" ? t("signupTab") : t("loginTitle")}

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { QuickReplies } from "@/components/QuickReplies";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
-import { DetailSkeleton, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
+import { BackLink, DetailSkeleton, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import type { Matching } from "@/lib/api/models";
 import { formatYen } from "@/lib/format";
@@ -213,9 +213,7 @@ function MatchingDetail() {
 
   return (
     <div className="space-y-4">
-      <Link href="/matchings" className="text-sm text-gray-500">
-        ← {t("title")}
-      </Link>
+      <BackLink href="/matchings" label={t("title")} />
 
       <div className="card space-y-2">
         <div className="flex items-center justify-between">
@@ -223,12 +221,12 @@ function MatchingDetail() {
           <StatusBadge status={m.status} />
         </div>
         {role === "contractor" && m.worker_display_name && (
-          <Link href={`/workers/${m.worker_id}`} className="text-sm text-brand underline">
+          <Link href={`/workers/${m.worker_id}`} className="link text-sm">
             {m.worker_display_name}
           </Link>
         )}
         {role === "worker" && m.contractor_id && (
-          <Link href={`/contractors/${m.contractor_id}`} className="text-sm text-brand underline">
+          <Link href={`/contractors/${m.contractor_id}`} className="link text-sm">
             {m.contractor_company_name}
           </Link>
         )}
@@ -240,7 +238,7 @@ function MatchingDetail() {
         />
         {m.terms && (
           <div>
-            <button className="text-sm text-brand underline" onClick={() => setShowTerms((v) => !v)}>
+            <button className="link text-sm" onClick={() => setShowTerms((v) => !v)}>
               {t("viewTerms")}
             </button>
             {showTerms && (

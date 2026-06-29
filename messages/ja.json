@@ -10,7 +10,7 @@
     },
     "hero": {
       "badge": "建設現場のスポットマッチング",
-      "title": "明日、職人が足りない？数分で穴を埋める。",
+      "title": "明日、職人が足りない？数分で人手を確保。",
       "subtitle": "CRAFT-ON は、建設現場と腕利きの職人を当日・翌日のスポット案件でつなぎます。求人を出して、マッチングして、仕事を完了。書類・安全・信頼まで、ひとつのアプリに。",
       "ctaPrimary": "はじめる",
       "ctaSecondary": "ログイン",
@@ -18,7 +18,7 @@
     },
     "audience": {
       "title": "現場の両サイドのために",
-      "subtitle": "ハンマーを振る人も、現場を回す人も。CRAFT-ON はあなたのためのアプリです。",
+      "subtitle": "自ら現場で手を動かす方も、現場を回す方も。CRAFT-ON はあなたのためのアプリです。",
       "worker": {
         "tag": "職人・一人親方の方へ",
         "title": "空いた日に、適正な日当の仕事を",
@@ -53,7 +53,7 @@
     },
     "features": {
       "title": "CRAFT-ON が選ばれる理由",
-      "subtitle": "人をつなぐだけではなく、仕事を回す道具まで。",
+      "subtitle": "人をつなぐだけでなく、仕事を回すためのツールまで。",
       "spot": {
         "title": "数分でスポットマッチング",
         "body": "当日・翌日の案件を、職種とエリアで自動マッチング。電話も待ち時間も不要です。"
@@ -320,7 +320,12 @@
     "thisDevice": "この端末",
     "revoke": "アクセスを取り消す",
     "revoked": "取り消し済み",
-    "unknownDevice": "不明な端末"
+    "unknownDevice": "不明な端末",
+    "endSession": "セッションを終了",
+    "endThisSession": "このセッションを終了",
+    "endAllOthers": "他をすべて終了",
+    "endAllOthersConfirm": "他のすべてのセッションを終了しますか？対象の端末はサインアウトされます。",
+    "ended": "セッションを終了しました"
   },
   "reviews": {
     "title": "レビュー",
@@ -441,7 +446,7 @@
       "location": "勤務地",
       "skills": "スキル",
       "qualifications": "資格",
-      "tools": "道具",
+      "tools": "工具",
       "bio": "自己紹介",
       "workHistory": "職歴",
       "companyName": "会社名",

@@ -56,8 +56,8 @@ function WorkerSettings({ me }: { me: Me }) {
   return (
     <form onSubmit={submit} className="card space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{p("edit")}</h1>
-        <Link href={`/workers/${me.user.id}`} className="text-sm text-brand underline">
+        <h1 className="text-lg font-bold tracking-tight sm:text-xl">{p("edit")}</h1>
+        <Link href={`/workers/${me.user.id}`} className="link text-sm">
           {p("view")}
         </Link>
       </div>
@@ -124,8 +124,8 @@ function ContractorSettings({ me }: { me: Me }) {
   return (
     <form onSubmit={submit} className="card space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{p("edit")}</h1>
-        <Link href={`/contractors/${me.user.id}`} className="text-sm text-brand underline">
+        <h1 className="text-lg font-bold tracking-tight sm:text-xl">{p("edit")}</h1>
+        <Link href={`/contractors/${me.user.id}`} className="link text-sm">
           {p("view")}
         </Link>
       </div>

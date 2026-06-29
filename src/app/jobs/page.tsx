@@ -192,11 +192,7 @@ function JobsList() {
             <option value="new">{t("sortNew")}</option>
           </select>
           {hasFilters && (
-            <button
-              type="button"
-              className="text-sm text-brand underline"
-              onClick={clearFilters}
-            >
+            <button type="button" className="link text-sm" onClick={clearFilters}>
               {t("clearFilters")}
             </button>
           )}

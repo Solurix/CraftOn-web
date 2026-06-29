@@ -31,7 +31,9 @@ function WorkerProfileView() {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <Avatar name={w.display_name} size="lg" />
-            <h1 className="text-xl font-bold">{w.display_name}</h1>
+            <h1 className="text-lg font-bold tracking-tight [overflow-wrap:anywhere] sm:text-xl">
+              {w.display_name}
+            </h1>
             {isContractor && (
               <FavoriteWorkerButton workerId={w.user_id} workerName={w.display_name} />
             )}

@@ -12,7 +12,7 @@ import {
 } from "@/components/FavoriteWorkerButton";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
-import { EmptyState, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
+import { BackLink, EmptyState, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import type { Applicant } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
@@ -23,6 +23,7 @@ type Sort = "trust" | "recent" | "favorites";
 function JobApplicants() {
   const t = useTranslations("applications");
   const ob = useTranslations("onboarding");
+  const nav = useTranslations("nav");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
   const toast = useToast();
@@ -85,12 +86,12 @@ function JobApplicants() {
 
   return (
     <div className="space-y-4">
-      <Link href="/my-jobs" className="text-sm text-gray-500">
-        ←
-      </Link>
+      <BackLink href="/my-jobs" label={nav("myJobs")} />
       <div className="card space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-lg font-bold">{job.data.trades.join(", ")}</h1>
+          <h1 className="text-lg font-bold [overflow-wrap:anywhere]">
+            {job.data.trades.join(", ")}
+          </h1>
           <StatusBadge status={job.data.status} />
         </div>
         <p className="text-sm text-gray-600">
@@ -99,9 +100,9 @@ function JobApplicants() {
         </p>
         <Link
           href={`/post-job?from=${job.data.id}`}
-          className="inline-block pt-1 text-xs font-medium text-brand hover:underline"
+          className="btn-secondary btn-sm mt-1"
         >
-          {t("duplicateJob")} →
+          {t("duplicateJob")}
         </Link>
       </div>
 
@@ -140,10 +141,7 @@ function JobApplicants() {
                 <Avatar name={a.worker_display_name} />
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <Link
-                      href={`/workers/${a.worker_id}`}
-                      className="font-medium text-brand underline"
-                    >
+                    <Link href={`/workers/${a.worker_id}`} className="link">
                       {a.worker_display_name}
                     </Link>
                     <FavoriteWorkerButton

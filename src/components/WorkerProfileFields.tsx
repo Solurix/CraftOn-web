@@ -371,7 +371,7 @@ export function WorkerProfileFields({
         ))}
         <button
           type="button"
-          className="text-sm text-brand underline"
+          className="link text-sm"
           onClick={() =>
             onChange({
               work_history: [

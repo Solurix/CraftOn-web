@@ -8,7 +8,7 @@ import { useState } from "react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { SaveJobButton } from "@/components/SaveJobButton";
 import { useToast } from "@/components/Toast";
-import { DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
+import { BackLink, DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
@@ -55,12 +55,10 @@ function JobDetail() {
 
   return (
     <div className="space-y-4">
-      <Link href="/jobs" className="text-sm text-gray-500">
-        ← {t("listTitle")}
-      </Link>
+      <BackLink href="/jobs" label={t("listTitle")} />
       <div className="card space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-lg font-bold">{job.trades.join(", ")}</h1>
+          <h1 className="text-lg font-bold [overflow-wrap:anywhere]">{job.trades.join(", ")}</h1>
           <div className="flex items-center gap-2">
             <StatusBadge status={job.status} />
             <SaveJobButton
@@ -79,9 +77,9 @@ function JobDetail() {
       </div>
 
       {applied ? (
-        <div className="card text-center text-sm text-green-700">
-          {t("applied")} ·{" "}
-          <Link href="/applications" className="text-brand underline">
+        <div className="card flex flex-col items-center gap-2 text-center text-sm text-green-700">
+          <span>{t("applied")}</span>
+          <Link href="/applications" className="btn-secondary btn-sm">
             {nav("myApplications")}
           </Link>
         </div>

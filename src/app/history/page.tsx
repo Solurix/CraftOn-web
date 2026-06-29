@@ -96,9 +96,9 @@ function WorkHistory() {
                         ...(m.prefecture ? { prefecture: m.prefecture } : {}),
                       },
                     }}
-                    className="mt-2 inline-block text-xs font-medium text-brand hover:underline"
+                    className="btn-secondary btn-sm mt-2"
                   >
-                    {t("workAgain")} →
+                    {t("workAgain")}
                   </Link>
                 </li>
               ))}

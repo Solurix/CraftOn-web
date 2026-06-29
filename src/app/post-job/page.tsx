@@ -178,7 +178,7 @@ function PostJobForm() {
 
   return (
     <form onSubmit={submit} className="card space-y-3">
-      <h1 className="text-xl font-bold">{t("postTitle")}</h1>
+      <h1 className="text-lg font-bold tracking-tight sm:text-xl">{t("postTitle")}</h1>
 
       {restored && (
         <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
@@ -186,7 +186,7 @@ function PostJobForm() {
           <button
             type="button"
             onClick={discardDraft}
-            className="font-medium underline"
+            className="shrink-0 rounded-md border border-amber-300 px-2 py-1 font-medium hover:bg-amber-100"
           >
             {tpl("discard")}
           </button>

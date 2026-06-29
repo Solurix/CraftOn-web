@@ -83,7 +83,7 @@ function UsersTab() {
                 <div className="flex items-center justify-between">
                   <div>
                     {href ? (
-                      <Link href={href} className="font-medium text-brand underline">
+                      <Link href={href} className="link">
                         {item.user.display_name}
                       </Link>
                     ) : (

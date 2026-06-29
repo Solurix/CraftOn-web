@@ -1,7 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import type { ReactNode } from "react";
+
+// A back navigation control styled as a subtle button (replaces bare "←" links).
+export function BackLink({ href, label }: { href: string; label?: string }) {
+  const common = useTranslations("common");
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+    >
+      <span aria-hidden>←</span>
+      {label ?? common("back")}
+    </Link>
+  );
+}
 
 export function Spinner() {
   const t = useTranslations("common");
@@ -104,8 +119,10 @@ export function PageHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h1 className="text-xl font-bold tracking-tight">{title}</h1>
-      {action}
+      <h1 className="text-lg font-bold leading-snug tracking-tight [overflow-wrap:anywhere] sm:text-xl">
+        {title}
+      </h1>
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }

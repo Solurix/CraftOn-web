@@ -320,7 +320,12 @@
     "thisDevice": "this device",
     "revoke": "Revoke",
     "revoked": "Revoked",
-    "unknownDevice": "Unknown device"
+    "unknownDevice": "Unknown device",
+    "endSession": "End session",
+    "endThisSession": "End this session",
+    "endAllOthers": "End all others",
+    "endAllOthersConfirm": "End all other sessions? Those devices will be signed out.",
+    "ended": "Session ended"
   },
   "reviews": {
     "title": "Reviews",

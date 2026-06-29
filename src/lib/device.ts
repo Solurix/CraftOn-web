@@ -2,6 +2,7 @@
 // from the user agent. Sent as X-Device-Id / X-Device-Name so the API can list
 // and revoke devices.
 const KEY = "crafton.device";
+const NAME_KEY = "crafton.device.name";
 
 export function getDeviceId(): string | null {
   if (typeof window === "undefined") return null;
@@ -20,11 +21,23 @@ export function getDeviceId(): string | null {
 // Used after a device_revoked response: a later legitimate login then gets a new
 // (non-revoked) device record, while the revoked one stays revoked.
 export function rotateDeviceId(): void {
-  if (typeof window !== "undefined") localStorage.removeItem(KEY);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(NAME_KEY);
+  }
 }
 
+// The device label is computed once from the user agent and then PINNED in
+// localStorage. Switching a mobile browser to "Desktop site" (or DevTools device
+// emulation) changes the UA mid-session; without pinning, the label we send
+// would change too, which the API can read as a different device and end the
+// session. Pinning keeps this device's identity stable across such toggles.
 export function getDeviceName(): string | null {
   if (typeof navigator === "undefined") return null;
+  if (typeof localStorage !== "undefined") {
+    const pinned = localStorage.getItem(NAME_KEY);
+    if (pinned) return pinned;
+  }
   const ua = navigator.userAgent;
   const browser = /Edg/.test(ua)
     ? "Edge"
@@ -48,5 +61,11 @@ export function getDeviceName(): string | null {
           : /Linux/.test(ua)
             ? "Linux"
             : "";
-  return os ? `${browser} · ${os}` : browser;
+  const name = os ? `${browser} · ${os}` : browser;
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(NAME_KEY, name);
+  } catch {
+    /* best-effort */
+  }
+  return name;
 }
