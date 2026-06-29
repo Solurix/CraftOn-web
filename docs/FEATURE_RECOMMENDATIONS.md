@@ -1,5 +1,11 @@
 # CRAFT-ON — Feature Recommendations & UI Roadmap
 
+> **Update:** Many of these are now built. See
+> [`IMPLEMENTATION_STATUS.md`](./IMPLEMENTATION_STATUS.md) for the per-item
+> status matrix (✅ done / 🟡 partial / ⛔ blocked) and
+> [`BLOCKERS.md`](./BLOCKERS.md) for implementable backend/infra specs of the
+> items that need API work. As of this round: **20 done, 13 partial, 17 blocked**.
+
 > Status: proposal. This document inventories ideas to make the CRAFT-ON web app
 > more attractive and sticky for workers, contractors, and operators. It builds
 > on the **current** feature set (jobs browse/apply, matching lifecycle, chat,
