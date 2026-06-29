@@ -17,7 +17,8 @@
     "required": "必須",
     "none": "なし",
     "remove": "削除",
-    "add": "追加"
+    "add": "追加",
+    "skipToContent": "本文へスキップ"
   },
   "nav": {
     "jobs": "求人",
@@ -290,5 +291,12 @@
     "generic": "エラーが発生しました。",
     "network": "通信エラーが発生しました。",
     "unauthorized": "ログインが必要です。"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "switchTo": "{mode}テーマに切り替え",
+    "current": "テーマ: {mode}"
   }
 }

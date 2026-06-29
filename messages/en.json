@@ -17,7 +17,8 @@
     "required": "Required",
     "none": "None",
     "remove": "Remove",
-    "add": "Add"
+    "add": "Add",
+    "skipToContent": "Skip to content"
   },
   "nav": {
     "jobs": "Jobs",
@@ -290,5 +291,12 @@
     "generic": "Something went wrong.",
     "network": "A network error occurred.",
     "unauthorized": "Please log in."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "switchTo": "Switch to {mode} theme",
+    "current": "Theme: {mode}"
   }
 }
