@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useAuth } from "@/lib/auth/context";
@@ -10,10 +11,17 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationBell } from "./NotificationBell";
 
 function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  const active = pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link
       href={href}
-      className="rounded-full border border-gray-200 bg-white px-3 py-1 text-gray-700 hover:bg-gray-100"
+      aria-current={active ? "page" : undefined}
+      className={
+        active
+          ? "rounded-full border border-brand bg-brand px-3 py-1 font-medium text-white shadow-sm"
+          : "rounded-full border border-gray-200 bg-white px-3 py-1 text-gray-700 transition hover:border-gray-300 hover:bg-gray-100"
+      }
     >
       {label}
     </Link>
@@ -28,9 +36,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="mx-auto min-h-screen max-w-3xl px-4 pb-20">
-      <header className="flex items-center justify-between py-4">
-        <Link href="/" className="flex flex-col">
-          <span className="text-lg font-bold text-brand">{app("name")}</span>
+      <header className="sticky top-0 z-20 -mx-4 mb-1 flex items-center justify-between border-b border-gray-200/70 bg-gray-50/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60">
+        <Link href="/" className="flex flex-col leading-tight">
+          <span className="text-lg font-bold tracking-tight text-brand">
+            {app("name")}
+          </span>
           <span className="text-[10px] text-gray-400">{app("tagline")}</span>
         </Link>
         <div className="flex items-center gap-3">
@@ -41,7 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       {me && (
-        <nav className="mb-5 flex flex-wrap gap-2 text-sm">
+        <nav className="mb-5 flex flex-wrap gap-2 pt-3 text-sm">
           {role === "worker" && (
             <>
               <NavLink href="/jobs" label={nav("jobs")} />

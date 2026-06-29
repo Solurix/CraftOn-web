@@ -135,7 +135,8 @@
     "save": "求人を保存",
     "unsave": "保存を解除",
     "savedTitle": "保存した求人",
-    "savedEmpty": "保存した求人はまだありません。"
+    "savedEmpty": "保存した求人はまだありません。",
+    "emptyHint": "求人は毎日追加されます。条件を変えるか、しばらくしてからご確認ください。"
   },
   "applications": {
     "title": "応募状況",

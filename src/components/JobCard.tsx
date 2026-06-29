@@ -28,20 +28,31 @@ export function JobCard({
         className="absolute right-1 top-1 z-10"
       />
       {/* Badge sits left of the trades, leaving the top-right corner for the star. */}
-      <Link href={`/jobs/${job.id}`} className="card block hover:border-brand">
+      <Link href={`/jobs/${job.id}`} className="card card-hover block">
         <div className="flex items-center gap-2 pr-10">
-          <span className="font-medium">{job.trades.join(", ")}</span>
+          <span className="font-semibold">{job.trades.join(", ")}</span>
           <StatusBadge status={job.status} />
         </div>
-        <p className="mt-1 text-sm text-gray-600">
-          {job.prefecture} · {job.work_date} · {formatTime(job.start_time)}–
-          {formatTime(job.end_time)}
+        <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-600">
+          <span aria-hidden>📍</span>
+          {job.prefecture}
+          <span className="text-gray-300" aria-hidden>
+            ·
+          </span>
+          <span aria-hidden>🗓️</span>
+          {job.work_date}
+          <span className="text-gray-300" aria-hidden>
+            ·
+          </span>
+          {formatTime(job.start_time)}–{formatTime(job.end_time)}
         </p>
-        <p className="mt-1 text-sm font-semibold text-brand">
+        <p className="mt-2 text-base font-bold text-brand">
           {formatYen(job.daily_wage)}
         </p>
         {job.contractor_company_name && (
-          <p className="text-xs text-gray-400">{job.contractor_company_name}</p>
+          <p className="mt-0.5 text-xs text-gray-400">
+            {job.contractor_company_name}
+          </p>
         )}
       </Link>
     </li>

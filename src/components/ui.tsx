@@ -1,15 +1,91 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 
 export function Spinner() {
   const t = useTranslations("common");
-  return <p className="py-8 text-center text-sm text-gray-500">{t("loading")}</p>;
+  return (
+    <div
+      className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500"
+      role="status"
+      aria-live="polite"
+    >
+      <span
+        className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-brand"
+        aria-hidden
+      />
+      {t("loading")}
+    </div>
+  );
 }
 
 export function ErrorText({ message }: { message: string }) {
   if (!message) return null;
   return <p className="mt-2 text-sm text-red-600">{message}</p>;
+}
+
+// A single shimmer block; size it via className (height/width).
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`skeleton ${className}`} aria-hidden />;
+}
+
+// Placeholder rows that mimic a list of cards while data loads.
+export function SkeletonList({ rows = 4 }: { rows?: number }) {
+  return (
+    <ul className="space-y-3" aria-hidden>
+      {Array.from({ length: rows }).map((_, i) => (
+        <li key={i} className="card space-y-2">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-3 w-3/4" />
+          <Skeleton className="h-3 w-1/4" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Friendly empty state with an optional icon glyph and call-to-action.
+export function EmptyState({
+  title,
+  hint,
+  icon = "✦",
+  action,
+}: {
+  title: string;
+  hint?: string;
+  icon?: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="card flex flex-col items-center gap-2 py-12 text-center">
+      <div
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft text-xl text-brand"
+        aria-hidden
+      >
+        {icon}
+      </div>
+      <p className="text-sm font-medium text-gray-700">{title}</p>
+      {hint && <p className="max-w-xs text-xs text-gray-500">{hint}</p>}
+      {action && <div className="mt-2">{action}</div>}
+    </div>
+  );
+}
+
+// Page heading with optional right-aligned action slot.
+export function PageHeader({
+  title,
+  action,
+}: {
+  title: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+      {action}
+    </div>
+  );
 }
 
 const STATUS_CLASS: Record<string, string> = {
@@ -33,7 +109,10 @@ export function StatusBadge({ status }: { status: string }) {
   const t = useTranslations("status");
   const cls = STATUS_CLASS[status] ?? "bg-gray-100 text-gray-700";
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden />
       {t(status as never)}
     </span>
   );

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { JobCard } from "@/components/JobCard";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -75,8 +75,8 @@ function JobsList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t("listTitle")}</h1>
-      <div className="space-y-2">
+      <PageHeader title={t("listTitle")} />
+      <div className="card space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <label className="flex flex-col text-xs text-gray-500">
             {t("filterTrade")}
@@ -160,9 +160,9 @@ function JobsList() {
       </div>
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : error ? null : !data || data.jobs.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} hint={t("emptyHint")} icon="🔍" />
       ) : (
         <ul className="space-y-3">
           {data.jobs.map((job) => (
