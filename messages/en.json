@@ -3,6 +3,93 @@
     "name": "CRAFT-ON",
     "tagline": "Spot matching for construction sites"
   },
+  "landing": {
+    "nav": {
+      "login": "Log in",
+      "signup": "Get started"
+    },
+    "hero": {
+      "badge": "Spot matching for construction sites",
+      "title": "Short a worker tomorrow? Fill the gap in minutes.",
+      "subtitle": "CRAFT-ON connects construction sites with skilled tradespeople for same-day and next-day work. Post a job, get matched, get it done — with paperwork, safety, and trust built in.",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "Log in",
+      "freeNote": "Free for workers · Contractors pay only per match"
+    },
+    "audience": {
+      "title": "Built for both sides of the site",
+      "subtitle": "Whether you swing the hammer or run the site, CRAFT-ON is made for you.",
+      "worker": {
+        "tag": "Workers & sole proprietors",
+        "title": "Find fair-paid work on your free days",
+        "body": "Browse same-day and next-day jobs near you and apply in a tap. Build a profile that proves your skill, earn reviews, and grow your reputation. It's 100% free — no fees, ever.",
+        "cta": "Find work"
+      },
+      "contractor": {
+        "tag": "Contractors & site supervisors",
+        "title": "Reach approved tradespeople in minutes",
+        "body": "Post a job and matching, vetted workers apply right away — no interviews, no phone tag. Review applicants, confirm in a tap, and keep the whole job in one place.",
+        "cta": "Post a job"
+      }
+    },
+    "how": {
+      "title": "How it works",
+      "step1": {
+        "title": "Post a job",
+        "body": "A contractor posts a same-day or next-day job — trade, date, wage, and site."
+      },
+      "step2": {
+        "title": "Apply & match",
+        "body": "Matching workers apply, and the contractor confirms one in a single tap."
+      },
+      "step3": {
+        "title": "Get it done",
+        "body": "Check in on site, report completion, and approve — all tracked in the app."
+      },
+      "step4": {
+        "title": "Build trust",
+        "body": "Both sides leave reviews that build a lasting, portable reputation."
+      }
+    },
+    "features": {
+      "title": "Why CRAFT-ON",
+      "subtitle": "More than a contact list — the tools to run the job, too.",
+      "spot": {
+        "title": "Spot matching in minutes",
+        "body": "Same-day and next-day jobs matched by trade and area — no calls, no waiting."
+      },
+      "noshow": {
+        "title": "Anti-no-show system",
+        "body": "Confirmations and trust scores keep both sides reliable, so jobs don't fall through."
+      },
+      "trust": {
+        "title": "Profiles & two-way reviews",
+        "body": "Qualifications, tools, and past work on every profile; honest ratings on both sides."
+      },
+      "foreign": {
+        "title": "Foreign-worker ready",
+        "body": "Multilingual support and built-in visa / work-permission checks keep hiring compliant."
+      },
+      "safe": {
+        "title": "Safe & private",
+        "body": "Contact details stay masked and chat is filtered until a match is confirmed."
+      },
+      "free": {
+        "title": "Free for workers",
+        "body": "Workers never pay. Contractors pay a simple flat fee per completed match."
+      }
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "body": "Join CRAFT-ON and fill your next shift — or your next job — today.",
+      "primary": "Create an account",
+      "secondary": "I already have an account"
+    },
+    "footer": {
+      "area": "Now serving Greater Tokyo (首都圏)",
+      "rights": "© CRAFT-ON"
+    }
+  },
   "common": {
     "loading": "Loading…",
     "save": "Save",
