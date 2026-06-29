@@ -6,24 +6,29 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useAuth } from "@/lib/auth/context";
+import { isActivePath, NAV, type Role } from "@/lib/nav";
 import { AccountMenu } from "./AccountMenu";
+import { BottomNav } from "./BottomNav";
+import { InstallPrompt } from "./InstallPrompt";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationBell } from "./NotificationBell";
+import { OfflineBanner } from "./OfflineBanner";
 import { ThemeToggle } from "./ThemeToggle";
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({ href, label, icon }: { href: string; label: string; icon: string }) {
   const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const active = isActivePath(pathname, href);
   return (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
       className={
         active
-          ? "rounded-full border border-brand bg-brand px-3 py-1 font-medium text-white shadow-sm"
-          : "rounded-full border border-gray-200 bg-white px-3 py-1 text-gray-700 transition hover:border-gray-300 hover:bg-gray-100"
+          ? "inline-flex items-center gap-1 rounded-full border border-brand bg-brand px-3 py-1 font-medium text-white shadow-sm"
+          : "inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-gray-700 transition hover:border-gray-300 hover:bg-gray-100"
       }
     >
+      <span aria-hidden>{icon}</span>
       {label}
     </Link>
   );
@@ -34,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const nav = useTranslations("nav");
   const app = useTranslations("app");
   const common = useTranslations("common");
-  const role = me?.user.user_type;
+  const role = me?.user.user_type as Role | undefined;
 
   return (
     <div className="mx-auto min-h-screen max-w-3xl px-4 pb-24">
@@ -56,35 +61,30 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {me && (
-        <nav className="mb-5 flex flex-wrap gap-2 pt-3 text-sm">
-          {role === "worker" && (
-            <>
-              <NavLink href="/jobs" label={nav("jobs")} />
-              <NavLink href="/saved" label={nav("saved")} />
-              <NavLink href="/applications" label={nav("myApplications")} />
-              <NavLink href="/matchings" label={nav("matchings")} />
-              <NavLink href="/history" label={nav("history")} />
-              <NavLink href="/profile" label={nav("profile")} />
-            </>
-          )}
-          {role === "contractor" && (
-            <>
-              <NavLink href="/post-job" label={nav("postJob")} />
-              <NavLink href="/my-jobs" label={nav("myJobs")} />
-              <NavLink href="/matchings" label={nav("matchings")} />
-              <NavLink href="/profile" label={nav("profile")} />
-            </>
-          )}
-          {role === "admin" && (
-            <>
-              <NavLink href="/admin" label={nav("vetting")} />
-            </>
-          )}
+      {/* Desktop/tablet pill nav; mobile uses the bottom tab bar instead. */}
+      {role && (
+        <nav
+          className="mb-5 hidden flex-wrap gap-2 pt-3 text-sm sm:flex"
+          aria-label={nav("primary")}
+        >
+          {NAV[role].map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={nav(item.key as never)}
+            />
+          ))}
         </nav>
       )}
 
-      <main id="main-content">{children}</main>
+      <main id="main-content" className="pt-2">
+        <OfflineBanner />
+        {me && <InstallPrompt />}
+        {children}
+      </main>
+
+      {me && <BottomNav />}
     </div>
   );
 }

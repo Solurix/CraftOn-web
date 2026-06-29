@@ -18,7 +18,8 @@
     "none": "なし",
     "remove": "削除",
     "add": "追加",
-    "skipToContent": "本文へスキップ"
+    "skipToContent": "本文へスキップ",
+    "offline": "オフラインです。一部の操作ができない場合があります。"
   },
   "nav": {
     "jobs": "求人",
@@ -30,7 +31,8 @@
     "postJob": "求人を投稿",
     "profile": "プロフィール",
     "vetting": "審査",
-    "config": "設定"
+    "config": "設定",
+    "primary": "メインナビゲーション"
   },
   "auth": {
     "loginTitle": "ログイン",
@@ -298,5 +300,22 @@
     "system": "システム",
     "switchTo": "{mode}テーマに切り替え",
     "current": "テーマ: {mode}"
+  },
+  "install": {
+    "title": "CRAFT-ON をインストール",
+    "body": "ホーム画面に追加して、ワンタップで開けます。",
+    "action": "インストール",
+    "dismiss": "閉じる"
+  },
+  "landing": {
+    "headline": "建設現場のスポットワーク",
+    "subhead": "CRAFT-ON は、職人と元請を日雇いの仕事でつなぎます。早く、公平に、コンプライアンスを守って。",
+    "forWorkers": "職人の方へ",
+    "forWorkersDesc": "近くの日雇い求人を探し、数秒で応募。完了した仕事の報酬を受け取れます。",
+    "forContractors": "元請の方へ",
+    "forContractorsDesc": "求人を投稿し、審査済みで評価のある職人を必要な日だけ確定できます。",
+    "pointCompliance": "就労資格を確認",
+    "pointFees": "手数料が明確",
+    "pointPrivacy": "連絡先を保護"
   }
 }

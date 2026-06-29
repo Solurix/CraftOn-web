@@ -18,7 +18,8 @@
     "none": "None",
     "remove": "Remove",
     "add": "Add",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "offline": "You are offline. Some actions may not work."
   },
   "nav": {
     "jobs": "Jobs",
@@ -30,7 +31,8 @@
     "postJob": "Post a job",
     "profile": "Profile",
     "vetting": "Vetting",
-    "config": "Config"
+    "config": "Config",
+    "primary": "Primary navigation"
   },
   "auth": {
     "loginTitle": "Log in",
@@ -298,5 +300,22 @@
     "system": "System",
     "switchTo": "Switch to {mode} theme",
     "current": "Theme: {mode}"
+  },
+  "install": {
+    "title": "Install CRAFT-ON",
+    "body": "Add the app to your home screen for one-tap access.",
+    "action": "Install",
+    "dismiss": "Dismiss"
+  },
+  "landing": {
+    "headline": "Spot work for construction sites",
+    "subhead": "CRAFT-ON connects skilled workers with contractors for day jobs — fast, fair, and compliant.",
+    "forWorkers": "For workers",
+    "forWorkersDesc": "Find day jobs near you, apply in seconds, and get paid for completed work.",
+    "forContractors": "For contractors",
+    "forContractorsDesc": "Post a job and confirm vetted, rated workers for the days you need them.",
+    "pointCompliance": "Work-permission verified",
+    "pointFees": "Transparent fees",
+    "pointPrivacy": "Contact details protected"
   }
 }

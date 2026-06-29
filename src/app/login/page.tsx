@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { LandingHero } from "@/components/LandingHero";
 import { ErrorText } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 
@@ -101,9 +102,15 @@ export default function LoginPage() {
     }
   };
 
+  // Show the marketing hero to first-time visitors (login mode, no remembered
+  // accounts); returning users go straight to the compact account picker/form.
+  const showHero = mode === "login" && accounts.length === 0;
+
   return (
     <AppShell>
-      <div className="mx-auto max-w-sm space-y-4">
+      <div className="mx-auto max-w-2xl space-y-6">
+        {showHero && <LandingHero />}
+        <div className="mx-auto max-w-sm space-y-4">
         <h1 className="text-xl font-bold">
           {mode === "login" ? t("loginTitle") : t("signupTab")}
         </h1>
@@ -288,6 +295,7 @@ export default function LoginPage() {
             {mode === "login" ? t("signupTab") : t("loginTitle")}
           </button>
         </p>
+        </div>
       </div>
     </AppShell>
   );
