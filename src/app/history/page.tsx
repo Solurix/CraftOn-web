@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
@@ -16,10 +16,10 @@ function WorkHistory() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t("title")}</h1>
+      <PageHeader title={t("title")} />
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : error ? null : !data ? null : (
         <>
           <div className="grid grid-cols-2 gap-3">
@@ -35,14 +35,14 @@ function WorkHistory() {
             </div>
           </div>
           {data.matchings.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
+            <EmptyState title={t("empty")} hint={t("emptyHint")} icon="💴" />
           ) : (
             <ul className="space-y-3">
               {data.matchings.map((m) => (
                 <li key={m.id}>
                   <Link
                     href={`/matchings/${m.id}`}
-                    className="card block hover:border-brand"
+                    className="card card-hover block"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium">

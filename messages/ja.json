@@ -136,7 +136,10 @@
     "unsave": "保存を解除",
     "savedTitle": "保存した求人",
     "savedEmpty": "保存した求人はまだありません。",
-    "emptyHint": "求人は毎日追加されます。条件を変えるか、しばらくしてからご確認ください。"
+    "emptyHint": "求人は毎日追加されます。条件を変えるか、しばらくしてからご確認ください。",
+    "savedEmptyHint": "気になる求人の星をタップすると、ここに保存されます。",
+    "myEmpty": "まだ求人を投稿していません。",
+    "myEmptyHint": "最初の求人を投稿して、応募を受け付けましょう。"
   },
   "applications": {
     "title": "応募状況",
@@ -146,7 +149,8 @@
     "confirm": "この職人で確定",
     "reject": "見送る",
     "withdraw": "応募を取り消す",
-    "trust": "信頼スコア"
+    "trust": "信頼スコア",
+    "emptyHint": "募集中の求人に応募すると、ここに表示されます。"
   },
   "matchings": {
     "title": "進行中の仕事",
@@ -162,13 +166,15 @@
     "contractType": "契約区分",
     "wage": "日当",
     "terms": "契約条件（暫定）",
-    "viewTerms": "契約条件を表示"
+    "viewTerms": "契約条件を表示",
+    "emptyHint": "確定した仕事がここに表示され、チェックインや進捗の確認ができます。"
   },
   "history": {
     "title": "稼働履歴",
     "completedJobs": "完了した仕事",
     "totalEarned": "獲得総額",
-    "empty": "完了した仕事はまだありません。"
+    "empty": "完了した仕事はまだありません。",
+    "emptyHint": "完了した仕事と収入がここに記録されます。"
   },
   "chat": {
     "title": "チャット",
@@ -183,7 +189,8 @@
     "markAllRead": "すべて既読にする",
     "bell": "通知",
     "bellUnread": "通知、未読{count}件",
-    "unread": "未読"
+    "unread": "未読",
+    "emptyHint": "求人・応募・メッセージのお知らせがここに表示されます。"
   },
   "devices": {
     "title": "端末",

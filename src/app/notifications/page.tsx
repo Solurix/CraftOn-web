@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import type { Notification } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
 import { formatDate } from "@/lib/format";
@@ -47,19 +47,21 @@ function Inbox() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{t("title")}</h1>
-        {hasUnread && (
-          <button className="text-sm text-brand underline" onClick={markAll}>
-            {t("markAllRead")}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={t("title")}
+        action={
+          hasUnread ? (
+            <button className="btn-ghost text-sm" onClick={markAll}>
+              {t("markAllRead")}
+            </button>
+          ) : undefined
+        }
+      />
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : !data || data.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} hint={t("emptyHint")} icon="🔔" />
       ) : (
         <ul className="space-y-2">
           {data.map((n) => (

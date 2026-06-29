@@ -136,7 +136,10 @@
     "unsave": "Remove from saved",
     "savedTitle": "Saved jobs",
     "savedEmpty": "You haven't saved any jobs yet.",
-    "emptyHint": "New jobs are posted daily — adjust your filters or check back soon."
+    "emptyHint": "New jobs are posted daily — adjust your filters or check back soon.",
+    "savedEmptyHint": "Tap the star on any job to keep it here for later.",
+    "myEmpty": "You have not posted any jobs yet.",
+    "myEmptyHint": "Post your first job to start receiving applications."
   },
   "applications": {
     "title": "My applications",
@@ -146,7 +149,8 @@
     "confirm": "Confirm this worker",
     "reject": "Reject",
     "withdraw": "Withdraw",
-    "trust": "Trust score"
+    "trust": "Trust score",
+    "emptyHint": "Browse open jobs and apply — your applications will show up here."
   },
   "matchings": {
     "title": "Active jobs",
@@ -162,13 +166,15 @@
     "contractType": "Contract type",
     "wage": "Daily wage",
     "terms": "Terms (provisional)",
-    "viewTerms": "View terms"
+    "viewTerms": "View terms",
+    "emptyHint": "Confirmed jobs appear here so you can check in and track them."
   },
   "history": {
     "title": "Work history",
     "completedJobs": "Jobs completed",
     "totalEarned": "Total earned",
-    "empty": "No completed jobs yet."
+    "empty": "No completed jobs yet.",
+    "emptyHint": "Completed jobs and earnings will be recorded here."
   },
   "chat": {
     "title": "Chat",
@@ -183,7 +189,8 @@
     "markAllRead": "Mark all read",
     "bell": "Notifications",
     "bellUnread": "Notifications, {count} unread",
-    "unread": "Unread"
+    "unread": "Unread",
+    "emptyHint": "Updates about jobs, applications, and messages will appear here."
   },
   "devices": {
     "title": "Devices",

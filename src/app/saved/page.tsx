@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { JobCard } from "@/components/JobCard";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
 
@@ -15,12 +15,12 @@ function SavedJobs() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t("savedTitle")}</h1>
+      <PageHeader title={t("savedTitle")} />
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : error ? null : !data || data.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{t("savedEmpty")}</p>
+        <EmptyState title={t("savedEmpty")} hint={t("savedEmptyHint")} icon="★" />
       ) : (
         <ul className="space-y-3">
           {data.map((job) => (

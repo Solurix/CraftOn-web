@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
@@ -16,17 +16,17 @@ function MatchingsList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t("title")}</h1>
+      <PageHeader title={t("title")} />
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : !data || data.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
+        <EmptyState title={t("empty")} hint={t("emptyHint")} icon="🤝" />
       ) : (
         <ul className="space-y-3">
           {data.map((m) => (
             <li key={m.id}>
-              <Link href={`/matchings/${m.id}`} className="card block hover:border-brand">
+              <Link href={`/matchings/${m.id}`} className="card card-hover block">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
                     {m.work_date ?? ""} {m.prefecture ? `· ${m.prefecture}` : ""}

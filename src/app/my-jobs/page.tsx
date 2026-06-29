@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
@@ -17,22 +17,33 @@ function MyJobs() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{nav("myJobs")}</h1>
-        <Link href="/post-job" className="btn-primary">
-          {nav("postJob")}
-        </Link>
-      </div>
+      <PageHeader
+        title={nav("myJobs")}
+        action={
+          <Link href="/post-job" className="btn-primary">
+            {nav("postJob")}
+          </Link>
+        }
+      />
       <ErrorText message={error} />
       {loading ? (
-        <Spinner />
+        <SkeletonList />
       ) : !data || data.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{t("empty")}</p>
+        <EmptyState
+          title={t("myEmpty")}
+          hint={t("myEmptyHint")}
+          icon="🛠️"
+          action={
+            <Link href="/post-job" className="btn-primary">
+              {nav("postJob")}
+            </Link>
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {data.map((job) => (
             <li key={job.id}>
-              <Link href={`/my-jobs/${job.id}`} className="card block hover:border-brand">
+              <Link href={`/my-jobs/${job.id}`} className="card card-hover block">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{job.trades.join(", ")}</span>
                   <StatusBadge status={job.status} />
