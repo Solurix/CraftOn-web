@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
+import { Avatar } from "@/components/Avatar";
+import { FavoriteWorkerButton } from "@/components/FavoriteWorkerButton";
 import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText, Spinner } from "@/components/ui";
@@ -14,19 +16,26 @@ function WorkerProfileView() {
   const ob = useTranslations("onboarding");
   const rt = useTranslations("reviews");
   const { id } = useParams<{ id: string }>();
-  const { api } = useAuth();
+  const { api, me } = useAuth();
   const profile = useAsync(() => api.worker(id), [id]);
   const reviews = useAsync(() => api.workerReviews(id), [id]);
 
   if (profile.loading) return <Spinner />;
   if (profile.error || !profile.data) return <ErrorText message={profile.error || "not found"} />;
   const w = profile.data;
+  const isContractor = me?.user.user_type === "contractor";
 
   return (
     <div className="space-y-4">
       <div className="card space-y-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">{w.display_name}</h1>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <Avatar name={w.display_name} size="lg" />
+            <h1 className="text-xl font-bold">{w.display_name}</h1>
+            {isContractor && (
+              <FavoriteWorkerButton workerId={w.user_id} workerName={w.display_name} />
+            )}
+          </div>
           <span className="inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">
             {ob(w.worker_class)}
           </span>

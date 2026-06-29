@@ -145,7 +145,8 @@
     "myEmptyHint": "最初の求人を投稿して、応募を受け付けましょう。",
     "recommendedTitle": "あなたへのおすすめ",
     "allJobsTitle": "すべての求人",
-    "loadMore": "もっと見る（{count}）"
+    "loadMore": "もっと見る（{count}）",
+    "posted": "求人を投稿しました"
   },
   "applications": {
     "title": "応募状況",
@@ -156,7 +157,13 @@
     "reject": "見送る",
     "withdraw": "応募を取り消す",
     "trust": "信頼スコア",
-    "emptyHint": "募集中の求人に応募すると、ここに表示されます。"
+    "emptyHint": "募集中の求人に応募すると、ここに表示されます。",
+    "duplicateJob": "この求人を複製",
+    "sortApplicants": "応募者を並び替え",
+    "sortTrust": "評価が高い順",
+    "sortRecent": "新着順",
+    "sortFavorites": "お気に入り優先",
+    "confirmed": "職人を確定しました"
   },
   "matchings": {
     "title": "進行中の仕事",
@@ -352,5 +359,21 @@
     "expiringBody": "就労資格の有効期限まであと{days}日です（{date}）。応募を続けるには更新してください。",
     "expiredTitle": "在留資格の有効期限が切れています",
     "expiredBody": "就労資格の有効期限は{date}で切れています。求人に応募するには更新してください。"
+  },
+  "templates": {
+    "title": "テンプレート",
+    "save": "テンプレートとして保存",
+    "untitled": "テンプレート",
+    "draftRestored": "前回の下書きを復元しました。",
+    "discard": "破棄"
+  },
+  "favorites": {
+    "add": "お気に入りに追加",
+    "remove": "お気に入りから削除"
+  },
+  "insights": {
+    "open": "募集中",
+    "filled": "充足",
+    "total": "合計"
   }
 }

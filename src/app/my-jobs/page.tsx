@@ -7,13 +7,16 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
+import { jobInsights } from "@/lib/insights";
 import { useAsync } from "@/lib/useAsync";
 
 function MyJobs() {
   const t = useTranslations("jobs");
   const nav = useTranslations("nav");
+  const ins = useTranslations("insights");
   const { api } = useAuth();
   const { data, loading, error } = useAsync(() => api.myJobs(), []);
+  const stats = data ? jobInsights(data) : null;
 
   return (
     <div className="space-y-4">
@@ -25,6 +28,22 @@ function MyJobs() {
           </Link>
         }
       />
+      {stats && stats.total > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="card py-3 text-center">
+            <p className="text-xl font-bold text-brand">{stats.open}</p>
+            <p className="text-[11px] text-gray-500">{ins("open")}</p>
+          </div>
+          <div className="card py-3 text-center">
+            <p className="text-xl font-bold text-brand">{stats.filled}</p>
+            <p className="text-[11px] text-gray-500">{ins("filled")}</p>
+          </div>
+          <div className="card py-3 text-center">
+            <p className="text-xl font-bold text-brand">{stats.total}</p>
+            <p className="text-[11px] text-gray-500">{ins("total")}</p>
+          </div>
+        </div>
+      )}
       <ErrorText message={error} />
       {loading ? (
         <SkeletonList />

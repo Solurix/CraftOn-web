@@ -3,40 +3,84 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { Avatar } from "@/components/Avatar";
+import {
+  FavoriteWorkerButton,
+  useFavoriteWorkers,
+} from "@/components/FavoriteWorkerButton";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { useToast } from "@/components/Toast";
+import { EmptyState, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
+import type { Applicant } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
+
+type Sort = "trust" | "recent" | "favorites";
 
 function JobApplicants() {
   const t = useTranslations("applications");
   const ob = useTranslations("onboarding");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
+  const toast = useToast();
   const router = useRouter();
   const job = useAsync(() => api.job(id), [id]);
   const apps = useAsync(() => api.applicants(id), [id]);
   const [error, setError] = useState("");
+  const [sort, setSort] = useState<Sort>("trust");
+  const [favorites] = useFavoriteWorkers();
 
   const confirm = async (applicationId: string) => {
     setError("");
     try {
       const m = await api.confirm(applicationId);
+      toast.success(t("confirmed"));
       router.push(`/matchings/${m.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
   const reject = async (applicationId: string) => {
-    await api.rejectApplication(applicationId);
-    apps.reload();
+    try {
+      await api.rejectApplication(applicationId);
+      apps.reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "error");
+    }
   };
 
-  if (job.loading) return <Spinner />;
+  const favIds = useMemo(() => new Set(favorites.map((f) => f.id)), [favorites]);
+  const sorted = useMemo(() => {
+    const list = [...(apps.data ?? [])];
+    const trust = (a: Applicant) => Number(a.worker_trust_score) || 0;
+    if (sort === "recent") {
+      list.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    } else if (sort === "favorites") {
+      list.sort(
+        (a, b) =>
+          Number(favIds.has(b.worker_id)) - Number(favIds.has(a.worker_id)) ||
+          trust(b) - trust(a),
+      );
+    } else {
+      list.sort((a, b) => trust(b) - trust(a));
+    }
+    return list;
+  }, [apps.data, sort, favIds]);
+
+  if (job.loading) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-6 w-1/3" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
   if (job.error || !job.data) return <ErrorText message={job.error || "not found"} />;
 
   return (
@@ -45,7 +89,7 @@ function JobApplicants() {
         ←
       </Link>
       <div className="card space-y-1">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h1 className="text-lg font-bold">{job.data.trades.join(", ")}</h1>
           <StatusBadge status={job.data.status} />
         </div>
@@ -53,29 +97,69 @@ function JobApplicants() {
           {job.data.prefecture} · {job.data.work_date} · {formatTime(job.data.start_time)}–
           {formatTime(job.data.end_time)} · {formatYen(job.data.daily_wage)}
         </p>
+        <Link
+          href={`/post-job?from=${job.data.id}`}
+          className="inline-block pt-1 text-xs font-medium text-brand hover:underline"
+        >
+          {t("duplicateJob")} →
+        </Link>
       </div>
 
-      <h2 className="font-semibold">{t("applicantsTitle")}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-semibold">{t("applicantsTitle")}</h2>
+        {apps.data && apps.data.length > 1 && (
+          <select
+            className="field-input w-auto text-xs"
+            aria-label={t("sortApplicants")}
+            value={sort}
+            onChange={(e) => setSort(e.target.value as Sort)}
+          >
+            <option value="trust">{t("sortTrust")}</option>
+            <option value="recent">{t("sortRecent")}</option>
+            <option value="favorites">{t("sortFavorites")}</option>
+          </select>
+        )}
+      </div>
+
       <ErrorText message={error} />
       {apps.loading ? (
-        <Spinner />
+        <ul className="space-y-3">
+          {[0, 1].map((i) => (
+            <li key={i} className="card">
+              <Skeleton className="h-10 w-full" />
+            </li>
+          ))}
+        </ul>
       ) : !apps.data || apps.data.length === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-500">{t("noApplicants")}</p>
+        <EmptyState title={t("noApplicants")} icon="📭" />
       ) : (
         <ul className="space-y-3">
-          {apps.data.map((a) => (
-            <li key={a.id} className="card flex items-center justify-between">
-              <div>
-                <Link href={`/workers/${a.worker_id}`} className="font-medium text-brand underline">
-                  {a.worker_display_name}
-                </Link>
-                <p className="text-xs text-gray-500">
-                  {ob(a.worker_class)} · {t("trust")}: {Number(a.worker_trust_score).toFixed(1)}
-                </p>
-                <StatusBadge status={a.status} />
+          {sorted.map((a) => (
+            <li key={a.id} className="card flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <Avatar name={a.worker_display_name} />
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      href={`/workers/${a.worker_id}`}
+                      className="font-medium text-brand underline"
+                    >
+                      {a.worker_display_name}
+                    </Link>
+                    <FavoriteWorkerButton
+                      workerId={a.worker_id}
+                      workerName={a.worker_display_name}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {ob(a.worker_class)} · {t("trust")}:{" "}
+                    {Number(a.worker_trust_score).toFixed(1)}
+                  </p>
+                  <StatusBadge status={a.status} />
+                </div>
               </div>
               {a.status === "applied" && (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <button className="btn-primary" onClick={() => confirm(a.id)}>
                     {t("confirm")}
                   </button>

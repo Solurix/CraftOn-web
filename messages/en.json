@@ -145,7 +145,8 @@
     "myEmptyHint": "Post your first job to start receiving applications.",
     "recommendedTitle": "Recommended for you",
     "allJobsTitle": "All open jobs",
-    "loadMore": "Show more ({count})"
+    "loadMore": "Show more ({count})",
+    "posted": "Job posted"
   },
   "applications": {
     "title": "My applications",
@@ -156,7 +157,13 @@
     "reject": "Reject",
     "withdraw": "Withdraw",
     "trust": "Trust score",
-    "emptyHint": "Browse open jobs and apply — your applications will show up here."
+    "emptyHint": "Browse open jobs and apply — your applications will show up here.",
+    "duplicateJob": "Duplicate this job",
+    "sortApplicants": "Sort applicants",
+    "sortTrust": "Highest rated",
+    "sortRecent": "Most recent",
+    "sortFavorites": "Favourites first",
+    "confirmed": "Worker confirmed"
   },
   "matchings": {
     "title": "Active jobs",
@@ -352,5 +359,21 @@
     "expiringBody": "Your work permission expires in {days} days ({date}). Renew it to keep applying.",
     "expiredTitle": "Residence status expired",
     "expiredBody": "Your work permission expired on {date}. Update it to apply for jobs."
+  },
+  "templates": {
+    "title": "Templates",
+    "save": "Save as template",
+    "untitled": "Template",
+    "draftRestored": "Draft restored from your last session.",
+    "discard": "Discard"
+  },
+  "favorites": {
+    "add": "Add to favourites",
+    "remove": "Remove from favourites"
+  },
+  "insights": {
+    "open": "Open",
+    "filled": "Filled",
+    "total": "Total"
   }
 }
