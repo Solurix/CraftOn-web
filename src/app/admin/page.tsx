@@ -14,8 +14,13 @@ import { useAsync } from "@/lib/useAsync";
 type Tab = "users" | "jobs" | "matchings" | "devices" | "admins" | "debug" | "config";
 
 function profileHref(item: VettingItem): string | null {
-  if (item.user.user_type === "worker") return `/workers/${item.user.id}`;
-  if (item.user.user_type === "contractor") return `/contractors/${item.user.id}`;
+  // Only link to a profile page that actually exists. A user who signed up but
+  // never completed onboarding has no worker/contractor profile, so the public
+  // profile endpoint would 404 (error.not_found). Render their name as plain
+  // text instead — same condition surfaced below as `awaitingOnboarding`.
+  if (item.user.user_type === "worker" && item.worker_profile) return `/workers/${item.user.id}`;
+  if (item.user.user_type === "contractor" && item.contractor_profile)
+    return `/contractors/${item.user.id}`;
   return null;
 }
 
@@ -262,20 +267,34 @@ function AdminsTab() {
   const admins = useAsync(() => api.adminAdmins(), []);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
-      await api.createAdmin({ phone_number: phone, display_name: name });
+      await api.createAdmin({
+        phone_number: phone,
+        username,
+        email,
+        password,
+        display_name: name,
+      });
       setPhone("");
       setName("");
+      setUsername("");
+      setEmail("");
+      setPassword("");
       admins.reload();
     } catch (e) {
       setError(e instanceof Error ? e.message : "error");
     }
   };
+
+  const canSubmit = phone && name && username && email && password;
 
   return (
     <div className="space-y-3">
@@ -287,6 +306,27 @@ function AdminsTab() {
             <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
           <label className="flex-1">
+            <span className="field-label">{auth("usernameLabel")}</span>
+            <input
+              className="field-input"
+              autoCapitalize="none"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </label>
+          <label className="flex-1">
+            <span className="field-label">{auth("emailLabel")}</span>
+            <input
+              className="field-input"
+              type="email"
+              autoCapitalize="none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label className="flex-1">
             <span className="field-label">{auth("phoneLabel")}</span>
             <input
               className="field-input"
@@ -296,7 +336,17 @@ function AdminsTab() {
               required
             />
           </label>
-          <button className="btn-primary" disabled={!phone || !name}>
+          <label className="flex-1">
+            <span className="field-label">{auth("passwordLabel")}</span>
+            <input
+              className="field-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+          <button className="btn-primary" disabled={!canSubmit}>
             {t("createAdmin")}
           </button>
         </div>

@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Create Session
-         * @description Create the user on first login (role required) or return the existing one.
+         * @description Register on first login (OTP + role + credentials) or return the existing user.
          */
         post: operations["create_session_api_v1_auth_session_post"];
         delete?: never;
@@ -75,7 +75,10 @@ export interface paths {
         put?: never;
         /**
          * Set Password
-         * @description Set/replace the caller's password (used for OTP-free returning logins).
+         * @description Set/replace the caller's password.
+         *
+         *     Gated behind ``require_active`` so a suspended account cannot establish or
+         *     rotate credentials.
          */
         post: operations["set_password_api_v1_auth_password_post"];
         delete?: never;
@@ -84,7 +87,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/password-login": {
+    "/api/v1/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -94,12 +97,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Password Login
-         * @description Phone + password → a bearer token, skipping OTP. Returns the same token
-         *     format the API verifier accepts. (Real Firebase password exchange is a later
-         *     GCP concern; only the fake/dev verifier can mint tokens here.)
+         * Login
+         * @description Returning login: username / email / phone + password → a session token.
+         *
+         *     SMS OTP is only used at registration; this path is OTP-free and works in every
+         *     environment (the API issues its own signed token — see core.session_token).
+         *
+         *     SECURITY — before exposing this widely, add per-identifier + per-IP rate
+         *     limiting / lockout on failed attempts (config-driven) and consider binding
+         *     tokens to the device record so revocation invalidates them server-side.
          */
-        post: operations["password_login_api_v1_auth_password_login_post"];
+        post: operations["login_api_v1_auth_login_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1008,11 +1016,17 @@ export interface components {
     schemas: {
         /**
          * AdminCreateIn
-         * @description Create a new admin account by phone number.
+         * @description Create a new admin account (logs in with identifier + password).
          */
         AdminCreateIn: {
             /** Phone Number */
             phone_number: string;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+            /** Password */
+            password: string;
             /** Display Name */
             display_name: string;
             /**
@@ -1451,6 +1465,25 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
+        /**
+         * LoginIn
+         * @description Returning login: username, email, or phone number + password.
+         */
+        LoginIn: {
+            /** Identifier */
+            identifier: string;
+            /** Password */
+            password: string;
+        };
+        /**
+         * LoginOut
+         * @description An app session token + the signed-in user.
+         */
+        LoginOut: {
+            /** Token */
+            token: string;
+            user: components["schemas"]["UserOut"];
+        };
         /** MarkAllReadOut */
         MarkAllReadOut: {
             /** Updated */
@@ -1595,22 +1628,6 @@ export interface components {
              */
             created_at: string;
         };
-        /** PasswordLoginIn */
-        PasswordLoginIn: {
-            /** Phone Number */
-            phone_number: string;
-            /** Password */
-            password: string;
-        };
-        /**
-         * PasswordLoginOut
-         * @description A bearer token (accepted by the API verifier) + the signed-in user.
-         */
-        PasswordLoginOut: {
-            /** Token */
-            token: string;
-            user: components["schemas"]["UserOut"];
-        };
         /** ReadyResponse */
         ReadyResponse: {
             /** Status */
@@ -1678,8 +1695,9 @@ export interface components {
          * SessionCreateIn
          * @description Body for ``POST /auth/session``.
          *
-         *     On first login the user row is created and a role is required. On subsequent
-         *     logins the body is optional (an existing user is simply returned).
+         *     On first login the user row is created: a role and login credentials
+         *     (username, email, password) are required. On subsequent logins the body is
+         *     optional (an existing user is simply returned).
          */
         SessionCreateIn: {
             user_type?: components["schemas"]["UserType"] | null;
@@ -1687,12 +1705,20 @@ export interface components {
             display_name?: string | null;
             /** Preferred Language */
             preferred_language?: string | null;
+            /** Username */
+            username?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Password */
+            password?: string | null;
         };
         /** SessionOut */
         SessionOut: {
             user: components["schemas"]["UserOut"];
             /** Created */
             created: boolean;
+            /** Token */
+            token?: string | null;
         };
         /**
          * SetPasswordIn
@@ -1748,6 +1774,10 @@ export interface components {
             id: string;
             /** Phone Number */
             phone_number: string;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
             user_type: components["schemas"]["UserType"];
             status: components["schemas"]["UserStatus"];
             /** Display Name */
@@ -2139,6 +2169,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2190,7 +2229,7 @@ export interface operations {
             };
         };
     };
-    password_login_api_v1_auth_password_login_post: {
+    login_api_v1_auth_login_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -2199,7 +2238,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PasswordLoginIn"];
+                "application/json": components["schemas"]["LoginIn"];
             };
         };
         responses: {
@@ -2209,16 +2248,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PasswordLoginOut"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["LoginOut"];
                 };
             };
             /** @description Unauthorized */

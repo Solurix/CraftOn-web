@@ -1,27 +1,34 @@
 import { expect, test } from "@playwright/test";
 
 // Verifies "remember logged-in accounts on a device": after onboarding, the
-// account is remembered; after logout it appears under "Recent accounts" and a
-// single tap logs back in with no phone/OTP typing (fake auth mode).
+// account is remembered; after logout it appears under "Recent accounts" and
+// tapping it pre-fills the identifier so re-login only needs the password.
 
 test.use({ locale: "en-US" });
 
-test("remembers the account and re-logs-in with one tap", async ({ page, context }) => {
+test("remembers the account and re-logs-in with the password", async ({ page, context }) => {
   await context.addCookies([
     { name: "NEXT_LOCALE", value: "en", url: "http://localhost:3000" },
   ]);
-  const phone = `+8190${Date.now().toString().slice(-9)}`;
+  const stamp = Date.now().toString().slice(-9);
+  const phone = `+8190${stamp}`;
   const name = "Remembered Builder";
+  const password = "test-password-123";
 
   // Sign up + onboard a contractor.
   await page.goto("/login");
-  await page.getByPlaceholder("+8190…").fill(phone);
+  await page.getByRole("button", { name: "Sign up", exact: true }).click();
+  await expect(page.getByText("Choose your role")).toBeVisible();
+  await page.getByRole("button", { name: "Sign up as a contractor" }).click();
+  await page.getByLabel("Display name").fill(name);
+  await page.getByLabel("Username").fill(`rem_${stamp}`);
+  await page.getByLabel("Email").fill(`rem_${stamp}@example.com`);
+  await page.getByLabel("Phone number").fill(phone);
+  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByPlaceholder("123456").fill("123456");
-  await page.getByRole("button", { name: "Log in" }).click();
-  await expect(page.getByText("Choose your role")).toBeVisible();
-  await page.getByRole("textbox").first().fill(name);
-  await page.getByRole("button", { name: "Sign up as a contractor" }).click();
+  await page.getByRole("button", { name: "Create account" }).click();
+
   await expect(page.getByText("Contractor profile")).toBeVisible();
   const inputs = page.getByRole("textbox");
   await inputs.nth(0).fill("Remembered Co");
@@ -33,13 +40,15 @@ test("remembers the account and re-logs-in with one tap", async ({ page, context
   await page.getByRole("button", { name: new RegExp(name) }).click();
   await page.getByRole("menuitem", { name: "Log out" }).click();
 
-  // The login page now offers the remembered account — no phone retyping.
+  // The login page now offers the remembered account — tapping pre-fills the id.
   await expect(page.getByText("Recent accounts")).toBeVisible();
   // Anchor on the name start so the "Remove <name>" button isn't also matched.
   const recent = page.getByRole("button", { name: new RegExp("^" + name) });
   await expect(recent).toBeVisible();
   await recent.click();
 
-  // Logged back in (still pending) without entering a phone number or code.
+  // Identifier is pre-filled; enter the password to log back in.
+  await page.getByLabel("Password").fill(password);
+  await page.getByRole("button", { name: "Log in", exact: true }).click();
   await expect(page.getByText("Under review. Please wait for approval.")).toBeVisible();
 });

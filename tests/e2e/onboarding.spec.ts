@@ -15,18 +15,24 @@ test("contractor can sign up and onboard", async ({ page, context }) => {
     { name: "NEXT_LOCALE", value: "en", url: "http://localhost:3000" },
   ]);
 
-  const phone = `+8190${Date.now().toString().slice(-9)}`;
+  const stamp = Date.now().toString().slice(-9);
+  const phone = `+8190${stamp}`;
 
   await page.goto("/login");
-  await page.getByPlaceholder("+8190…").fill(phone);
+  // Switch to sign-up, choose the contractor role.
+  await page.getByRole("button", { name: "Sign up", exact: true }).click();
+  await expect(page.getByText("Choose your role")).toBeVisible();
+  await page.getByRole("button", { name: "Sign up as a contractor" }).click();
+
+  // Registration details, then verify the phone by SMS (only step needing OTP).
+  await page.getByLabel("Display name").fill("E2E Builder");
+  await page.getByLabel("Username").fill(`e2e_${stamp}`);
+  await page.getByLabel("Email").fill(`e2e_${stamp}@example.com`);
+  await page.getByLabel("Phone number").fill(phone);
+  await page.getByLabel("Password").fill("test-password-123");
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByPlaceholder("123456").fill("123456");
-  await page.getByRole("button", { name: "Log in" }).click();
-
-  // First login → role selection.
-  await expect(page.getByText("Choose your role")).toBeVisible();
-  await page.getByRole("textbox").first().fill("E2E Builder");
-  await page.getByRole("button", { name: "Sign up as a contractor" }).click();
+  await page.getByRole("button", { name: "Create account" }).click();
 
   // Contractor onboarding form.
   await expect(page.getByText("Contractor profile")).toBeVisible();

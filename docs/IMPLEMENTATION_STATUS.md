@@ -74,7 +74,7 @@ and is instead delivered as an implementable backend spec.
 | # | Feature | Status | What shipped / why blocked |
 |---|---|:--:|---|
 | 5.1 | Guided first-run / checklist | 🟡 | Rich empty-state CTAs + profile-completeness nudges ship; a multi-step product tour is a later add |
-| 5.2 | Public landing / marketing page | ✅ | `LandingHero` on the login entry point |
+| 5.2 | Public landing / marketing page | ✅ | Full public marketing landing on `/` (the merged `Landing` component) |
 | 5.3 | PWA install prompt | ✅ | `InstallPrompt` (beforeinstallprompt, dismissable) |
 | 5.4 | Inline form validation | 🟡 | `/post-job` validates (trade/date/past-date/wage/headcount); rollout to onboarding continues |
 | 5.5 | Resume onboarding where you left off | 🟡 | Job-post draft autosave ships; full onboarding resume needs server-side partial-profile. BLOCKERS §2.4 (pattern) |
@@ -129,7 +129,7 @@ and passes `i18n:check`, `lint`, `typecheck`, `test`, and `build`.
 
 **Components** (`src/components/`)
 - `Toast.tsx`, `Avatar.tsx`, `ThemeToggle.tsx`, `BottomNav.tsx`,
-  `InstallPrompt.tsx`, `OfflineBanner.tsx`, `LandingHero.tsx`,
+  `InstallPrompt.tsx`, `OfflineBanner.tsx`,
   `ProfileCompleteness.tsx`, `VisaStatusBanner.tsx`, `SavedSearches.tsx`,
   `JobTemplates.tsx`, `FavoriteWorkerButton.tsx`, `QuickReplies.tsx`
 - `ui.tsx` extended: real `Spinner`, `Skeleton`/`SkeletonList`/`DetailSkeleton`,

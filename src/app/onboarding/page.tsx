@@ -15,32 +15,6 @@ import {
 } from "@/components/WorkerProfileFields";
 import { useAuth } from "@/lib/auth/context";
 
-function RoleChooser({ onChoose }: { onChoose: (role: "worker" | "contractor", name: string) => void }) {
-  const t = useTranslations("auth");
-  const [name, setName] = useState("");
-  return (
-    <div className="card space-y-4">
-      <h1 className="text-lg font-bold">{t("chooseRole")}</h1>
-      <div>
-        <label className="field-label">{t("displayName")}</label>
-        <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <button className="btn-primary" disabled={!name} onClick={() => onChoose("worker", name)}>
-          {t("roleWorker")}
-        </button>
-        <button
-          className="btn-secondary"
-          disabled={!name}
-          onClick={() => onChoose("contractor", name)}
-        >
-          {t("roleContractor")}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function WorkerForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
@@ -174,38 +148,25 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
 }
 
 export default function OnboardingPage() {
-  const { token, me, completeSignup, refresh } = useAuth();
+  const { me, loading, refresh } = useAuth();
   const router = useRouter();
-  const [signupError, setSignupError] = useState("");
 
+  // Account creation (with credentials) happens at /login; onboarding only
+  // completes the profile. Anyone here without a signed-in account goes back.
   useEffect(() => {
-    if (token === null && me === null) router.replace("/login");
-  }, [token, me, router]);
+    if (!loading && !me) router.replace("/login");
+  }, [loading, me, router]);
 
   const onboarded = me && (me.has_worker_profile || me.has_contractor_profile);
   useEffect(() => {
     if (onboarded) router.replace("/");
   }, [onboarded, router]);
 
-  const choose = async (role: "worker" | "contractor", name: string) => {
-    setSignupError("");
-    try {
-      await completeSignup({ user_type: role, display_name: name });
-    } catch (err) {
-      setSignupError(err instanceof Error ? err.message : "error");
-    }
-  };
-
   return (
     <AppShell>
       <div className="mx-auto max-w-md">
-        {!token ? (
+        {!me ? (
           <Spinner />
-        ) : !me ? (
-          <>
-            <RoleChooser onChoose={choose} />
-            <ErrorText message={signupError} />
-          </>
         ) : me.user.user_type === "worker" ? (
           <WorkerForm onDone={() => refresh().then(() => router.replace("/"))} />
         ) : (
