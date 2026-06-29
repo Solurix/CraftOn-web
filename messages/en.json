@@ -237,7 +237,7 @@
     "reject": "Reject",
     "suspend": "Suspend",
     "documents": "Documents",
-    "awaitingOnboarding": "Onboarding not completed (cannot approve)",
+    "awaitingOnboarding": "Signed up but hasn't filled in their profile yet — they must complete onboarding in the app before you can approve them.",
     "flags": "Feature flags (toggles)",
     "autoApproveUsers": "Auto-approve all users",
     "configTitle": "Config & flags",

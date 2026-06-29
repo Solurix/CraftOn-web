@@ -5,6 +5,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Self-contained server build for the Docker image (Cloud Run).
+  output: "standalone",
   // PWA assets (manifest, service worker) are served from /public.
   async headers() {
     return [

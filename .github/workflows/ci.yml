@@ -25,3 +25,60 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+
+  # ── Continuous deployment ───────────────────────────────────────────────────
+  # On push to main (after CI passes): resolve the live API URL, bake it into the
+  # image (NEXT_PUBLIC_* are build-time), push, and roll the Cloud Run service.
+  # Auth is via Workload Identity Federation (no stored keys). Terraform apply stays manual.
+  deploy:
+    needs: lint-type-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: crafton-dev-500709
+      REGION: asia-northeast1
+      SERVICE: crafton-web-dev
+      API_SERVICE: crafton-api-dev
+      IMAGE: asia-northeast1-docker.pkg.dev/crafton-dev-500709/crafton/web
+      AUTH_MODE: fake
+      WIF_PROVIDER: projects/784671749504/locations/global/workloadIdentityPools/github-actions/providers/github
+      DEPLOYER_SA: crafton-deployer@crafton-dev-500709.iam.gserviceaccount.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Resolve live API URL
+        id: api
+        run: |
+          url=$(gcloud run services describe "$API_SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          if [ -z "$url" ]; then echo "API service not found"; exit 1; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push image
+        run: |
+          docker build --platform=linux/amd64 --provenance=false \
+            --build-arg NEXT_PUBLIC_API_BASE_URL="${{ steps.api.outputs.url }}" \
+            --build-arg NEXT_PUBLIC_AUTH_MODE="$AUTH_MODE" \
+            -t "$IMAGE:dev" -t "$IMAGE:${GITHUB_SHA}" .
+          docker push "$IMAGE:dev"
+          docker push "$IMAGE:${GITHUB_SHA}"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run services update "$SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" \
+            --image "$IMAGE:dev"

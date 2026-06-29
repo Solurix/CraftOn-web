@@ -14,8 +14,13 @@ import { useAsync } from "@/lib/useAsync";
 type Tab = "users" | "jobs" | "matchings" | "devices" | "admins" | "debug" | "config";
 
 function profileHref(item: VettingItem): string | null {
-  if (item.user.user_type === "worker") return `/workers/${item.user.id}`;
-  if (item.user.user_type === "contractor") return `/contractors/${item.user.id}`;
+  // Only link to a profile page that actually exists. A user who signed up but
+  // never completed onboarding has no worker/contractor profile, so the public
+  // profile endpoint would 404 (error.not_found). Render their name as plain
+  // text instead — same condition surfaced below as `awaitingOnboarding`.
+  if (item.user.user_type === "worker" && item.worker_profile) return `/workers/${item.user.id}`;
+  if (item.user.user_type === "contractor" && item.contractor_profile)
+    return `/contractors/${item.user.id}`;
   return null;
 }
 

@@ -237,7 +237,7 @@
     "reject": "却下",
     "suspend": "停止",
     "documents": "提出書類",
-    "awaitingOnboarding": "オンボーディング未完了（承認できません）",
+    "awaitingOnboarding": "登録のみでプロフィール未入力です。本人がアプリでオンボーディングを完了するまで承認できません。",
     "flags": "フラグ（切り替え）",
     "autoApproveUsers": "全ユーザーを自動承認",
     "configTitle": "設定とフラグ",
