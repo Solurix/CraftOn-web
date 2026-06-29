@@ -64,11 +64,26 @@ function PostJobForm() {
   const params = useSearchParams();
   const fromId = params.get("from");
 
+  const v = useTranslations("validation");
   const [form, setForm] = useState<JobForm>(DEFAULTS);
   const [restored, setRestored] = useState(false);
   const [error, setError] = useState("");
+  const [attempted, setAttempted] = useState(false);
   const [busy, setBusy] = useState(false);
   const hydrated = useRef(false);
+
+  // Today's date in Asia/Tokyo (business rules run in Tokyo time).
+  const todayTokyo = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+  }).format(new Date());
+
+  const issues: string[] = [];
+  if (!form.trades.split(",").map((s) => s.trim()).filter(Boolean).length)
+    issues.push(v("tradesRequired"));
+  if (!form.work_date) issues.push(v("dateRequired"));
+  else if (form.work_date < todayTokyo) issues.push(v("datePast"));
+  if (!(Number(form.daily_wage) > 0)) issues.push(v("wagePositive"));
+  if (!(Number(form.headcount) >= 1)) issues.push(v("headcountMin"));
 
   const set = (k: keyof JobForm, v: string | number) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -130,6 +145,10 @@ function PostJobForm() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (issues.length > 0) {
+      setAttempted(true);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -204,6 +223,16 @@ function PostJobForm() {
       <Field label={t("notes")}>
         <textarea className="field-input" value={form.notes} onChange={(e) => set("notes", e.target.value)} />
       </Field>
+      {attempted && issues.length > 0 && (
+        <ul className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {issues.map((msg) => (
+            <li key={msg} className="flex items-start gap-1">
+              <span aria-hidden>•</span>
+              {msg}
+            </li>
+          ))}
+        </ul>
+      )}
       <button className="btn-primary w-full" disabled={busy}>
         {busy ? common("loading") : t("create")}
       </button>

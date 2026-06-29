@@ -3,9 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
+import { Avatar } from "@/components/Avatar";
 import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { DetailSkeleton, ErrorText, Skeleton } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
 
@@ -18,14 +19,17 @@ function ContractorProfileView() {
   const profile = useAsync(() => api.contractor(id), [id]);
   const reviews = useAsync(() => api.contractorReviews(id), [id]);
 
-  if (profile.loading) return <Spinner />;
+  if (profile.loading) return <DetailSkeleton />;
   if (profile.error || !profile.data) return <ErrorText message={profile.error || "not found"} />;
   const c = profile.data;
 
   return (
     <div className="space-y-4">
       <div className="card space-y-2">
-        <h1 className="text-xl font-bold">{c.display_name}</h1>
+        <div className="flex items-center gap-3">
+          <Avatar name={c.company_name || c.display_name} size="lg" />
+          <h1 className="text-xl font-bold">{c.display_name}</h1>
+        </div>
         <ProfileRow label={p("company")} value={c.company_name} />
         <ProfileRow label={ob("prefecture")} value={c.prefecture} />
         <ProfileRow label={p("trust")} value={`★ ${Number(c.rating).toFixed(1)}`} />
@@ -39,7 +43,11 @@ function ContractorProfileView() {
 
       <div className="card space-y-2">
         <h2 className="font-semibold">{rt("title")}</h2>
-        {reviews.loading ? <Spinner /> : <ReviewList reviews={reviews.data ?? []} />}
+        {reviews.loading ? (
+          <Skeleton className="h-12 w-full" />
+        ) : (
+          <ReviewList reviews={reviews.data ?? []} />
+        )}
       </div>
     </div>
   );

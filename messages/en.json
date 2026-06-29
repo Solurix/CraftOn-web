@@ -180,7 +180,13 @@
     "wage": "Daily wage",
     "terms": "Terms (provisional)",
     "viewTerms": "View terms",
-    "emptyHint": "Confirmed jobs appear here so you can check in and track them."
+    "emptyHint": "Confirmed jobs appear here so you can check in and track them.",
+    "cancelConfirm": "Cancel this job? This may affect your reliability rating.",
+    "cancelPolicy": "Cancelling after 20:00 the night before the work date (Japan time) may incur a penalty.",
+    "canceled": "Job cancelled",
+    "checkedIn": "Checked in",
+    "completionRequested": "Completion reported",
+    "completionApproved": "Completion approved"
   },
   "history": {
     "title": "Work history",
@@ -197,7 +203,12 @@
     "placeholder": "Type a message…",
     "send": "Send",
     "filteredNotice": "Suspected contact info was masked.",
-    "empty": "No messages yet."
+    "empty": "No messages yet.",
+    "maskingInfo": "For your safety, phone numbers and contact details are hidden until the job is confirmed.",
+    "quickOnMyWay": "On my way",
+    "quickRunningLate": "Running a little late",
+    "quickArrived": "I have arrived",
+    "saveQuickReply": "Save reply"
   },
   "notifications": {
     "title": "Notifications",
@@ -375,5 +386,12 @@
     "open": "Open",
     "filled": "Filled",
     "total": "Total"
+  },
+  "validation": {
+    "tradesRequired": "Enter at least one trade.",
+    "dateRequired": "Choose a work date.",
+    "datePast": "The work date cannot be in the past.",
+    "wagePositive": "Daily wage must be greater than zero.",
+    "headcountMin": "Headcount must be at least 1."
   }
 }

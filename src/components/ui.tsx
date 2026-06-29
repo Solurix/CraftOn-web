@@ -45,6 +45,24 @@ export function SkeletonList({ rows = 4 }: { rows?: number }) {
   );
 }
 
+// Placeholder for a single detail page (header card + a couple of blocks).
+export function DetailSkeleton() {
+  return (
+    <div className="space-y-3" aria-hidden>
+      <Skeleton className="h-4 w-24" />
+      <div className="card space-y-2">
+        <Skeleton className="h-5 w-1/2" />
+        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
+      <div className="card space-y-2">
+        <Skeleton className="h-3 w-1/3" />
+        <Skeleton className="h-3 w-full" />
+      </div>
+    </div>
+  );
+}
+
 // Friendly empty state with an optional icon glyph and call-to-action.
 export function EmptyState({
   title,

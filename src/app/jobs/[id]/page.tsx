@@ -7,7 +7,8 @@ import { useState } from "react";
 
 import { RequireAuth } from "@/components/RequireAuth";
 import { SaveJobButton } from "@/components/SaveJobButton";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { useToast } from "@/components/Toast";
+import { DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
@@ -28,6 +29,7 @@ function JobDetail() {
     return { job, saved };
   }, [id]);
   const job = data?.job;
+  const toast = useToast();
   const [applied, setApplied] = useState(false);
   const [applyError, setApplyError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,14 +40,17 @@ function JobDetail() {
     try {
       await api.apply(id);
       setApplied(true);
+      toast.success(t("applied"));
     } catch (e) {
-      setApplyError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setApplyError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return <DetailSkeleton />;
   if (error || !job) return <ErrorText message={error || "not found"} />;
 
   return (

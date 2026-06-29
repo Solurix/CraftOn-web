@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
+import { QuickReplies } from "@/components/QuickReplies";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
+import { useToast } from "@/components/Toast";
+import { DetailSkeleton, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import type { Matching } from "@/lib/api/models";
 import { formatYen } from "@/lib/format";
@@ -15,15 +17,19 @@ import { useAsync } from "@/lib/useAsync";
 function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: string; onChanged: () => void }) {
   const t = useTranslations("matchings");
   const { api } = useAuth();
+  const toast = useToast();
   const [error, setError] = useState("");
 
-  const act = async (fn: () => Promise<unknown>) => {
+  const act = async (fn: () => Promise<unknown>, successMsg?: string) => {
     setError("");
     try {
       await fn();
+      if (successMsg) toast.success(successMsg);
       onChanged();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -32,32 +38,42 @@ function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: st
   const isContractor = role === "contractor";
   const active = matching.status === "confirmed" || matching.status === "checked_in";
 
+  const cancel = () => {
+    if (typeof window !== "undefined" && !window.confirm(t("cancelConfirm"))) return;
+    act(() => api.cancelMatching(id), t("canceled"));
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
         {isWorker && matching.status === "confirmed" && (
-          <button className="btn-primary" onClick={() => act(() => api.checkIn(id))}>
+          <button className="btn-primary" onClick={() => act(() => api.checkIn(id), t("checkedIn"))}>
             {t("checkIn")}
           </button>
         )}
         {isWorker && matching.status === "checked_in" && !matching.completion_requested_at && (
-          <button className="btn-primary" onClick={() => act(() => api.completeRequest(id))}>
+          <button className="btn-primary" onClick={() => act(() => api.completeRequest(id), t("completionRequested"))}>
             {t("completeRequest")}
           </button>
         )}
         {isContractor &&
           matching.status === "checked_in" &&
           matching.completion_requested_at && (
-            <button className="btn-primary" onClick={() => act(() => api.approveCompletion(id))}>
+            <button className="btn-primary" onClick={() => act(() => api.approveCompletion(id), t("completionApproved"))}>
               {t("approveCompletion")}
             </button>
           )}
         {active && (
-          <button className="btn-danger" onClick={() => act(() => api.cancelMatching(id))}>
+          <button className="btn-danger" onClick={cancel}>
             {t("cancel")}
           </button>
         )}
       </div>
+      {active && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          ⏰ {t("cancelPolicy")}
+        </p>
+      )}
       <ErrorText message={error} />
     </div>
   );
@@ -66,6 +82,7 @@ function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: st
 function ChatPanel({ matchingId }: { matchingId: string }) {
   const t = useTranslations("chat");
   const { api, me } = useAuth();
+  const toast = useToast();
   const { data, loading, reload } = useAsync(() => api.messages(matchingId), [matchingId]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,6 +95,8 @@ function ChatPanel({ matchingId }: { matchingId: string }) {
       await api.sendMessage(matchingId, text);
       setText("");
       reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "error");
     } finally {
       setBusy(false);
     }
@@ -86,8 +105,16 @@ function ChatPanel({ matchingId }: { matchingId: string }) {
   return (
     <div className="card space-y-3">
       <h2 className="font-semibold">{t("title")}</h2>
+      {/* Why messages can look altered — masking is enforced server-side. */}
+      <p className="flex items-start gap-1.5 rounded-lg border border-brand/20 bg-brand-soft px-3 py-2 text-xs text-gray-600">
+        <span aria-hidden>🔒</span>
+        {t("maskingInfo")}
+      </p>
       {loading ? (
-        <Spinner />
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-2/3" />
+          <Skeleton className="ml-auto h-6 w-1/2" />
+        </div>
       ) : !data || data.length === 0 ? (
         <p className="text-sm text-gray-500">{t("empty")}</p>
       ) : (
@@ -111,6 +138,7 @@ function ChatPanel({ matchingId }: { matchingId: string }) {
           })}
         </ul>
       )}
+      <QuickReplies currentText={text} onPick={setText} />
       <form onSubmit={send} className="flex gap-2">
         <input
           className="field-input"
@@ -178,7 +206,7 @@ function MatchingDetail() {
   const { data: m, loading, error, reload } = useAsync(() => api.matching(id), [id]);
   const [showTerms, setShowTerms] = useState(false);
 
-  if (loading) return <Spinner />;
+  if (loading) return <DetailSkeleton />;
   if (error || !m) return <ErrorText message={error || "not found"} />;
 
   const role = me?.user.user_type ?? "";

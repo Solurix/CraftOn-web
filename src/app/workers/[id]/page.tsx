@@ -7,7 +7,7 @@ import { Avatar } from "@/components/Avatar";
 import { FavoriteWorkerButton } from "@/components/FavoriteWorkerButton";
 import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { DetailSkeleton, ErrorText, Skeleton } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/useAsync";
 
@@ -20,7 +20,7 @@ function WorkerProfileView() {
   const profile = useAsync(() => api.worker(id), [id]);
   const reviews = useAsync(() => api.workerReviews(id), [id]);
 
-  if (profile.loading) return <Spinner />;
+  if (profile.loading) return <DetailSkeleton />;
   if (profile.error || !profile.data) return <ErrorText message={profile.error || "not found"} />;
   const w = profile.data;
   const isContractor = me?.user.user_type === "contractor";
@@ -84,7 +84,11 @@ function WorkerProfileView() {
 
       <div className="card space-y-2">
         <h2 className="font-semibold">{rt("title")}</h2>
-        {reviews.loading ? <Spinner /> : <ReviewList reviews={reviews.data ?? []} />}
+        {reviews.loading ? (
+          <Skeleton className="h-12 w-full" />
+        ) : (
+          <ReviewList reviews={reviews.data ?? []} />
+        )}
       </div>
     </div>
   );

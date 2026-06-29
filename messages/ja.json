@@ -180,7 +180,13 @@
     "wage": "日当",
     "terms": "契約条件（暫定）",
     "viewTerms": "契約条件を表示",
-    "emptyHint": "確定した仕事がここに表示され、チェックインや進捗の確認ができます。"
+    "emptyHint": "確定した仕事がここに表示され、チェックインや進捗の確認ができます。",
+    "cancelConfirm": "この仕事をキャンセルしますか？信頼スコアに影響する場合があります。",
+    "cancelPolicy": "作業日前日の20時（日本時間）以降のキャンセルは、ペナルティが発生する場合があります。",
+    "canceled": "仕事をキャンセルしました",
+    "checkedIn": "チェックインしました",
+    "completionRequested": "完了報告を送信しました",
+    "completionApproved": "完了を承認しました"
   },
   "history": {
     "title": "稼働履歴",
@@ -197,7 +203,12 @@
     "placeholder": "メッセージを入力…",
     "send": "送信",
     "filteredNotice": "連絡先と思われる内容はマスクされました。",
-    "empty": "まだメッセージはありません。"
+    "empty": "まだメッセージはありません。",
+    "maskingInfo": "安全のため、電話番号や連絡先は仕事が確定するまで表示されません。",
+    "quickOnMyWay": "向かっています",
+    "quickRunningLate": "少し遅れます",
+    "quickArrived": "到着しました",
+    "saveQuickReply": "返信を保存"
   },
   "notifications": {
     "title": "通知",
@@ -375,5 +386,12 @@
     "open": "募集中",
     "filled": "充足",
     "total": "合計"
+  },
+  "validation": {
+    "tradesRequired": "職種を1つ以上入力してください。",
+    "dateRequired": "作業日を選択してください。",
+    "datePast": "作業日は過去の日付にできません。",
+    "wagePositive": "日当は0より大きくしてください。",
+    "headcountMin": "募集人数は1人以上にしてください。"
   }
 }
