@@ -16,24 +16,25 @@ export default function LoginPage() {
   const common = useTranslations("common");
   const {
     loginWithPhone,
-    loginWithPassword,
-    switchAccount,
+    loginWithIdentifier,
     forgetAccount,
     completeSignup,
     accounts,
-    authMode,
   } = useAuth();
   const router = useRouter();
 
   const [mode, setMode] = useState<Mode>("login");
-  // Signup starts by choosing a role — that is the first decision, before phone.
+  // Signup starts by choosing a role — that is the first decision, before details.
   const [role, setRole] = useState<Role | null>(null);
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  // Login: a single identifier (username / email / phone).
+  const [identifier, setIdentifier] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState("");
-  const [usePassword, setUsePassword] = useState(false);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -43,11 +44,13 @@ export default function LoginPage() {
   const reset = () => {
     setRole(null);
     setName("");
+    setUsername("");
+    setEmail("");
     setPhone("");
+    setPassword("");
+    setIdentifier("");
     setCode("");
     setCodeSent(false);
-    setUsePassword(false);
-    setPassword("");
     setError("");
   };
 
@@ -56,42 +59,29 @@ export default function LoginPage() {
     reset();
   };
 
-  const pickAccount = async (accountPhone: string) => {
-    setError("");
-    // Firebase mode can't skip OTP — pre-fill the phone and ask for the code.
-    if (authMode === "firebase") {
-      setPhone(accountPhone);
-      setCodeSent(true);
-      return;
-    }
-    setBusy(true);
-    try {
-      const { needsSignup } = await switchAccount(accountPhone);
-      goAfterLogin(needsSignup);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "error");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError("");
     try {
-      if (mode === "login" && usePassword) {
-        await loginWithPassword(phone, password);
+      if (mode === "login") {
+        await loginWithIdentifier(identifier, password);
         router.replace("/");
         return;
       }
+      // Signup: OTP proves phone ownership, then we register the credentials.
       const { needsSignup } = await loginWithPhone(phone, code);
-      if (mode === "signup" && needsSignup && role) {
-        // Role was chosen up front; create the account, then go finish the profile.
-        await completeSignup({ user_type: role, display_name: name });
+      if (needsSignup && role) {
+        await completeSignup({
+          user_type: role,
+          display_name: name,
+          username,
+          email,
+          password,
+        });
         router.replace("/onboarding");
       } else {
-        // Existing account (or login mode) → straight in.
+        // Phone already has an account → straight in.
         goAfterLogin(needsSignup);
       }
     } catch (err) {
@@ -131,7 +121,7 @@ export default function LoginPage() {
                 {accounts.map((a) => (
                   <div key={a.phone} className="flex items-center justify-between">
                     <button
-                      onClick={() => pickAccount(a.phone)}
+                      onClick={() => setIdentifier(a.phone)}
                       disabled={busy}
                       className="flex-1 rounded px-2 py-2 text-left hover:bg-gray-100"
                     >
@@ -161,43 +151,22 @@ export default function LoginPage() {
                   ← {t("chooseRole")}
                 </button>
               )}
-              {mode === "login" && accounts.length > 0 && (
-                <p className="text-xs uppercase tracking-wide text-gray-400">
-                  {t("useAnotherNumber")}
-                </p>
-              )}
 
-              {mode === "signup" && (
-                <div>
-                  <label className="field-label" htmlFor="name">
-                    {t("displayName")}
-                  </label>
-                  <input
-                    id="name"
-                    className="field-input"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="field-label" htmlFor="phone">
-                  {t("phoneLabel")}
-                </label>
-                <input
-                  id="phone"
-                  className="field-input"
-                  placeholder={t("phonePlaceholder")}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-              </div>
-
-              {mode === "login" && usePassword ? (
+              {mode === "login" ? (
                 <>
+                  <div>
+                    <label className="field-label" htmlFor="identifier">
+                      {t("identifierLabel")}
+                    </label>
+                    <input
+                      id="identifier"
+                      className="field-input"
+                      placeholder={t("identifierPlaceholder")}
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      required
+                    />
+                  </div>
                   <div>
                     <label className="field-label" htmlFor="password">
                       {t("passwordLabel")}
@@ -214,64 +183,117 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     className="btn-primary w-full"
-                    disabled={busy || !phone || !password}
+                    disabled={busy || !identifier || !password}
                   >
                     {busy ? common("loading") : t("verify")}
                   </button>
                 </>
-              ) : !codeSent ? (
-                <button
-                  type="button"
-                  className="btn-primary w-full"
-                  disabled={!phone || (mode === "signup" && !name)}
-                  onClick={() => setCodeSent(true)}
-                >
-                  {t("sendCode")}
-                </button>
               ) : (
                 <>
+                  {/* Signup: collect identity + credentials, then verify phone by SMS. */}
                   <div>
-                    <label className="field-label" htmlFor="code">
-                      {t("codeLabel")}
+                    <label className="field-label" htmlFor="name">
+                      {t("displayName")}
                     </label>
                     <input
-                      id="code"
+                      id="name"
                       className="field-input"
-                      placeholder={t("codePlaceholder")}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       required
                     />
-                    <p className="mt-1 text-xs text-gray-400">{t("devHint")}</p>
                   </div>
-                  <button
-                    type="submit"
-                    className="btn-primary w-full"
-                    disabled={busy || !code}
-                  >
-                    {busy
-                      ? common("loading")
-                      : mode === "signup"
-                        ? t("createAccount")
-                        : t("verify")}
-                  </button>
+                  <div>
+                    <label className="field-label" htmlFor="username">
+                      {t("usernameLabel")}
+                    </label>
+                    <input
+                      id="username"
+                      className="field-input"
+                      placeholder={t("usernamePlaceholder")}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      autoCapitalize="none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="email">
+                      {t("emailLabel")}
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="field-input"
+                      placeholder={t("emailPlaceholder")}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoCapitalize="none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="phone">
+                      {t("phoneLabel")}
+                    </label>
+                    <input
+                      id="phone"
+                      className="field-input"
+                      placeholder={t("phonePlaceholder")}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="signup-password">
+                      {t("passwordLabel")}
+                    </label>
+                    <input
+                      id="signup-password"
+                      type="password"
+                      className="field-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {!codeSent ? (
+                    <button
+                      type="button"
+                      className="btn-primary w-full"
+                      disabled={!name || !username || !email || !phone || !password}
+                      onClick={() => setCodeSent(true)}
+                    >
+                      {t("sendCode")}
+                    </button>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="field-label" htmlFor="code">
+                          {t("codeLabel")}
+                        </label>
+                        <input
+                          id="code"
+                          className="field-input"
+                          placeholder={t("codePlaceholder")}
+                          value={code}
+                          onChange={(e) => setCode(e.target.value)}
+                          required
+                        />
+                        <p className="mt-1 text-xs text-gray-400">{t("devHint")}</p>
+                      </div>
+                      <button
+                        type="submit"
+                        className="btn-primary w-full"
+                        disabled={busy || !code}
+                      >
+                        {busy ? common("loading") : t("createAccount")}
+                      </button>
+                    </>
+                  )}
                 </>
-              )}
-              {/* Toggle OTP ⇄ password for returning logins. */}
-              {mode === "login" && (
-                <button
-                  type="button"
-                  className="text-xs text-brand underline"
-                  onClick={() => {
-                    setUsePassword((v) => !v);
-                    setCode("");
-                    setCodeSent(false);
-                    setPassword("");
-                    setError("");
-                  }}
-                >
-                  {usePassword ? t("useSmsCode") : t("usePassword")}
-                </button>
               )}
               <ErrorText message={error} />
             </form>

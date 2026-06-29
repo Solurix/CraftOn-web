@@ -267,20 +267,34 @@ function AdminsTab() {
   const admins = useAsync(() => api.adminAdmins(), []);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
-      await api.createAdmin({ phone_number: phone, display_name: name });
+      await api.createAdmin({
+        phone_number: phone,
+        username,
+        email,
+        password,
+        display_name: name,
+      });
       setPhone("");
       setName("");
+      setUsername("");
+      setEmail("");
+      setPassword("");
       admins.reload();
     } catch (e) {
       setError(e instanceof Error ? e.message : "error");
     }
   };
+
+  const canSubmit = phone && name && username && email && password;
 
   return (
     <div className="space-y-3">
@@ -292,6 +306,27 @@ function AdminsTab() {
             <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
           <label className="flex-1">
+            <span className="field-label">{auth("usernameLabel")}</span>
+            <input
+              className="field-input"
+              autoCapitalize="none"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </label>
+          <label className="flex-1">
+            <span className="field-label">{auth("emailLabel")}</span>
+            <input
+              className="field-input"
+              type="email"
+              autoCapitalize="none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label className="flex-1">
             <span className="field-label">{auth("phoneLabel")}</span>
             <input
               className="field-input"
@@ -301,7 +336,17 @@ function AdminsTab() {
               required
             />
           </label>
-          <button className="btn-primary" disabled={!phone || !name}>
+          <label className="flex-1">
+            <span className="field-label">{auth("passwordLabel")}</span>
+            <input
+              className="field-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+          <button className="btn-primary" disabled={!canSubmit}>
             {t("createAdmin")}
           </button>
         </div>

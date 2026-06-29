@@ -32,7 +32,7 @@ type AuthContextValue = {
   authMode: string;
   accounts: RememberedAccount[];
   loginWithPhone: (phone: string, code: string) => Promise<{ needsSignup: boolean }>;
-  loginWithPassword: (phone: string, password: string) => Promise<void>;
+  loginWithIdentifier: (identifier: string, password: string) => Promise<void>;
   switchAccount: (phone: string) => Promise<{ needsSignup: boolean }>;
   forgetAccount: (phone: string) => void;
   completeSignup: (body: SessionCreate) => Promise<void>;
@@ -164,12 +164,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [remember],
   );
 
-  // Returning login without OTP: phone + password → the API mints a bearer token.
-  const loginWithPassword = useCallback(
-    async (phone: string, password: string) => {
+  // Returning login without OTP: identifier (username/email/phone) + password →
+  // the API issues a signed session token.
+  const loginWithIdentifier = useCallback(
+    async (identifier: string, password: string) => {
       const prevToken =
         typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
-      const { token: t } = await new ApiClient(null).passwordLogin(phone, password);
+      const { token: t } = await new ApiClient(null).login(identifier, password);
       localStorage.setItem(TOKEN_KEY, t);
       setToken(t);
       const m = await fetchMe(t);
@@ -212,14 +213,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeSignup = useCallback(
     async (body: SessionCreate) => {
-      // Fall back to the freshly-stored token: when signup runs right after
+      // Fall back to the freshly-stored OTP token: when signup runs right after
       // loginWithPhone in the same handler, the `token` state hasn't re-rendered
       // yet, but localStorage was already set synchronously.
-      const t =
+      const otp =
         token ?? (typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null);
-      if (!t) throw new Error("no token");
-      await new ApiClient(t).createSession(body);
-      await fetchMe(t);
+      if (!otp) throw new Error("no token");
+      // Registration verifies the OTP token and returns a durable session token
+      // (SMS is only needed here) — swap to it so the device stays logged in
+      // without the one-time OTP token.
+      const res = await new ApiClient(otp).createSession(body);
+      const sessionToken = res.token ?? otp;
+      localStorage.setItem(TOKEN_KEY, sessionToken);
+      setToken(sessionToken);
+      await fetchMe(sessionToken);
     },
     [token, fetchMe],
   );
@@ -243,7 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authMode: AUTH_MODE,
     accounts,
     loginWithPhone,
-    loginWithPassword,
+    loginWithIdentifier,
     switchAccount,
     forgetAccount,
     completeSignup,

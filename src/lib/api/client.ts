@@ -12,11 +12,11 @@ import type {
   DocumentOut,
   Job,
   JobCreate,
+  Login,
   Matching,
   Me,
   Message,
   Notification,
-  PasswordLogin,
   Review,
   ReviewCreate,
   SessionCreate,
@@ -115,10 +115,11 @@ export class ApiClient {
   setPassword(password: string) {
     return request<void>("/auth/password", { method: "POST", body: { password }, token: this.token });
   }
-  passwordLogin(phone: string, password: string) {
-    return request<PasswordLogin>("/auth/password-login", {
+  // Returning login with any identifier (username / email / phone) + password.
+  login(identifier: string, password: string) {
+    return request<Login>("/auth/login", {
       method: "POST",
-      body: { phone_number: phone, password },
+      body: { identifier, password },
     });
   }
 
@@ -298,7 +299,13 @@ export class ApiClient {
   adminAdmins() {
     return request<User[]>("/admin/admins", { token: this.token });
   }
-  createAdmin(body: { phone_number: string; display_name: string }) {
+  createAdmin(body: {
+    phone_number: string;
+    username: string;
+    email: string;
+    password: string;
+    display_name: string;
+  }) {
     return request<User>("/admin/admins", { method: "POST", body, token: this.token });
   }
   debugSeed(body: { workers: number; contractors: number; jobs: number }) {

@@ -13,7 +13,7 @@ those first; this file pins the web-local essentials.
 |---|---|
 | Framework | **Next.js App Router** + TypeScript, mobile-first **PWA** |
 | i18n | **next-intl**; message **keys English**, default locale **`ja`**, full **`en`** (parity in CI) |
-| Auth | **Firebase phone OTP**; API verifies the ID token. Dev/CI/E2E use a **fake** token matching the API's fake verifier |
+| Auth | Identifier (username/email/phone)+password login → **API session token**; Firebase phone OTP **only at registration** (ADR 0009). Dev/CI/E2E use a **fake** OTP token matching the API's fake verifier |
 | API types | generated from the backend **OpenAPI** (`npm run gen:api`) — no hand-maintained duplicates |
 | Money/time | integer **JPY**; times display **Asia/Tokyo** |
 | Tests | Vitest + Testing Library; Playwright E2E |
