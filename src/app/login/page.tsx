@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
@@ -8,7 +9,7 @@ import { AppShell } from "@/components/AppShell";
 import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "reset";
 type Role = "worker" | "contractor";
 
 function LoginPage() {
@@ -17,9 +18,11 @@ function LoginPage() {
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "login";
   const t = useTranslations("auth");
   const common = useTranslations("common");
+  const legal = useTranslations("legal");
   const {
     loginWithPhone,
     loginWithIdentifier,
+    resetPassword,
     forgetAccount,
     completeSignup,
     accounts,
@@ -72,6 +75,12 @@ function LoginPage() {
         router.replace("/");
         return;
       }
+      if (mode === "reset") {
+        // Forgot-password: OTP proves phone ownership, then set a new password.
+        await resetPassword(phone, code, password);
+        router.replace("/");
+        return;
+      }
       // Signup: OTP proves phone ownership, then we register the credentials.
       const { needsSignup } = await loginWithPhone(phone, code);
       if (needsSignup && role) {
@@ -98,8 +107,88 @@ function LoginPage() {
     <AppShell>
       <div className="mx-auto max-w-sm space-y-4">
         <h1 className="text-lg font-bold tracking-tight sm:text-xl">
-          {mode === "login" ? t("loginTitle") : t("signupTab")}
+          {mode === "login"
+            ? t("loginTitle")
+            : mode === "reset"
+              ? t("resetTitle")
+              : t("signupTab")}
         </h1>
+
+        {mode === "reset" ? (
+          <form onSubmit={submit} className="card space-y-4">
+            <p className="text-sm text-gray-600">{t("resetHint")}</p>
+            <div>
+              <label className="field-label" htmlFor="reset-phone">
+                {t("phoneLabel")}
+              </label>
+              <input
+                id="reset-phone"
+                className="field-input"
+                placeholder={t("phonePlaceholder")}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+            {!codeSent ? (
+              <button
+                type="button"
+                className="btn-primary w-full"
+                disabled={!phone}
+                onClick={() => setCodeSent(true)}
+              >
+                {t("sendCode")}
+              </button>
+            ) : (
+              <>
+                <div>
+                  <label className="field-label" htmlFor="reset-code">
+                    {t("codeLabel")}
+                  </label>
+                  <input
+                    id="reset-code"
+                    className="field-input"
+                    placeholder={t("codePlaceholder")}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-gray-400">{t("devHint")}</p>
+                </div>
+                <div>
+                  <label className="field-label" htmlFor="reset-password">
+                    {t("newPasswordLabel")}
+                  </label>
+                  <input
+                    id="reset-password"
+                    type="password"
+                    className="field-input"
+                    minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="btn-primary w-full"
+                  disabled={busy || !code || password.length < 8}
+                >
+                  {busy ? common("loading") : t("resetSubmit")}
+                </button>
+              </>
+            )}
+            <ErrorText message={error} />
+            <button
+              type="button"
+              className="link text-sm"
+              onClick={() => switchMode("login")}
+            >
+              ← {t("loginTitle")}
+            </button>
+          </form>
+        ) : (
+          <>{/* login / signup */}
 
         {/* Sign up: choose role FIRST, before entering any details. */}
         {mode === "signup" && !role ? (
@@ -189,6 +278,13 @@ function LoginPage() {
                     disabled={busy || !identifier || !password}
                   >
                     {busy ? common("loading") : t("verify")}
+                  </button>
+                  <button
+                    type="button"
+                    className="link text-xs"
+                    onClick={() => switchMode("reset")}
+                  >
+                    {t("forgotPassword")}
                   </button>
                 </>
               ) : (
@@ -302,16 +398,30 @@ function LoginPage() {
             </form>
           </>
         )}
+          </>
+        )}
 
-        <p className="text-center text-sm text-gray-500">
-          {mode === "login" ? t("noAccount") : t("haveAccount")}{" "}
-          <button
-            type="button"
-            className="link"
-            onClick={() => switchMode(mode === "login" ? "signup" : "login")}
-          >
-            {mode === "login" ? t("signupTab") : t("loginTitle")}
-          </button>
+        {mode !== "reset" && (
+          <p className="text-center text-sm text-gray-500">
+            {mode === "login" ? t("noAccount") : t("haveAccount")}{" "}
+            <button
+              type="button"
+              className="link"
+              onClick={() => switchMode(mode === "login" ? "signup" : "login")}
+            >
+              {mode === "login" ? t("signupTab") : t("loginTitle")}
+            </button>
+          </p>
+        )}
+
+        <p className="text-center text-xs text-gray-400">
+          <Link href="/terms" className="link">
+            {legal("terms")}
+          </Link>{" "}
+          ·{" "}
+          <Link href="/privacy" className="link">
+            {legal("privacy")}
+          </Link>
         </p>
       </div>
     </AppShell>

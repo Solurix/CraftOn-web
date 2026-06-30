@@ -114,6 +114,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Password
+         * @description Forgot-password recovery. The client re-verifies the phone by SMS OTP; the
+         *     OTP token here proves phone ownership, so we set a new password on the
+         *     matching account and return a fresh session token (logged in). No old
+         *     password required — SMS is the proof of identity, consistent with the
+         *     OTP-at-confirmation-only model (ADR 0009).
+         */
+        post: operations["reset_password_api_v1_auth_reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Account
+         * @description Change the caller's login identifiers (username and/or email) from account
+         *     settings. Each is uniqueness-checked (excluding the caller) → clean 409.
+         */
+        patch: operations["update_account_api_v1_me_account_patch"];
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -279,6 +324,28 @@ export interface paths {
         };
         /** List My Documents */
         get: operations["list_my_documents_api_v1_documents_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{doc_id}/view-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Document View Url
+         * @description Short-lived signed read URL for a document's bytes. The owner can view
+         *     their own documents; admins can view any (vetting). The bytes are served by
+         *     Cloud Storage via the signed URL — never proxied through the API.
+         */
+        get: operations["get_document_view_url_api_v1_documents__doc_id__view_url_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1015,6 +1082,19 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * AccountUpdateIn
+         * @description Change login identifiers (username and/or email) from account settings.
+         *
+         *     Both fields are optional; only the provided ones change. Normalized and
+         *     uniqueness-checked exactly like registration.
+         */
+        AccountUpdateIn: {
+            /** Username */
+            username?: string | null;
+            /** Email */
+            email?: string | null;
+        };
+        /**
          * AdminCreateIn
          * @description Create a new admin account (logs in with identifier + password).
          */
@@ -1627,6 +1707,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /**
+         * PasswordResetIn
+         * @description Reset the password for the phone number proven by the OTP token in the
+         *     request (forgot-password flow). SMS OTP confirms phone ownership; no old
+         *     password is needed.
+         */
+        PasswordResetIn: {
+            /** Password */
+            password: string;
         };
         /** ReadyResponse */
         ReadyResponse: {
@@ -2271,6 +2361,108 @@ export interface operations {
             };
         };
     };
+    reset_password_api_v1_auth_reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginOut"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_account_api_v1_me_account_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_me_api_v1_me_get: {
         parameters: {
             query?: never;
@@ -2612,6 +2804,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentOut"][];
+                };
+            };
+        };
+    };
+    get_document_view_url_api_v1_documents__doc_id__view_url_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentWithUrlOut"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

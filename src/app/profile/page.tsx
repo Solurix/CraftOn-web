@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { DevicesCard } from "@/components/DevicesCard";
+import { PhotoManager } from "@/components/PhotoManager";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
@@ -210,6 +211,60 @@ function SetPasswordCard() {
   );
 }
 
+function AccountSettingsCard({ me }: { me: Me }) {
+  const p = useTranslations("profile");
+  const auth = useTranslations("auth");
+  const common = useTranslations("common");
+  const { api, refresh } = useAuth();
+  const toast = useToast();
+  const [username, setUsername] = useState(me.user.username);
+  const [email, setEmail] = useState(me.user.email);
+  const [error, setError] = useState("");
+
+  const dirty = username !== me.user.username || email !== me.user.email;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await api.updateAccount({ username, email });
+      await refresh();
+      toast.success(p("accountSaved"));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "error";
+      setError(msg);
+      toast.error(msg);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="card space-y-3">
+      <h2 className="font-semibold">{p("account")}</h2>
+      <Field label={auth("usernameLabel")}>
+        <input
+          className="field-input"
+          autoCapitalize="none"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </Field>
+      <Field label={auth("emailLabel")}>
+        <input
+          type="email"
+          className="field-input"
+          autoCapitalize="none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Field>
+      <button className="btn-primary w-full" disabled={!dirty}>
+        {common("save")}
+      </button>
+      <ErrorText message={error} />
+    </form>
+  );
+}
+
 function Settings() {
   const { me } = useAuth();
   if (!me) return null;
@@ -229,6 +284,8 @@ function Settings() {
       ) : isContractor ? (
         <ContractorSettings me={me} />
       ) : null}
+      {(isWorker || isContractor) && <PhotoManager />}
+      <AccountSettingsCard me={me} />
       <SetPasswordCard />
       <DevicesCard />
     </div>

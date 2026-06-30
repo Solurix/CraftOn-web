@@ -10,6 +10,7 @@ import type {
   ContractorUpdate,
   Device,
   DocumentOut,
+  DocumentWithUrl,
   Job,
   JobCreate,
   Login,
@@ -122,6 +123,19 @@ export class ApiClient {
       body: { identifier, password },
     });
   }
+  // Forgot-password: this client must hold the freshly-minted OTP token (proves
+  // phone ownership); the API sets the new password and returns a session token.
+  resetPassword(password: string) {
+    return request<Login>("/auth/reset-password", {
+      method: "POST",
+      body: { password },
+      token: this.token,
+    });
+  }
+  // Change own login identifiers (username / email) from account settings.
+  updateAccount(body: { username?: string; email?: string }) {
+    return request<User>("/me/account", { method: "PATCH", body, token: this.token });
+  }
 
   // devices
   myDevices() {
@@ -164,6 +178,12 @@ export class ApiClient {
     return request<DocumentOut>("/documents", {
       method: "POST", body: { doc_type: docType, storage_path: storagePath }, token: this.token,
     });
+  }
+  myDocuments() {
+    return request<DocumentOut[]>("/documents/me", { token: this.token });
+  }
+  documentViewUrl(id: string) {
+    return request<DocumentWithUrl>(`/documents/${id}/view-url`, { token: this.token });
   }
 
   // jobs

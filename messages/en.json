@@ -152,7 +152,12 @@
     "switchAccount": "Switch account",
     "addAccount": "Add account",
     "forget": "Remove",
-    "forgetNamed": "Remove {name} from this device"
+    "forgetNamed": "Remove {name} from this device",
+    "resetTitle": "Reset password",
+    "resetHint": "Verify your phone by SMS, then set a new password.",
+    "newPasswordLabel": "New password",
+    "resetSubmit": "Reset password",
+    "forgotPassword": "Forgot password?"
   },
   "onboarding": {
     "workerTitle": "Worker profile",
@@ -355,7 +360,9 @@
     "career": "Work history",
     "careerEntry": "{company} · {trade} · {years} yrs",
     "qualifications": "Qualifications",
-    "skills": "Skills"
+    "skills": "Skills",
+    "account": "Account",
+    "accountSaved": "Account updated"
   },
   "admin": {
     "vettingTitle": "Pending review",
@@ -482,5 +489,18 @@
     "datePast": "The work date cannot be in the past.",
     "wagePositive": "Daily wage must be greater than zero.",
     "headcountMin": "Headcount must be at least 1."
+  },
+  "photos": {
+    "title": "Work photos",
+    "add": "Add photo",
+    "hint": "Show past work on your profile. Photos are reviewed before they appear publicly.",
+    "empty": "No photos yet.",
+    "uploading": "Uploading…",
+    "added": "Photo added",
+    "pending": "In review"
+  },
+  "legal": {
+    "terms": "Terms",
+    "privacy": "Privacy"
   }
 }

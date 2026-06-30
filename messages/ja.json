@@ -152,7 +152,12 @@
     "switchAccount": "アカウントを切り替え",
     "addAccount": "アカウントを追加",
     "forget": "削除",
-    "forgetNamed": "{name} を端末から削除"
+    "forgetNamed": "{name} を端末から削除",
+    "resetTitle": "パスワードを再設定",
+    "resetHint": "SMSで電話番号を確認し、新しいパスワードを設定します。",
+    "newPasswordLabel": "新しいパスワード",
+    "resetSubmit": "パスワードを再設定",
+    "forgotPassword": "パスワードをお忘れですか？"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",
@@ -355,7 +360,9 @@
     "career": "職歴",
     "careerEntry": "{company}・{trade}・{years}年",
     "qualifications": "資格",
-    "skills": "スキル"
+    "skills": "スキル",
+    "account": "アカウント",
+    "accountSaved": "アカウントを更新しました"
   },
   "admin": {
     "vettingTitle": "審査待ち",
@@ -482,5 +489,18 @@
     "datePast": "作業日は過去の日付にできません。",
     "wagePositive": "日当は0より大きくしてください。",
     "headcountMin": "募集人数は1人以上にしてください。"
+  },
+  "photos": {
+    "title": "作業写真",
+    "add": "写真を追加",
+    "hint": "これまでの仕事をプロフィールに掲載できます。写真は公開前に確認されます。",
+    "empty": "写真はまだありません。",
+    "uploading": "アップロード中…",
+    "added": "写真を追加しました",
+    "pending": "確認中"
+  },
+  "legal": {
+    "terms": "利用規約",
+    "privacy": "プライバシー"
   }
 }

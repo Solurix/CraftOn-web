@@ -25,6 +25,7 @@ export type ContractorUpdate = S["ContractorProfileUpdate"];
 export type SessionCreate = S["SessionCreateIn"];
 export type SessionResult = S["SessionOut"];
 export type DocumentOut = S["DocumentOut"];
+export type DocumentWithUrl = S["DocumentWithUrlOut"];
 export type UploadUrl = S["UploadUrlOut"];
 export type ConfigSnapshot = S["ConfigOut"];
 export type VettingQueue = S["VettingQueueOut"];
