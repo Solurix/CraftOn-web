@@ -362,7 +362,8 @@
     "qualifications": "Qualifications",
     "skills": "Skills",
     "account": "Account",
-    "accountSaved": "Account updated"
+    "accountSaved": "Account updated",
+    "photos": "Work photos"
   },
   "admin": {
     "vettingTitle": "Pending review",
@@ -493,7 +494,7 @@
   "photos": {
     "title": "Work photos",
     "add": "Add photo",
-    "hint": "Show past work on your profile. Photos are reviewed before they appear publicly.",
+    "hint": "Show past work on your public profile. Keep it professional — photos may be removed by moderators.",
     "empty": "No photos yet.",
     "uploading": "Uploading…",
     "added": "Photo added",

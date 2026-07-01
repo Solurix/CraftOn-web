@@ -911,6 +911,59 @@
         }
       }
     },
+    "/api/v1/workers/{user_id}/photos": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Worker Public Photos",
+        "description": "A worker's public portfolio photos (signed read URLs). Visible to any\napproved user — the same audience as the public worker profile. Only\n`job_photo` documents; identity documents are never exposed here.",
+        "operationId": "worker_public_photos_api_v1_workers__user_id__photos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentWithUrlOut"
+                  },
+                  "title": "Response Worker Public Photos Api V1 Workers  User Id  Photos Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/jobs": {
       "post": {
         "tags": [

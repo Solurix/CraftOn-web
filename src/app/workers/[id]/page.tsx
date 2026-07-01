@@ -19,6 +19,14 @@ function WorkerProfileView() {
   const { api, me } = useAuth();
   const profile = useAsync(() => api.worker(id), [id]);
   const reviews = useAsync(() => api.workerReviews(id), [id]);
+  // Portfolio photos are decoration — a failure must not break the profile.
+  const photos = useAsync(async () => {
+    try {
+      return await api.workerPhotos(id);
+    } catch {
+      return [];
+    }
+  }, [id]);
 
   if (profile.loading) return <DetailSkeleton />;
   if (profile.error || !profile.data) return <ErrorText message={profile.error || "not found"} />;
@@ -66,6 +74,23 @@ function WorkerProfileView() {
           </div>
         )}
       </div>
+
+      {photos.data && photos.data.length > 0 && (
+        <div className="card space-y-2">
+          <h2 className="font-semibold">{p("photos")}</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {photos.data.map((ph) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={ph.id}
+                src={ph.read_url}
+                alt=""
+                className="aspect-square w-full rounded-lg border border-gray-200 object-cover"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {w.work_history?.length > 0 && (
         <div className="card space-y-1">

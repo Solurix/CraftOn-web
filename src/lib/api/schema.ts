@@ -354,6 +354,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workers/{user_id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Worker Public Photos
+         * @description A worker's public portfolio photos (signed read URLs). Visible to any
+         *     approved user — the same audience as the public worker profile. Only
+         *     `job_photo` documents; identity documents are never exposed here.
+         */
+        get: operations["worker_public_photos_api_v1_workers__user_id__photos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/jobs": {
         parameters: {
             query?: never;
@@ -2844,6 +2866,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    worker_public_photos_api_v1_workers__user_id__photos_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentWithUrlOut"][];
                 };
             };
             /** @description Validation Error */

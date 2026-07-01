@@ -164,6 +164,9 @@ export class ApiClient {
   worker(id: string) {
     return request<WorkerPublic>(`/workers/${id}`, { token: this.token });
   }
+  workerPhotos(id: string) {
+    return request<DocumentWithUrl[]>(`/workers/${id}/photos`, { token: this.token });
+  }
   contractor(id: string) {
     return request<ContractorPublic>(`/contractors/${id}`, { token: this.token });
   }
