@@ -1,0 +1,147 @@
+name: preview-deploy
+
+# Per-PR preview environment for the web app.
+#
+# Each PR gets a --no-traffic --tag pr<N> revision of crafton-web-dev whose image
+# is baked (NEXT_PUBLIC_* are inlined at build time) to point at the shared live
+# crafton-api-dev URL — a web-only PR doesn't change the API, so it previews against
+# dev. No database is involved. Prod (the live revision) is never touched.
+#
+# Trust model: pull_request_target runs this from `main` so a PR can't rewrite the
+# credentialed steps; CODEOWNERS gates the workflow + Dockerfile. PR code executes
+# only inside `docker build` and at preview runtime. Fork PRs are skipped.
+#
+# NOTE: because this runs from `main`, pipeline changes only take effect after merge.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: preview-web-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: crafton-dev-500709
+      REGION: asia-northeast1
+      SERVICE: crafton-web-dev
+      API_SERVICE: crafton-api-dev
+      IMAGE: asia-northeast1-docker.pkg.dev/crafton-dev-500709/crafton/web
+      AUTH_MODE: fake
+      WIF_PROVIDER: projects/784671749504/locations/global/workloadIdentityPools/github-actions/providers/github
+      DEPLOYER_SA: crafton-deployer@crafton-dev-500709.iam.gserviceaccount.com
+      PR: ${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Compute identifiers
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          {
+            echo "TAG=pr${PR}"
+            echo "REV_SUFFIX=pr${PR}-${SHORT_SHA}"
+            echo "IMAGE_TAG=${IMAGE}:pr${PR}-${SHORT_SHA}"
+          } >> "$GITHUB_ENV"
+
+      - name: Resolve live API URL
+        run: |
+          url=$(gcloud run services describe "$API_SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          if [ -z "$url" ]; then echo "API service not found"; exit 1; fi
+          echo "API_BASE_URL=$url" >> "$GITHUB_ENV"
+
+      # NEXT_PUBLIC_* are inlined at build time, so the preview API URL must be baked.
+      - name: Build & push preview image
+        run: |
+          docker build --platform=linux/amd64 --provenance=false \
+            --build-arg NEXT_PUBLIC_API_BASE_URL="$API_BASE_URL" \
+            --build-arg NEXT_PUBLIC_AUTH_MODE="$AUTH_MODE" \
+            -t "$IMAGE_TAG" .
+          docker push "$IMAGE_TAG"
+
+      - name: Deploy preview revision (no traffic)
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" \
+            --image "$IMAGE_TAG" \
+            --no-traffic --tag "$TAG" \
+            --revision-suffix "$REV_SUFFIX" \
+            --labels "preview-pr=${PR}" \
+            --quiet
+
+      - name: Resolve preview URL
+        run: |
+          BASE=$(gcloud run services describe "$SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          if [ -z "$BASE" ]; then echo "could not read service URL"; exit 1; fi
+          echo "WEB_URL=https://${TAG}---${BASE#https://}" >> "$GITHUB_ENV"
+
+      - name: Smoke test the preview
+        run: |
+          echo "Preview web: $WEB_URL"
+          code=000
+          for i in $(seq 1 36); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$WEB_URL/" || echo 000)
+            if [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; then
+              echo "served $code after ~$((i*5))s"; break
+            fi
+            sleep 5
+          done
+          if ! { [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; }; then
+            echo "::error::web preview never served (last code: $code)"; exit 1
+          fi
+
+      - name: Comment preview URL on the PR
+        uses: actions/github-script@v7
+        env:
+          WEB_URL: ${{ env.WEB_URL }}
+          API_BASE_URL: ${{ env.API_BASE_URL }}
+          TAG: ${{ env.TAG }}
+          REV_SUFFIX: ${{ env.REV_SUFFIX }}
+        with:
+          script: |
+            const marker = '<!-- crafton-preview-web -->';
+            const { WEB_URL, API_BASE_URL, TAG, REV_SUFFIX } = process.env;
+            const pr = context.issue.number;
+            const body = [
+              marker,
+              '### 🖥️ Web preview',
+              `- **URL:** ${WEB_URL}`,
+              `- **API (baked):** ${API_BASE_URL}`,
+              `- **Revision:** \`${REV_SUFFIX}\` — no-traffic, tag \`${TAG}\``,
+              '',
+              'Points at the shared dev API. Torn down automatically when this PR closes.',
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: pr,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: pr, body });
+            }

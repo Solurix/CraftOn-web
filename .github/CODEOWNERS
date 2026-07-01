@@ -1,0 +1,19 @@
+# Code owners for the security/infra blast radius.
+#
+# With branch protection "Require review from Code Owners" enabled on `main`,
+# these paths cannot be merged without the owner's review. `@Solurix` is the repo
+# owner — change it to the actual reviewer handle or a team if that org uses teams.
+
+# CI/CD & the preview pipeline (holds the WIF trust + deploy steps).
+/.github/workflows/**    @Solurix
+/.github/CODEOWNERS       @Solurix
+
+# The image the build SA executes.
+**/Dockerfile            @Solurix
+
+# Build config that bakes NEXT_PUBLIC_* (incl. the API URL) into the image.
+/next.config.mjs         @Solurix
+
+# Dependencies = supply chain.
+/package.json            @Solurix
+/package-lock.json       @Solurix
