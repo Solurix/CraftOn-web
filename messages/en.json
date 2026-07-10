@@ -137,7 +137,6 @@
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "phoneLabel": "Phone number",
-    "phonePlaceholder": "+8190…",
     "sendCode": "Send verification code",
     "codeLabel": "Verification code (SMS)",
     "codePlaceholder": "123456",
@@ -159,7 +158,13 @@
     "resetSubmit": "Reset password",
     "forgotPassword": "Forgot password?",
     "roleWorkerDesc": "Find and apply for site work",
-    "roleContractorDesc": "Post jobs and hire tradespeople"
+    "roleContractorDesc": "Post jobs and hire tradespeople",
+    "countryCode": "Country code",
+    "phoneNationalPlaceholder": "90 1234 5678",
+    "usernameInvalid": "Username must be 3–64 characters: letters, numbers, . _ -",
+    "emailInvalid": "Enter a valid email address.",
+    "phoneInvalid": "Enter a valid phone number: pick the country code, then digits only.",
+    "passwordTooShort": "Password must be at least {min} characters."
   },
   "onboarding": {
     "workerTitle": "Worker profile",

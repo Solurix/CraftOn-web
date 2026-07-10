@@ -11,7 +11,8 @@ test("remembers the account and re-logs-in with the password", async ({ page, co
     { name: "NEXT_LOCALE", value: "en", url: "http://localhost:3000" },
   ]);
   const stamp = Date.now().toString().slice(-9);
-  const phone = `+8190${stamp}`;
+  // The phone field is now a country picker (+81 default) + national number.
+  const phoneNational = `90${stamp}`;
   // No display name is asked at signup anymore; after onboarding the account's
   // public name defaults to the company name.
   const name = "Remembered Co";
@@ -24,7 +25,7 @@ test("remembers the account and re-logs-in with the password", async ({ page, co
   await page.getByRole("button", { name: "Sign up as a contractor" }).click();
   await page.getByLabel("Username").fill(`rem_${stamp}`);
   await page.getByLabel("Email").fill(`rem_${stamp}@example.com`);
-  await page.getByLabel("Phone number").fill(phone);
+  await page.getByLabel("Phone number").fill(phoneNational);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByPlaceholder("123456").fill("123456");

@@ -60,6 +60,13 @@ async function request<T>(path: string, opts: Options = {}): Promise<T> {
   }
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
+  // Tell the API which language the UI is showing so error messages come back
+  // localized (the browser's own Accept-Language may differ from NEXT_LOCALE).
+  const uiLocale =
+    typeof document !== "undefined"
+      ? /(?:^|;\s*)NEXT_LOCALE=(ja|en)/.exec(document.cookie)?.[1]
+      : undefined;
+  if (uiLocale) headers["Accept-Language"] = uiLocale;
   // Identify the device so the API can list/revoke it.
   const deviceId = getDeviceId();
   if (deviceId) {

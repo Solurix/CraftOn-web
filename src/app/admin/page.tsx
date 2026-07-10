@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
+import { PhoneInput } from "@/components/PhoneInput";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
 import type { VettingItem } from "@/lib/api/models";
@@ -296,7 +297,7 @@ function AdminsTab() {
     }
   };
 
-  const canSubmit = phone && name && username && email && password;
+  const canSubmit = phone && name && username && email && password.length >= 8;
 
   return (
     <div className="space-y-3">
@@ -328,16 +329,10 @@ function AdminsTab() {
               required
             />
           </label>
-          <label className="min-w-[9rem] flex-1">
+          <div className="min-w-[13rem] flex-1">
             <span className="field-label">{auth("phoneLabel")}</span>
-            <input
-              className="field-input"
-              placeholder={auth("phonePlaceholder")}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </label>
+            <PhoneInput value={phone} onChange={setPhone} required />
+          </div>
           <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("passwordLabel")}</span>
             <input

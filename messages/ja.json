@@ -137,7 +137,6 @@
     "emailLabel": "メールアドレス",
     "emailPlaceholder": "you@example.com",
     "phoneLabel": "電話番号",
-    "phonePlaceholder": "+8190…",
     "sendCode": "確認コードを送信",
     "codeLabel": "確認コード（SMS）",
     "codePlaceholder": "123456",
@@ -159,7 +158,13 @@
     "resetSubmit": "パスワードを再設定",
     "forgotPassword": "パスワードをお忘れですか？",
     "roleWorkerDesc": "現場の仕事を探して応募する方",
-    "roleContractorDesc": "求人を掲載して職人を募集する方"
+    "roleContractorDesc": "求人を掲載して職人を募集する方",
+    "countryCode": "国番号",
+    "phoneNationalPlaceholder": "90 1234 5678",
+    "usernameInvalid": "ユーザー名は3〜64文字の半角英数字と . _ - が使えます。",
+    "emailInvalid": "メールアドレスの形式が正しくありません。",
+    "phoneInvalid": "電話番号が正しくありません。国番号を選び、番号を数字で入力してください。",
+    "passwordTooShort": "パスワードは{min}文字以上で入力してください。"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",

@@ -6,11 +6,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { PhoneInput } from "@/components/PhoneInput";
 import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { isValidNationalNumber, splitPhone } from "@/lib/phone";
 
 type Mode = "login" | "signup" | "reset";
 type Role = "worker" | "contractor";
+
+// Same shape the API enforces (normalized lower-case server-side).
+const USERNAME_RE = /^[a-zA-Z0-9._-]{3,64}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_MIN = 8;
+
+// Inline, per-field validation message (shown only once the field has input,
+// so an empty form isn't a wall of red).
+function FieldHint({ show, message }: { show: boolean; message: string }) {
+  if (!show) return null;
+  return <p className="mt-1 text-xs text-red-600">{message}</p>;
+}
 
 function LoginPage() {
   // Landing-page CTAs link to /login?mode=signup to open the sign-up flow directly.
@@ -42,6 +56,13 @@ function LoginPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Field-level validity (signup/reset). The buttons stay disabled and each
+  // invalid field explains itself, instead of the server's generic 422.
+  const usernameOk = USERNAME_RE.test(username);
+  const emailOk = EMAIL_RE.test(email);
+  const phoneOk = phone !== "" && isValidNationalNumber(splitPhone(phone).national);
+  const passwordOk = password.length >= PASSWORD_MIN;
 
   const goAfterLogin = (needsSignup: boolean) =>
     router.replace(needsSignup ? "/onboarding" : "/");
@@ -120,20 +141,14 @@ function LoginPage() {
               <label className="field-label" htmlFor="reset-phone">
                 {t("phoneLabel")}
               </label>
-              <input
-                id="reset-phone"
-                className="field-input"
-                placeholder={t("phonePlaceholder")}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
+              <PhoneInput id="reset-phone" value={phone} onChange={setPhone} required />
+              <FieldHint show={!!phone && !phoneOk} message={t("phoneInvalid")} />
             </div>
             {!codeSent ? (
               <button
                 type="button"
                 className="btn-primary w-full"
-                disabled={!phone}
+                disabled={!phoneOk}
                 onClick={() => setCodeSent(true)}
               >
                 {t("sendCode")}
@@ -162,16 +177,20 @@ function LoginPage() {
                     id="reset-password"
                     type="password"
                     className="field-input"
-                    minLength={8}
+                    minLength={PASSWORD_MIN}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                  />
+                  <FieldHint
+                    show={!!password && !passwordOk}
+                    message={t("passwordTooShort", { min: PASSWORD_MIN })}
                   />
                 </div>
                 <button
                   type="submit"
                   className="btn-primary w-full"
-                  disabled={busy || !code || password.length < 8}
+                  disabled={busy || !code || !passwordOk}
                 >
                   {busy ? common("loading") : t("resetSubmit")}
                 </button>
@@ -335,6 +354,10 @@ function LoginPage() {
                       autoCapitalize="none"
                       required
                     />
+                    <FieldHint
+                      show={!!username && !usernameOk}
+                      message={t("usernameInvalid")}
+                    />
                   </div>
                   <div>
                     <label className="field-label" htmlFor="email">
@@ -350,19 +373,14 @@ function LoginPage() {
                       autoCapitalize="none"
                       required
                     />
+                    <FieldHint show={!!email && !emailOk} message={t("emailInvalid")} />
                   </div>
                   <div>
                     <label className="field-label" htmlFor="phone">
                       {t("phoneLabel")}
                     </label>
-                    <input
-                      id="phone"
-                      className="field-input"
-                      placeholder={t("phonePlaceholder")}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                    />
+                    <PhoneInput id="phone" value={phone} onChange={setPhone} required />
+                    <FieldHint show={!!phone && !phoneOk} message={t("phoneInvalid")} />
                   </div>
                   <div>
                     <label className="field-label" htmlFor="signup-password">
@@ -372,9 +390,14 @@ function LoginPage() {
                       id="signup-password"
                       type="password"
                       className="field-input"
+                      minLength={PASSWORD_MIN}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                    />
+                    <FieldHint
+                      show={!!password && !passwordOk}
+                      message={t("passwordTooShort", { min: PASSWORD_MIN })}
                     />
                   </div>
 
@@ -382,7 +405,7 @@ function LoginPage() {
                     <button
                       type="button"
                       className="btn-primary w-full"
-                      disabled={!username || !email || !phone || !password}
+                      disabled={!usernameOk || !emailOk || !phoneOk || !passwordOk}
                       onClick={() => setCodeSent(true)}
                     >
                       {t("sendCode")}
