@@ -8,11 +8,13 @@ import type {
   ContractorProfile,
   ContractorPublic,
   ContractorUpdate,
+  CustomTrade,
   Device,
   DocumentOut,
   DocumentWithUrl,
   Job,
   JobCreate,
+  JobPhoto,
   Login,
   Matching,
   Me,
@@ -22,6 +24,8 @@ import type {
   ReviewCreate,
   SessionCreate,
   SessionResult,
+  Trade,
+  TradeMergeResult,
   UploadUrl,
   User,
   VettingQueue,
@@ -60,6 +64,13 @@ async function request<T>(path: string, opts: Options = {}): Promise<T> {
   }
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
+  // Tell the API which language the UI is showing so error messages come back
+  // localized (the browser's own Accept-Language may differ from NEXT_LOCALE).
+  const uiLocale =
+    typeof document !== "undefined"
+      ? /(?:^|;\s*)NEXT_LOCALE=(ja|en)/.exec(document.cookie)?.[1]
+      : undefined;
+  if (uiLocale) headers["Accept-Language"] = uiLocale;
   // Identify the device so the API can list/revoke it.
   const deviceId = getDeviceId();
   if (deviceId) {
@@ -187,6 +198,14 @@ export class ApiClient {
   }
   documentViewUrl(id: string) {
     return request<DocumentWithUrl>(`/documents/${id}/view-url`, { token: this.token });
+  }
+
+  // trades catalog
+  trades() {
+    return request<Trade[]>("/trades", { token: this.token });
+  }
+  jobPhotos(jobId: string) {
+    return request<JobPhoto[]>(`/jobs/${jobId}/photos`, { token: this.token });
   }
 
   // jobs
@@ -345,6 +364,23 @@ export class ApiClient {
   }
   suspendUser(id: string, suspend: boolean) {
     return request<unknown>(`/admin/users/${id}/suspend`, { method: "POST", body: { suspend }, token: this.token });
+  }
+  adminTrades() {
+    return request<Trade[]>("/admin/trades", { token: this.token });
+  }
+  createTrade(body: { name_ja: string; name_en: string; sort_order?: number }) {
+    return request<Trade>("/admin/trades", { method: "POST", body, token: this.token });
+  }
+  updateTrade(id: string, body: { name_ja?: string; name_en?: string; active?: boolean; sort_order?: number }) {
+    return request<Trade>(`/admin/trades/${id}`, { method: "PATCH", body, token: this.token });
+  }
+  customTrades() {
+    return request<CustomTrade[]>("/admin/trades/custom", { token: this.token });
+  }
+  mergeTrade(fromName: string, intoTradeId: string) {
+    return request<TradeMergeResult>("/admin/trades/merge", {
+      method: "POST", body: { from_name: fromName, into_trade_id: intoTradeId }, token: this.token,
+    });
   }
   readConfig() {
     return request<ConfigSnapshot>("/admin/config", { token: this.token });

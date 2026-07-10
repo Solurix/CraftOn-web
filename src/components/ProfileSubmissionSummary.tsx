@@ -1,9 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { ProfileRow } from "@/components/profile";
 import type { Me } from "@/lib/api/models";
+import { prefectureLabel } from "@/lib/prefectures";
 
 // Read-only recap of what a user submitted, shown while their account is under
 // review so they can confirm their details (docs/04 onboarding spec).
@@ -11,6 +12,7 @@ export function ProfileSubmissionSummary({ me }: { me: Me }) {
   const ob = useTranslations("onboarding");
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
+  const locale = useLocale();
   const list = (a: string[] | null | undefined) =>
     a && a.length > 0 ? a.join(", ") : "—";
 
@@ -33,7 +35,7 @@ export function ProfileSubmissionSummary({ me }: { me: Me }) {
           {(wp.prefecture || wp.area) && (
             <ProfileRow
               label={p("region")}
-              value={[wp.prefecture, wp.area].filter(Boolean).join(" / ")}
+              value={[prefectureLabel(wp.prefecture, locale), wp.area].filter(Boolean).join(" / ")}
             />
           )}
           {wp.current_employer && (
@@ -56,6 +58,9 @@ export function ProfileSubmissionSummary({ me }: { me: Me }) {
                       trade: h.trade || "—",
                       years: h.years,
                     })}
+                    {h.description && (
+                      <p className="text-xs text-gray-500">{h.description}</p>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -74,7 +79,7 @@ export function ProfileSubmissionSummary({ me }: { me: Me }) {
         <>
           <ProfileRow label={ob("companyName")} value={cp.company_name} />
           <ProfileRow label={ob("contactPerson")} value={cp.contact_person} />
-          <ProfileRow label={ob("prefecture")} value={cp.prefecture} />
+          <ProfileRow label={ob("prefecture")} value={prefectureLabel(cp.prefecture, locale)} />
           {cp.address && <ProfileRow label={ob("address")} value={cp.address} />}
           {cp.bio && (
             <div>

@@ -24,8 +24,8 @@ function NavLink({ href, label, icon }: { href: string; label: string; icon: str
       aria-current={active ? "page" : undefined}
       className={
         active
-          ? "inline-flex items-center gap-1 rounded-full border border-brand bg-brand px-3 py-1 font-medium text-white shadow-sm"
-          : "inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-gray-700 transition hover:border-gray-300 hover:bg-gray-100"
+          ? "inline-flex items-center gap-1 rounded-full bg-brand-soft px-3 py-1 font-semibold text-brand"
+          : "inline-flex items-center gap-1 rounded-full px-3 py-1 text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
       }
     >
       <span aria-hidden>{icon}</span>
@@ -42,18 +42,28 @@ export function AppShell({ children }: { children: ReactNode }) {
   const role = me?.user.user_type as Role | undefined;
 
   return (
-    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-24">
+    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <a href="#main-content" className="skip-link">
         {common("skipToContent")}
       </a>
-      <header className="sticky top-0 z-20 -mx-4 mb-1 flex items-center justify-between border-b border-gray-200/70 bg-gray-50/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60">
-        <Link href="/" className="flex flex-col leading-tight">
-          <span className="text-lg font-bold tracking-tight text-brand">
-            {app("name")}
+      <header className="sticky top-0 z-20 -mx-4 mb-1 flex items-center justify-between gap-2 border-b border-gray-200 bg-white px-4 py-2.5">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          <span
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand text-sm font-black text-white"
+            aria-hidden
+          >
+            C
           </span>
-          <span className="text-[10px] text-gray-400">{app("tagline")}</span>
+          <span className="flex flex-col leading-tight">
+            <span className="whitespace-nowrap text-base font-bold tracking-tight text-gray-900">
+              {app("name")}
+            </span>
+            <span className="hidden text-[10px] text-gray-400 sm:block">
+              {app("tagline")}
+            </span>
+          </span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
           <LanguageSwitcher />
           {me && <NotificationBell />}

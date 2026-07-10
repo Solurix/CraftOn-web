@@ -1657,6 +1657,79 @@
         }
       }
     },
+    "/api/v1/jobs/{job_id}/photos": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Job Photos",
+        "description": "Signed read URLs for a posting's attached photos. Any approved user who\ncan see the job can see its photos (unlike private documents, which stay\nowner/admin-only).",
+        "operationId": "job_photos_api_v1_jobs__job_id__photos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobPhotoOut"
+                  },
+                  "title": "Response Job Photos Api V1 Jobs  Job Id  Photos Get"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/jobs/{job_id}/apply": {
       "post": {
         "tags": [
@@ -3190,6 +3263,296 @@
         ]
       }
     },
+    "/api/v1/trades": {
+      "get": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "List Trades",
+        "description": "Active trades for the pickers. Available to any signed-in user (the\nonboarding form runs before approval).",
+        "operationId": "list_trades_api_v1_trades_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TradeOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Trades Api V1 Trades Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/trades": {
+      "get": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Admin List Trades",
+        "operationId": "admin_list_trades_api_v1_admin_trades_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TradeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Admin List Trades Api V1 Admin Trades Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Admin Create Trade",
+        "operationId": "admin_create_trade_api_v1_admin_trades_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/trades/{trade_id}": {
+      "patch": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Admin Update Trade",
+        "operationId": "admin_update_trade_api_v1_admin_trades__trade_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trade_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trade Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeUpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/trades/custom": {
+      "get": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Admin Custom Trades",
+        "description": "Free-text trade values users invented (not in the catalog), with usage\ncounts — the merge worklist.",
+        "operationId": "admin_custom_trades_api_v1_admin_trades_custom_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CustomTradeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Admin Custom Trades Api V1 Admin Trades Custom Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/trades/merge": {
+      "post": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Admin Merge Trade",
+        "operationId": "admin_merge_trade_api_v1_admin_trades_merge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeMergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeMergeOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin/vetting/queue": {
       "get": {
         "tags": [
@@ -4358,6 +4721,30 @@
         "title": "ContractorPublicOut",
         "description": "Public contractor profile (docs/06: rating, reviews)."
       },
+      "CustomTradeOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "worker_count": {
+            "type": "integer",
+            "title": "Worker Count"
+          },
+          "job_count": {
+            "type": "integer",
+            "title": "Job Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "worker_count",
+          "job_count"
+        ],
+        "title": "CustomTradeOut",
+        "description": "A free-text trade value found on profiles/jobs that isn't in the catalog."
+      },
       "DebugSeedIn": {
         "properties": {
           "workers": {
@@ -4746,6 +5133,15 @@
               }
             ],
             "title": "Notes"
+          },
+          "photo_doc_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Photo Doc Ids"
           }
         },
         "type": "object",
@@ -4849,6 +5245,14 @@
             ],
             "title": "Notes"
           },
+          "photo_doc_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Photo Doc Ids"
+          },
           "status": {
             "$ref": "#/components/schemas/JobStatus"
           },
@@ -4877,11 +5281,32 @@
           "daily_wage",
           "headcount",
           "notes",
+          "photo_doc_ids",
           "status",
           "created_at",
           "updated_at"
         ],
         "title": "JobOut"
+      },
+      "JobPhotoOut": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Document Id"
+          },
+          "read_url": {
+            "type": "string",
+            "title": "Read Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "read_url"
+        ],
+        "title": "JobPhotoOut",
+        "description": "A posting photo: document reference + short-lived signed read URL."
       },
       "JobStatus": {
         "type": "string",
@@ -5013,6 +5438,22 @@
               }
             ],
             "title": "Notes"
+          },
+          "photo_doc_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array",
+                "maxItems": 12
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Doc Ids"
           }
         },
         "type": "object",
@@ -5705,6 +6146,178 @@
         "type": "object",
         "title": "SuspendIn"
       },
+      "TradeCreateIn": {
+        "properties": {
+          "name_ja": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name Ja"
+          },
+          "name_en": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name En"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "name_ja",
+          "name_en"
+        ],
+        "title": "TradeCreateIn"
+      },
+      "TradeMergeIn": {
+        "properties": {
+          "from_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "From Name"
+          },
+          "into_trade_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Into Trade Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from_name",
+          "into_trade_id"
+        ],
+        "title": "TradeMergeIn",
+        "description": "Merge a free-text trade value into a catalog trade: every occurrence on\nworker profiles and jobs is rewritten to the catalog trade's canonical\nname (deduplicated)."
+      },
+      "TradeMergeOut": {
+        "properties": {
+          "workers_updated": {
+            "type": "integer",
+            "title": "Workers Updated"
+          },
+          "jobs_updated": {
+            "type": "integer",
+            "title": "Jobs Updated"
+          },
+          "canonical_name": {
+            "type": "string",
+            "title": "Canonical Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "workers_updated",
+          "jobs_updated",
+          "canonical_name"
+        ],
+        "title": "TradeMergeOut"
+      },
+      "TradeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name_ja": {
+            "type": "string",
+            "title": "Name Ja"
+          },
+          "name_en": {
+            "type": "string",
+            "title": "Name En"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name_ja",
+          "name_en",
+          "active",
+          "sort_order",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TradeOut"
+      },
+      "TradeUpdateIn": {
+        "properties": {
+          "name_ja": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Ja"
+          },
+          "name_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name En"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "title": "TradeUpdateIn"
+      },
       "UnreadCountOut": {
         "properties": {
           "count": {
@@ -5964,6 +6577,12 @@
             "minimum": 0.0,
             "title": "Years",
             "default": 0
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Description",
+            "default": ""
           }
         },
         "type": "object",
@@ -6074,6 +6693,42 @@
               }
             ],
             "title": "Full Name"
+          },
+          "family_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Name"
+          },
+          "given_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given Name"
+          },
+          "middle_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Middle Name"
           },
           "name_kana": {
             "anyOf": [
@@ -6277,6 +6932,39 @@
             ],
             "title": "Full Name"
           },
+          "family_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Name"
+          },
+          "given_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given Name"
+          },
+          "middle_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Middle Name"
+          },
           "name_kana": {
             "anyOf": [
               {
@@ -6423,6 +7111,9 @@
           "bio",
           "years_experience",
           "full_name",
+          "family_name",
+          "given_name",
+          "middle_name",
           "name_kana",
           "email",
           "current_employer",
@@ -6549,6 +7240,42 @@
               }
             ],
             "title": "Full Name"
+          },
+          "family_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Name"
+          },
+          "given_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given Name"
+          },
+          "middle_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Middle Name"
           },
           "name_kana": {
             "anyOf": [

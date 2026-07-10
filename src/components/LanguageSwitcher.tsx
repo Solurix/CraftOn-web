@@ -46,7 +46,8 @@ export function LanguageSwitcher() {
         aria-label={t("language")}
       >
         <span aria-hidden>🌐</span>
-        <span className="font-medium">{current.label}</span>
+        {/* On phones the full language name crowds the header — icon only. */}
+        <span className="hidden font-medium sm:inline">{current.label}</span>
         <span className="text-gray-400">▾</span>
       </button>
 

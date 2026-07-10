@@ -1,11 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
 import { DevicesCard } from "@/components/DevicesCard";
 import { PhotoManager } from "@/components/PhotoManager";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
@@ -22,17 +23,34 @@ import {
   workerFormToPayload,
   type WorkerFormValue,
 } from "@/components/WorkerProfileFields";
-import type { Me } from "@/lib/api/models";
+import type { Me, Trade } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
+import { tradeOptionsFor } from "@/lib/trades";
+import { useAsync } from "@/lib/useAsync";
 
 function WorkerSettings({ me }: { me: Me }) {
+  // Load the trade catalog first: the form init needs it to split stored
+  // trades into catalog chips vs custom tags.
+  const { api } = useAuth();
+  const catalog = useAsync(() => api.trades().catch(() => []), []);
+  if (catalog.loading) return null;
+  return <WorkerSettingsForm me={me} catalog={catalog.data ?? []} />;
+}
+
+function WorkerSettingsForm({ me, catalog }: { me: Me; catalog: Trade[] }) {
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
   const common = useTranslations("common");
+  const locale = useLocale();
   const { api, refresh } = useAuth();
   const toast = useToast();
   const [form, setForm] = useState<WorkerFormValue>(() =>
-    workerFormFromProfile(me.user.display_name, me.worker_profile!),
+    workerFormFromProfile(
+      me.user.display_name,
+      me.worker_profile!,
+      catalog.map((t) => t.name_ja),
+    ),
   );
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -48,7 +66,7 @@ function WorkerSettings({ me }: { me: Me }) {
       setSaved(true);
       toast.success(p("saved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -69,7 +87,11 @@ function WorkerSettings({ me }: { me: Me }) {
           onChange={(e) => patch({ display_name: e.target.value })}
         />
       </Field>
-      <WorkerProfileFields value={form} onChange={patch} />
+      <WorkerProfileFields
+        value={form}
+        onChange={patch}
+        tradeOptions={tradeOptionsFor(catalog, locale)}
+      />
       <button className="btn-primary w-full" disabled={!isWorkerFormValid(form)}>
         {common("save")}
       </button>
@@ -140,7 +162,7 @@ function ContractorSettings({ me }: { me: Me }) {
         <input className="field-input" value={form.contact_person} onChange={(e) => set("contact_person", e.target.value)} />
       </Field>
       <Field label={t("prefecture")}>
-        <input className="field-input" value={form.prefecture} onChange={(e) => set("prefecture", e.target.value)} />
+        <PrefectureSelect value={form.prefecture} onChange={(v) => set("prefecture", v)} />
       </Field>
       <Field label={t("address")}>
         <input className="field-input" value={form.address} onChange={(e) => set("address", e.target.value)} />
@@ -192,8 +214,8 @@ function SetPasswordCard() {
 
   return (
     <form onSubmit={submit} className="card space-y-2">
-      <h2 className="font-semibold">{p("setPassword")}</h2>
-      <p className="text-xs text-gray-500">{p("setPasswordHint")}</p>
+      <h2 className="font-semibold">{p("changePassword")}</h2>
+      <p className="text-xs text-gray-500">{p("changePasswordHint")}</p>
       <input
         type="password"
         className="field-input"
@@ -203,7 +225,7 @@ function SetPasswordCard() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button className="btn-primary w-full" disabled={password.length < 8}>
-        {p("setPassword")}
+        {p("changePassword")}
       </button>
       {saved && <p className="text-sm text-green-700">{p("passwordSaved")}</p>}
       <ErrorText message={error} />

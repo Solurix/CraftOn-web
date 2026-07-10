@@ -106,7 +106,8 @@
     "remove": "Remove",
     "add": "Add",
     "skipToContent": "Skip to content",
-    "offline": "You are offline. Some actions may not work."
+    "offline": "You are offline. Some actions may not work.",
+    "networkError": "Could not reach the server. Check your connection and try again."
   },
   "nav": {
     "jobs": "Jobs",
@@ -137,7 +138,6 @@
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "phoneLabel": "Phone number",
-    "phonePlaceholder": "+8190…",
     "sendCode": "Send verification code",
     "codeLabel": "Verification code (SMS)",
     "codePlaceholder": "123456",
@@ -157,7 +157,16 @@
     "resetHint": "Verify your phone by SMS, then set a new password.",
     "newPasswordLabel": "New password",
     "resetSubmit": "Reset password",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "roleWorkerDesc": "Find and apply for site work",
+    "roleContractorDesc": "Post jobs and hire tradespeople",
+    "countryCode": "Country code",
+    "phoneNationalPlaceholder": "90 1234 5678",
+    "usernameInvalid": "Username must be 3–64 characters: letters, numbers, . _ -",
+    "emailInvalid": "Enter a valid email address.",
+    "phoneInvalid": "Enter a valid phone number: pick the country code, then digits only.",
+    "passwordTooShort": "Password must be at least {min} characters.",
+    "phoneAlreadyRegistered": "This phone number already has an account — you have been signed in to it."
   },
   "onboarding": {
     "workerTitle": "Worker profile",
@@ -173,7 +182,7 @@
     "trades": "Trades",
     "selectTrades": "Select your trades",
     "otherTrade": "Add another trade",
-    "tools": "Tools (comma-separated)",
+    "tools": "Tools",
     "fullName": "Full name",
     "nameKana": "Name (kana)",
     "email": "Email",
@@ -185,10 +194,9 @@
     "whTrade": "Trade",
     "whYears": "Years",
     "addWorkHistory": "Add work history",
-    "qualifications": "Qualifications (comma-separated)",
-    "skills": "Skills (comma-separated)",
+    "qualifications": "Qualifications",
+    "skills": "Skills",
     "bio": "About you",
-    "yearsExperience": "Years of experience",
     "hasInsurance": "Has labor insurance",
     "visaExpiry": "Visa expiry",
     "companyName": "Company name",
@@ -201,7 +209,20 @@
     "photoId": "Photo ID",
     "submitted": "Submitted. Please wait for review.",
     "pendingReview": "Under review. Please wait for approval.",
-    "yourSubmission": "Your submitted details"
+    "yourSubmission": "Your submitted details",
+    "toolsPlaceholder": "e.g. impact driver, circular saw",
+    "qualificationsPlaceholder": "e.g. grade-2 certified skilled worker, slinging",
+    "skillsPlaceholder": "e.g. formwork, layout marking",
+    "whSummary": "Summary",
+    "whSummaryPlaceholder": "e.g. Interior finishing for Tokyo apartment renovations; strong at fixture work and boarding.",
+    "workHistoryHint": "Your total experience is calculated from the years below.",
+    "selectPrefecture": "Select…",
+    "areaPlaceholder": "e.g. Tokyo 23 wards, around Yokohama",
+    "bioPlaceholder": "e.g. 10 years as a carpenter; careful, high-quality interior finishing.",
+    "lastName": "Last name",
+    "firstName": "First name",
+    "middleName": "Middle name(s) (optional)",
+    "completeLater": "Work history, qualifications, skills, tools and your bio can be added any time from profile settings after registration."
   },
   "jobs": {
     "listTitle": "Open jobs",
@@ -244,7 +265,10 @@
     "recommendedTitle": "Recommended for you",
     "allJobsTitle": "All open jobs",
     "loadMore": "Show more ({count})",
-    "posted": "Job posted"
+    "posted": "Job posted",
+    "anyPrefecture": "All",
+    "nextDayTime": "{time} (next day {next})",
+    "nightShiftHint": "For night shifts, enter the end time as 24+ hours (e.g. 21:00–29:00 = finishes 5:00 next morning)."
   },
   "applications": {
     "title": "My applications",
@@ -352,9 +376,7 @@
     "tools": "Tools",
     "company": "Company",
     "trust": "Trust score",
-    "setPassword": "Set a password",
-    "setPasswordHint": "Sign in faster next time without an SMS code (8+ characters).",
-    "passwordSaved": "Password saved.",
+    "passwordSaved": "Password changed.",
     "region": "Region",
     "employer": "Current employer",
     "career": "Work history",
@@ -363,7 +385,9 @@
     "skills": "Skills",
     "account": "Account",
     "accountSaved": "Account updated",
-    "photos": "Work photos"
+    "photos": "Work photos",
+    "changePassword": "Change password",
+    "changePasswordHint": "Change the password you use to log in (8+ characters)."
   },
   "admin": {
     "vettingTitle": "Pending review",
@@ -403,7 +427,19 @@
     "seedDone": "Created {workers} workers, {contractors} contractors, {jobs} jobs.",
     "markFeePaid": "Mark fee paid",
     "company": "Company",
-    "worker": "Worker"
+    "worker": "Worker",
+    "tabTrades": "Trades",
+    "addTrade": "Add trade",
+    "tradeJa": "Name (Japanese)",
+    "tradeEn": "Name (English)",
+    "customTrades": "User-entered trades",
+    "customTradesHint": "Free-text trades that aren't in the catalog. Merge them into an existing trade or promote them to a new one.",
+    "customUsage": "{workers} workers · {jobs} jobs",
+    "mergeInto": "Merge into…",
+    "merge": "Merge",
+    "promote": "Promote to trade",
+    "mergeDone": "Merged into “{name}” ({workers} workers, {jobs} jobs updated).",
+    "noCustomTrades": "No unregistered trades."
   },
   "status": {
     "pending": "Pending",
@@ -489,7 +525,9 @@
     "dateRequired": "Choose a work date.",
     "datePast": "The work date cannot be in the past.",
     "wagePositive": "Daily wage must be greater than zero.",
-    "headcountMin": "Headcount must be at least 1."
+    "headcountMin": "Headcount must be at least 1.",
+    "endAfterStart": "End time must be after the start time. For overnight shifts use 24+ hours (e.g. 29:00).",
+    "shiftTooLong": "A shift cannot be longer than 24 hours."
   },
   "photos": {
     "title": "Work photos",
@@ -498,7 +536,9 @@
     "empty": "No photos yet.",
     "uploading": "Uploading…",
     "added": "Photo added",
-    "pending": "In review"
+    "pending": "In review",
+    "jobPhotos": "Site photos",
+    "reuseHint": "Tap an uploaded photo to reuse it (＋ to add a new one)."
   },
   "legal": {
     "terms": "Terms",

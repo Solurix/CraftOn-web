@@ -6,7 +6,7 @@ import Link from "next/link";
 import { RequireAuth } from "@/components/RequireAuth";
 import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
-import { formatTime, formatYen } from "@/lib/format";
+import { formatTimeRange, formatYen } from "@/lib/format";
 import { jobInsights } from "@/lib/insights";
 import { useAsync } from "@/lib/useAsync";
 
@@ -68,8 +68,8 @@ function MyJobs() {
                   <StatusBadge status={job.status} />
                 </div>
                 <p className="mt-1 text-sm text-gray-600">
-                  {job.prefecture} · {job.work_date} · {formatTime(job.start_time)}–
-                  {formatTime(job.end_time)}
+                  {job.prefecture} · {job.work_date} ·{" "}
+                  {formatTimeRange(job.start_time, job.end_time)}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-brand">{formatYen(job.daily_wage)}</p>
               </Link>

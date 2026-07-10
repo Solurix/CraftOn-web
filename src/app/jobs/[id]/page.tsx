@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -10,14 +10,25 @@ import { SaveJobButton } from "@/components/SaveJobButton";
 import { useToast } from "@/components/Toast";
 import { BackLink, DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
-import { formatTime, formatYen } from "@/lib/format";
+import { formatTimeRange, formatYen } from "@/lib/format";
+import { prefectureLabel } from "@/lib/prefectures";
 import { useAsync } from "@/lib/useAsync";
 
 function JobDetail() {
   const t = useTranslations("jobs");
+  const ph = useTranslations("photos");
+  const locale = useLocale();
   const nav = useTranslations("nav");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
+  // Photos are decoration — a failure must not break the job page.
+  const photos = useAsync(async () => {
+    try {
+      return await api.jobPhotos(id);
+    } catch {
+      return [];
+    }
+  }, [id]);
   const { data, loading, error } = useAsync(async () => {
     const job = await api.job(id);
     let saved = false;
@@ -69,12 +80,29 @@ function JobDetail() {
           </div>
         </div>
         <Row label={t("date")} value={job.work_date} />
-        <Row label={t("time")} value={`${formatTime(job.start_time)}–${formatTime(job.end_time)}`} />
-        <Row label={t("filterPrefecture")} value={`${job.prefecture}${job.area ? ` / ${job.area}` : ""}`} />
+        <Row label={t("time")} value={formatTimeRange(job.start_time, job.end_time)} />
+        <Row label={t("filterPrefecture")} value={`${prefectureLabel(job.prefecture, locale)}${job.area ? ` / ${job.area}` : ""}`} />
         <Row label={t("wage")} value={formatYen(job.daily_wage)} />
         <Row label={t("headcount")} value={String(job.headcount)} />
         {job.notes && <Row label={t("notes")} value={job.notes} />}
       </div>
+
+      {photos.data && photos.data.length > 0 && (
+        <div className="card space-y-2">
+          <h2 className="font-semibold">{ph("jobPhotos")}</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {photos.data.map((p) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={p.document_id}
+                src={p.read_url}
+                alt=""
+                className="aspect-square w-full rounded-lg border border-gray-200 object-cover"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {applied ? (
         <div className="card flex flex-col items-center gap-2 text-center text-sm text-green-700">

@@ -1,32 +1,41 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
+import { JobPhotoPicker } from "@/components/JobPhotoPicker";
 import { JobTemplates, type JobTemplate } from "@/components/JobTemplates";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { RequireAuth } from "@/components/RequireAuth";
-import { ErrorText, Spinner } from "@/components/ui";
+import { TagInput } from "@/components/TagInput";
 import { useToast } from "@/components/Toast";
+import { ErrorText, Spinner } from "@/components/ui";
 import type { Job } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { KEY, readJSON, writeJSON } from "@/lib/storage";
+import { tradeOptionsFor } from "@/lib/trades";
+import { useAsync } from "@/lib/useAsync";
 
 type JobForm = {
-  trades: string;
+  trades: string[]; // selected catalog trades
+  trades_other: string[]; // custom trades
   work_date: string;
-  start_time: string;
-  end_time: string;
+  start_time: string; // HH:MM
+  end_time: string; // HH:MM on a 36-hour clock (24+ = ends the NEXT day)
   prefecture: string;
   area: string;
   address: string;
   daily_wage: number | string;
   headcount: number | string;
   notes: string;
+  photo_doc_ids: string[];
 };
 
 const DEFAULTS: JobForm = {
-  trades: "",
+  trades: [],
+  trades_other: [],
   work_date: "",
   start_time: "08:00",
   end_time: "17:00",
@@ -36,21 +45,55 @@ const DEFAULTS: JobForm = {
   daily_wage: 18000,
   headcount: 1,
   notes: "",
+  photo_doc_ids: [],
 };
 
-function jobToForm(job: Job): JobForm {
+const minutes = (hhmm: string): number =>
+  Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+
+// End-time choices on a 36-hour clock, 30-minute steps (24+ = next day).
+const END_TIME_CHOICES = Array.from({ length: 72 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  return `${String(h).padStart(2, "0")}:${m}`;
+}).filter((t) => t !== "00:00");
+
+function jobToForm(job: Job, catalogValues: string[]): JobForm {
+  // A stored overnight shift (end <= start) surfaces as 24+ in the picker.
+  let end = job.end_time.slice(0, 5);
+  if (end <= job.start_time.slice(0, 5)) {
+    end = `${Number(end.slice(0, 2)) + 24}:${end.slice(3, 5)}`;
+  }
   return {
-    trades: job.trades.join(", "),
+    trades: job.trades.filter((t) => catalogValues.includes(t)),
+    trades_other: job.trades.filter((t) => !catalogValues.includes(t)),
     work_date: "", // a reposted job gets a fresh date
     start_time: job.start_time.slice(0, 5),
-    end_time: job.end_time.slice(0, 5),
+    end_time: end,
     prefecture: job.prefecture,
     area: job.area ?? "",
     address: job.address ?? "",
     daily_wage: job.daily_wage,
     headcount: job.headcount,
     notes: job.notes ?? "",
+    photo_doc_ids: job.photo_doc_ids ?? [],
   };
+}
+
+// Drafts/templates written before trades became chips stored them as a CSV
+// string — normalize so an old draft doesn't crash the form.
+function normalizeForm(raw: unknown): JobForm {
+  const d = { ...DEFAULTS, ...(raw as Partial<JobForm>) };
+  if (typeof (d.trades as unknown) === "string") {
+    d.trades_other = (d.trades as unknown as string)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    d.trades = [];
+  }
+  if (!Array.isArray(d.trades_other)) d.trades_other = [];
+  if (!Array.isArray(d.photo_doc_ids)) d.photo_doc_ids = [];
+  return d;
 }
 
 function PostJobForm() {
@@ -58,6 +101,8 @@ function PostJobForm() {
   const common = useTranslations("common");
   const ob = useTranslations("onboarding");
   const tpl = useTranslations("templates");
+  const ph = useTranslations("photos");
+  const locale = useLocale();
   const { api } = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -72,21 +117,30 @@ function PostJobForm() {
   const [busy, setBusy] = useState(false);
   const hydrated = useRef(false);
 
+  // Trade catalog for the picker.
+  const catalog = useAsync(() => api.trades().catch(() => []), []);
+  const tradeOptions = tradeOptionsFor(catalog.data, locale);
+
   // Today's date in Asia/Tokyo (business rules run in Tokyo time).
   const todayTokyo = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
   }).format(new Date());
 
+  const startMin = minutes(form.start_time);
+  const endMin = minutes(form.end_time); // 0..36h scale
+  const allTrades = [...form.trades, ...form.trades_other];
+
   const issues: string[] = [];
-  if (!form.trades.split(",").map((s) => s.trim()).filter(Boolean).length)
-    issues.push(v("tradesRequired"));
+  if (allTrades.length === 0) issues.push(v("tradesRequired"));
   if (!form.work_date) issues.push(v("dateRequired"));
   else if (form.work_date < todayTokyo) issues.push(v("datePast"));
+  if (endMin <= startMin) issues.push(v("endAfterStart"));
+  else if (endMin - startMin > 24 * 60) issues.push(v("shiftTooLong"));
   if (!(Number(form.daily_wage) > 0)) issues.push(v("wagePositive"));
   if (!(Number(form.headcount) >= 1)) issues.push(v("headcountMin"));
 
-  const set = (k: keyof JobForm, v: string | number) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof JobForm, val: JobForm[keyof JobForm]) =>
+    setForm((f) => ({ ...f, [k]: val }));
 
   // On mount: prefill from a job being duplicated, or restore an autosaved draft.
   useEffect(() => {
@@ -94,15 +148,19 @@ function PostJobForm() {
     (async () => {
       if (fromId) {
         try {
-          const job = await api.job(fromId);
-          if (!cancelled) setForm(jobToForm(job));
+          const [job, trades] = await Promise.all([
+            api.job(fromId),
+            api.trades().catch(() => []),
+          ]);
+          if (!cancelled)
+            setForm(jobToForm(job, trades.map((x) => x.name_ja)));
         } catch {
           /* fall back to defaults */
         }
       } else {
-        const draft = readJSON<JobForm | null>(KEY.jobDraft, null);
+        const draft = readJSON<unknown>(KEY.jobDraft, null);
         if (draft && !cancelled) {
-          setForm(draft);
+          setForm(normalizeForm(draft));
           setRestored(true);
         }
       }
@@ -126,13 +184,21 @@ function PostJobForm() {
   };
 
   const applyTemplate = (template: JobTemplate) => {
-    const { name: _name, ...fields } = template;
+    const { name: _name, trades: tplTrades, ...fields } = template;
     void _name;
-    setForm((f) => ({ ...f, ...fields }));
+    const values = tplTrades.split(",").map((s) => s.trim()).filter(Boolean);
+    const catalogValues = (catalog.data ?? []).map((x) => x.name_ja);
+    setForm((f) => ({
+      ...f,
+      ...fields,
+      trades: values.filter((x) => catalogValues.includes(x)),
+      trades_other: values.filter((x) => !catalogValues.includes(x)),
+    }));
   };
 
+  // Templates keep their CSV `trades` shape (device-local storage compat).
   const currentTemplate = {
-    trades: form.trades,
+    trades: allTrades.join(", "),
     start_time: form.start_time,
     end_time: form.end_time,
     prefecture: form.prefecture,
@@ -152,28 +218,46 @@ function PostJobForm() {
     setBusy(true);
     setError("");
     try {
+      // 24+ end times wrap to the real clock time; the API stores end <= start
+      // as "ends the next day".
+      const endH = Number(form.end_time.slice(0, 2));
+      const apiEnd =
+        endH >= 24
+          ? `${String(endH - 24).padStart(2, "0")}:${form.end_time.slice(3, 5)}`
+          : form.end_time;
       const job = await api.createJob({
-        trades: form.trades.split(",").map((s) => s.trim()).filter(Boolean),
+        trades: allTrades,
         work_date: form.work_date,
         start_time: `${form.start_time}:00`,
-        end_time: `${form.end_time}:00`,
+        end_time: `${apiEnd}:00`,
         prefecture: form.prefecture,
         area: form.area || null,
         address: form.address || null,
         daily_wage: Number(form.daily_wage),
         headcount: Number(form.headcount),
         notes: form.notes || null,
+        photo_doc_ids: form.photo_doc_ids,
       });
       writeJSON(KEY.jobDraft, null); // posted → clear the draft
       toast.success(t("posted"));
       router.replace(`/my-jobs/${job.id}`);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     } finally {
       setBusy(false);
     }
+  };
+
+  // "29:00（翌5:00）" style label for 24+ choices.
+  const endChoiceLabel = (val: string) => {
+    const h = Number(val.slice(0, 2));
+    if (h < 24) return val;
+    return t("nextDayTime", {
+      time: val,
+      next: `${h - 24}:${val.slice(3, 5)}`,
+    });
   };
 
   return (
@@ -195,9 +279,44 @@ function PostJobForm() {
 
       <JobTemplates current={currentTemplate} onApply={applyTemplate} />
 
-      <Field label={t("trade")}>
-        <input className="field-input" value={form.trades} onChange={(e) => set("trades", e.target.value)} required />
-      </Field>
+      <fieldset>
+        <legend className="field-label">{t("trade")}</legend>
+        <div className="flex flex-wrap gap-2 text-sm">
+          {tradeOptions.map((tr) => (
+            <label
+              key={tr.value}
+              className={`cursor-pointer rounded-full border px-3 py-1 ${
+                form.trades.includes(tr.value)
+                  ? "border-brand bg-brand/10 text-brand"
+                  : "border-gray-200 text-gray-600"
+              }`}
+            >
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={form.trades.includes(tr.value)}
+                onChange={() =>
+                  set(
+                    "trades",
+                    form.trades.includes(tr.value)
+                      ? form.trades.filter((x) => x !== tr.value)
+                      : [...form.trades, tr.value],
+                  )
+                }
+              />
+              {tr.label}
+            </label>
+          ))}
+        </div>
+        <div className="mt-2">
+          <TagInput
+            value={form.trades_other}
+            onChange={(val) => set("trades_other", val)}
+            placeholder={ob("otherTrade")}
+          />
+        </div>
+      </fieldset>
+
       <Field label={t("date")}>
         <input type="date" className="field-input" value={form.work_date} onChange={(e) => set("work_date", e.target.value)} required />
       </Field>
@@ -206,11 +325,26 @@ function PostJobForm() {
           <input type="time" className="field-input" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} />
         </Field>
         <Field label={t("endTime")}>
-          <input type="time" className="field-input" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} />
+          <select
+            className="field-input"
+            value={form.end_time}
+            onChange={(e) => set("end_time", e.target.value)}
+          >
+            {/* Keep an off-grid stored value selectable. */}
+            {!END_TIME_CHOICES.includes(form.end_time) && (
+              <option value={form.end_time}>{endChoiceLabel(form.end_time)}</option>
+            )}
+            {END_TIME_CHOICES.map((val) => (
+              <option key={val} value={val}>
+                {endChoiceLabel(val)}
+              </option>
+            ))}
+          </select>
         </Field>
       </div>
+      <p className="text-xs text-gray-400">{t("nightShiftHint")}</p>
       <Field label={ob("prefecture")}>
-        <input className="field-input" value={form.prefecture} onChange={(e) => set("prefecture", e.target.value)} required />
+        <PrefectureSelect value={form.prefecture} onChange={(val) => set("prefecture", val)} required />
       </Field>
       <div className="flex gap-2">
         <Field label={t("wage")}>
@@ -223,6 +357,15 @@ function PostJobForm() {
       <Field label={t("notes")}>
         <textarea className="field-input" value={form.notes} onChange={(e) => set("notes", e.target.value)} />
       </Field>
+
+      <fieldset>
+        <legend className="field-label">{ph("jobPhotos")}</legend>
+        <JobPhotoPicker
+          selected={form.photo_doc_ids}
+          onChange={(ids) => set("photo_doc_ids", ids)}
+        />
+      </fieldset>
+
       {attempted && issues.length > 0 && (
         <ul className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
           {issues.map((msg) => (
@@ -243,7 +386,7 @@ function PostJobForm() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex-1">
+    <div className="min-w-0 flex-1">
       <label className="field-label">{label}</label>
       {children}
     </div>

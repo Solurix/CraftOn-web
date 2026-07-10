@@ -74,7 +74,7 @@ export function Landing() {
   return (
     <div className="min-h-screen">
       {/* Top bar */}
-      <header className="sticky top-0 z-20 border-b border-gray-200/70 bg-gray-50/80 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60">
+      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex flex-col leading-tight">
             <span className="text-lg font-bold tracking-tight text-brand">

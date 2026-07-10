@@ -228,11 +228,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeSignup = useCallback(
     async (body: SessionCreate) => {
-      // Fall back to the freshly-stored OTP token: when signup runs right after
-      // loginWithPhone in the same handler, the `token` state hasn't re-rendered
-      // yet, but localStorage was already set synchronously.
+      // Read the token from localStorage FIRST: loginWithPhone stores the fresh
+      // OTP token there synchronously, while the `token` state in this closure
+      // can still be a previous account's session token when signup runs in the
+      // same handler (state doesn't re-render mid-handler). Preferring the
+      // stale state token made "add account while logged in" silently return
+      // the already-logged-in user instead of registering the new one.
       const otp =
-        token ?? (typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null);
+        (typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null) ?? token;
       if (!otp) throw new Error("no token");
       // Registration verifies the OTP token and returns a durable session token
       // (SMS is only needed here) — swap to it so the device stays logged in

@@ -59,12 +59,23 @@ export function AccountMenu() {
       <button
         ref={triggerRef}
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs"
+        className="flex items-center gap-1 rounded-full border border-gray-200 bg-white p-0.5 text-xs sm:px-3 sm:py-1"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={me.user.display_name}
       >
-        <span className="font-medium text-gray-800">{me.user.display_name}</span>
-        <span className="rounded-full bg-gray-100 px-1.5 text-[10px] text-gray-500">
+        {/* Phones: initial-only avatar so the header fits 320px screens.
+            ≥sm: full name + role chip. */}
+        <span
+          className="grid h-6 w-6 place-items-center rounded-full bg-brand-soft text-[11px] font-bold text-brand sm:hidden"
+          aria-hidden
+        >
+          {(me.user.display_name.trim()[0] ?? "?").toUpperCase()}
+        </span>
+        <span className="hidden max-w-[12rem] truncate font-medium text-gray-800 sm:inline">
+          {me.user.display_name}
+        </span>
+        <span className="hidden rounded-full bg-gray-100 px-1.5 text-[10px] text-gray-500 sm:inline">
           {me.user.user_type}
         </span>
         <span className="text-gray-400">▾</span>
