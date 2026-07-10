@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { ErrorText, Spinner } from "@/components/ui";
 import {
   emptyWorkerForm,
@@ -18,10 +19,10 @@ import { useAuth } from "@/lib/auth/context";
 function WorkerForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
-  const { api, me } = useAuth();
-  const [form, setForm] = useState<WorkerFormValue>(() =>
-    emptyWorkerForm(me?.user.display_name ?? ""),
-  );
+  const { api } = useAuth();
+  // No display-name prefill: signup no longer asks for one, and the API
+  // derives it from the profile (worker name) on first onboarding.
+  const [form, setForm] = useState<WorkerFormValue>(() => emptyWorkerForm());
   const [frontId, setFrontId] = useState<string | null>(null);
   const [backId, setBackId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -128,8 +129,15 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
         <input className="field-input" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required />
       </div>
       <div>
-        <label className="field-label">{t("prefecture")}</label>
-        <input className="field-input" value={prefecture} onChange={(e) => setPrefecture(e.target.value)} required />
+        <label className="field-label" htmlFor="ob-prefecture">
+          {t("prefecture")}
+        </label>
+        <PrefectureSelect
+          id="ob-prefecture"
+          value={prefecture}
+          onChange={setPrefecture}
+          required
+        />
       </div>
       <div>
         <label className="field-label">{t("address")}</label>

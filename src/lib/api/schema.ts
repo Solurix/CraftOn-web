@@ -1970,6 +1970,11 @@ export interface components {
              * @default 0
              */
             years: number;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
         };
         /**
          * WorkHistoryOut

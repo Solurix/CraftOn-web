@@ -4,8 +4,14 @@ import { useTranslations } from "next-intl";
 
 import type { WorkerOnboarding, WorkerProfile } from "@/lib/api/models";
 import { COMMON_TRADES } from "@/lib/trades";
+import { PrefectureSelect } from "./PrefectureSelect";
 
-export type WorkHistoryRow = { company: string; trade: string; years: number };
+export type WorkHistoryRow = {
+  company: string;
+  trade: string;
+  years: number;
+  description: string;
+};
 
 // Controlled form state shared by the onboarding form and the profile editor.
 // Array-ish text fields (tools/qualifications/skills) are kept comma-separated
@@ -85,6 +91,7 @@ export function workerFormFromProfile(
       company: w.company ?? "",
       trade: w.trade ?? "",
       years: w.years ?? 0,
+      description: w.description ?? "",
     })),
     qualifications: csv(wp.qualifications),
     skills: csv(wp.skills),
@@ -105,13 +112,28 @@ export function isWorkerFormValid(v: WorkerFormValue): boolean {
 }
 
 export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
+  // Accept both ASCII and Japanese commas (、) plus the middle dot (・) —
+  // Japanese users rarely type "," in an IME.
   const csv = (s: string) =>
-    s.split(",").map((x) => x.trim()).filter(Boolean);
+    s.split(/[,、・]/).map((x) => x.trim()).filter(Boolean);
   const isJp = v.nationality.toUpperCase() === "JP";
   // Merge chip-selected common trades with the free-text custom ones (deduped).
   const trades = [...new Set([...v.trades, ...csv(v.trades_other)])];
+  const workHistory = v.work_history
+    .filter((w) => w.company.trim() || w.description.trim())
+    .map((w) => ({
+      company: w.company.trim(),
+      trade: w.trade.trim(),
+      years: Number(w.years) || 0,
+      description: w.description.trim(),
+    }));
+  // The dedicated years-of-experience input is gone (redundant with the work
+  // history); derive the total from the history when it has any years.
+  const historyYears = workHistory.reduce((sum, w) => sum + w.years, 0);
   return {
-    display_name: v.display_name,
+    // Blank means "not chosen" — the API then keeps/derives a sensible default
+    // (worker's name) instead of persisting an empty display name.
+    display_name: v.display_name || null,
     // Never coerce a blank "Other" nationality to JP — the form blocks submit
     // until a 2-letter code is entered (isWorkerFormValid), so the visa gate
     // can't be bypassed.
@@ -126,17 +148,11 @@ export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
     current_employer_public: v.current_employer_public,
     prefecture: v.prefecture || null,
     area: v.area || null,
-    work_history: v.work_history
-      .filter((w) => w.company.trim())
-      .map((w) => ({
-        company: w.company.trim(),
-        trade: w.trade.trim(),
-        years: Number(w.years) || 0,
-      })),
+    work_history: workHistory,
     qualifications: csv(v.qualifications),
     skills: csv(v.skills),
     bio: v.bio || null,
-    years_experience: Number(v.years_experience) || 0,
+    years_experience: historyYears > 0 ? historyYears : Number(v.years_experience) || 0,
     has_insurance: v.has_insurance,
     visa_expiry_date: !isJp && v.visa_expiry_date ? v.visa_expiry_date : null,
   };
@@ -315,52 +331,70 @@ export function WorkerProfileFields({
       </label>
 
       <div className="flex gap-2">
-        <Field label={t("prefecture")}>
-          <input
-            className="field-input"
-            value={v.prefecture}
-            onChange={(e) => onChange({ prefecture: e.target.value })}
-          />
-        </Field>
-        <Field label={t("area")}>
-          <input
-            className="field-input"
-            value={v.area}
-            onChange={(e) => onChange({ area: e.target.value })}
-          />
-        </Field>
+        <div className="flex-1">
+          <Field label={t("prefecture")}>
+            <PrefectureSelect
+              value={v.prefecture}
+              onChange={(prefecture) => onChange({ prefecture })}
+              emptyLabel={t("selectPrefecture")}
+            />
+          </Field>
+        </div>
+        <div className="flex-1">
+          <Field label={t("area")}>
+            <input
+              className="field-input"
+              placeholder={t("areaPlaceholder")}
+              value={v.area}
+              onChange={(e) => onChange({ area: e.target.value })}
+            />
+          </Field>
+        </div>
       </div>
 
-      {/* Work history: repeatable rows. */}
+      {/* Work history: repeatable rows with a free-text summary. The summary
+          replaces the old standalone years-of-experience field. */}
       <fieldset className="space-y-2">
         <legend className="field-label">{t("workHistory")}</legend>
+        <p className="text-xs text-gray-400">{t("workHistoryHint")}</p>
         {v.work_history.map((w, i) => (
-          <div key={i} className="rounded-md border border-gray-200 p-2">
-            <div className="flex gap-2">
+          <div key={i} className="space-y-2 rounded-lg border border-gray-200 p-3">
+            <div className="flex flex-wrap gap-2">
               <input
-                className="field-input"
+                className="field-input min-w-[8rem] flex-1"
                 placeholder={t("whCompany")}
                 value={w.company}
                 onChange={(e) => setWorkRow(i, { company: e.target.value })}
               />
               <input
-                className="field-input"
+                className="field-input min-w-[6rem] flex-1"
                 placeholder={t("whTrade")}
                 value={w.trade}
                 onChange={(e) => setWorkRow(i, { trade: e.target.value })}
               />
-              <input
-                type="number"
-                min={0}
-                className="field-input w-20"
-                placeholder={t("whYears")}
-                value={w.years}
-                onChange={(e) => setWorkRow(i, { years: Number(e.target.value) })}
-              />
+              <label className="flex items-center gap-1 text-sm text-gray-500">
+                <input
+                  type="number"
+                  min={0}
+                  className="field-input w-16"
+                  aria-label={t("whYears")}
+                  value={w.years}
+                  onChange={(e) => setWorkRow(i, { years: Number(e.target.value) })}
+                />
+                {t("whYears")}
+              </label>
             </div>
+            <textarea
+              className="field-input"
+              rows={2}
+              placeholder={t("whSummaryPlaceholder")}
+              aria-label={t("whSummary")}
+              value={w.description}
+              onChange={(e) => setWorkRow(i, { description: e.target.value })}
+            />
             <button
               type="button"
-              className="mt-1 text-xs text-red-600"
+              className="text-xs text-red-600"
               onClick={() =>
                 onChange({ work_history: v.work_history.filter((_, j) => j !== i) })
               }
@@ -376,7 +410,7 @@ export function WorkerProfileFields({
             onChange({
               work_history: [
                 ...v.work_history,
-                { company: "", trade: "", years: 0 },
+                { company: "", trade: "", years: 0, description: "" },
               ],
             })
           }
@@ -388,6 +422,7 @@ export function WorkerProfileFields({
       <Field label={t("qualifications")}>
         <input
           className="field-input"
+          placeholder={t("qualificationsPlaceholder")}
           value={v.qualifications}
           onChange={(e) => onChange({ qualifications: e.target.value })}
         />
@@ -395,6 +430,7 @@ export function WorkerProfileFields({
       <Field label={t("skills")}>
         <input
           className="field-input"
+          placeholder={t("skillsPlaceholder")}
           value={v.skills}
           onChange={(e) => onChange({ skills: e.target.value })}
         />
@@ -402,22 +438,16 @@ export function WorkerProfileFields({
       <Field label={t("tools")}>
         <input
           className="field-input"
+          placeholder={t("toolsPlaceholder")}
           value={v.tools}
           onChange={(e) => onChange({ tools: e.target.value })}
-        />
-      </Field>
-      <Field label={t("yearsExperience")}>
-        <input
-          type="number"
-          min={0}
-          className="field-input"
-          value={v.years_experience}
-          onChange={(e) => onChange({ years_experience: Number(e.target.value) })}
         />
       </Field>
       <Field label={t("bio")}>
         <textarea
           className="field-input"
+          rows={3}
+          placeholder={t("bioPlaceholder")}
           value={v.bio}
           onChange={(e) => onChange({ bio: e.target.value })}
         />

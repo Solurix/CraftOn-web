@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { JobCard } from "@/components/JobCard";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { SavedSearches, type SavedSearch } from "@/components/SavedSearches";
@@ -132,10 +133,10 @@ function JobsList() {
           </label>
           <label className="flex flex-col text-xs text-gray-500">
             {t("filterPrefecture")}
-            <input
-              className="field-input"
+            <PrefectureSelect
               value={prefecture}
-              onChange={(e) => setPrefecture(e.target.value)}
+              onChange={setPrefecture}
+              emptyLabel={t("anyPrefecture")}
             />
           </label>
           <label className="flex flex-col text-xs text-gray-500">

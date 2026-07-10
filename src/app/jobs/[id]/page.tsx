@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -11,10 +11,12 @@ import { useToast } from "@/components/Toast";
 import { BackLink, DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { formatTime, formatYen } from "@/lib/format";
+import { prefectureLabel } from "@/lib/prefectures";
 import { useAsync } from "@/lib/useAsync";
 
 function JobDetail() {
   const t = useTranslations("jobs");
+  const locale = useLocale();
   const nav = useTranslations("nav");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
@@ -70,7 +72,7 @@ function JobDetail() {
         </div>
         <Row label={t("date")} value={job.work_date} />
         <Row label={t("time")} value={`${formatTime(job.start_time)}–${formatTime(job.end_time)}`} />
-        <Row label={t("filterPrefecture")} value={`${job.prefecture}${job.area ? ` / ${job.area}` : ""}`} />
+        <Row label={t("filterPrefecture")} value={`${prefectureLabel(job.prefecture, locale)}${job.area ? ` / ${job.area}` : ""}`} />
         <Row label={t("wage")} value={formatYen(job.daily_wage)} />
         <Row label={t("headcount")} value={String(job.headcount)} />
         {job.notes && <Row label={t("notes")} value={job.notes} />}

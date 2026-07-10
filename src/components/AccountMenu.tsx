@@ -63,8 +63,10 @@ export function AccountMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <span className="font-medium text-gray-800">{me.user.display_name}</span>
-        <span className="rounded-full bg-gray-100 px-1.5 text-[10px] text-gray-500">
+        <span className="max-w-[7rem] truncate font-medium text-gray-800 sm:max-w-[12rem]">
+          {me.user.display_name}
+        </span>
+        <span className="hidden rounded-full bg-gray-100 px-1.5 text-[10px] text-gray-500 sm:inline">
           {me.user.user_type}
         </span>
         <span className="text-gray-400">▾</span>

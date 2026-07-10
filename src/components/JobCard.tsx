@@ -1,9 +1,11 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import Link from "next/link";
 
 import type { Job } from "@/lib/api/models";
 import { formatTime, formatYen } from "@/lib/format";
+import { prefectureLabel } from "@/lib/prefectures";
 import { SaveJobButton } from "./SaveJobButton";
 import { StatusBadge } from "./ui";
 
@@ -18,6 +20,7 @@ export function JobCard({
   saved: boolean;
   onSavedChange?: (saved: boolean) => void;
 }) {
+  const locale = useLocale();
   return (
     <li className="relative">
       <SaveJobButton
@@ -35,7 +38,7 @@ export function JobCard({
         </div>
         <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-600">
           <span aria-hidden>📍</span>
-          {job.prefecture}
+          {prefectureLabel(job.prefecture, locale)}
           <span className="text-gray-300" aria-hidden>
             ·
           </span>

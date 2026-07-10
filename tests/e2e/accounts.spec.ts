@@ -12,7 +12,9 @@ test("remembers the account and re-logs-in with the password", async ({ page, co
   ]);
   const stamp = Date.now().toString().slice(-9);
   const phone = `+8190${stamp}`;
-  const name = "Remembered Builder";
+  // No display name is asked at signup anymore; after onboarding the account's
+  // public name defaults to the company name.
+  const name = "Remembered Co";
   const password = "test-password-123";
 
   // Sign up + onboard a contractor.
@@ -20,7 +22,6 @@ test("remembers the account and re-logs-in with the password", async ({ page, co
   await page.getByRole("button", { name: "Sign up", exact: true }).click();
   await expect(page.getByText("Choose your role")).toBeVisible();
   await page.getByRole("button", { name: "Sign up as a contractor" }).click();
-  await page.getByLabel("Display name").fill(name);
   await page.getByLabel("Username").fill(`rem_${stamp}`);
   await page.getByLabel("Email").fill(`rem_${stamp}@example.com`);
   await page.getByLabel("Phone number").fill(phone);
@@ -31,7 +32,7 @@ test("remembers the account and re-logs-in with the password", async ({ page, co
 
   await expect(page.getByText("Contractor profile")).toBeVisible();
   const inputs = page.getByRole("textbox");
-  await inputs.nth(0).fill("Remembered Co");
+  await inputs.nth(0).fill(name);
   await inputs.nth(1).fill("Tanaka");
   await page.getByRole("button", { name: "Submit" }).click();
   await expect(page.getByText("Under review. Please wait for approval.")).toBeVisible();

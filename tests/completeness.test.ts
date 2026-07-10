@@ -37,7 +37,7 @@ describe("completeness", () => {
         qualifications: ["玉掛け"],
         tools: ["インパクト"],
         bio: "10年の経験",
-        work_history: [{ company: "A", trade: "大工", years: 5 }],
+        work_history: [{ company: "A", trade: "大工", years: 5, description: "" }],
       }),
     );
     expect(c.pct).toBe(100);

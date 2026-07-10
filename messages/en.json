@@ -157,7 +157,9 @@
     "resetHint": "Verify your phone by SMS, then set a new password.",
     "newPasswordLabel": "New password",
     "resetSubmit": "Reset password",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "roleWorkerDesc": "Find and apply for site work",
+    "roleContractorDesc": "Post jobs and hire tradespeople"
   },
   "onboarding": {
     "workerTitle": "Worker profile",
@@ -173,7 +175,7 @@
     "trades": "Trades",
     "selectTrades": "Select your trades",
     "otherTrade": "Add another trade",
-    "tools": "Tools (comma-separated)",
+    "tools": "Tools",
     "fullName": "Full name",
     "nameKana": "Name (kana)",
     "email": "Email",
@@ -185,10 +187,9 @@
     "whTrade": "Trade",
     "whYears": "Years",
     "addWorkHistory": "Add work history",
-    "qualifications": "Qualifications (comma-separated)",
-    "skills": "Skills (comma-separated)",
+    "qualifications": "Qualifications",
+    "skills": "Skills",
     "bio": "About you",
-    "yearsExperience": "Years of experience",
     "hasInsurance": "Has labor insurance",
     "visaExpiry": "Visa expiry",
     "companyName": "Company name",
@@ -201,7 +202,16 @@
     "photoId": "Photo ID",
     "submitted": "Submitted. Please wait for review.",
     "pendingReview": "Under review. Please wait for approval.",
-    "yourSubmission": "Your submitted details"
+    "yourSubmission": "Your submitted details",
+    "toolsPlaceholder": "e.g. impact driver, circular saw",
+    "qualificationsPlaceholder": "e.g. grade-2 certified skilled worker, slinging",
+    "skillsPlaceholder": "e.g. formwork, layout marking",
+    "whSummary": "Summary",
+    "whSummaryPlaceholder": "e.g. Interior finishing for Tokyo apartment renovations; strong at fixture work and boarding.",
+    "workHistoryHint": "Your total experience is calculated from the years below.",
+    "selectPrefecture": "Select…",
+    "areaPlaceholder": "e.g. Tokyo 23 wards, around Yokohama",
+    "bioPlaceholder": "e.g. 10 years as a carpenter; careful, high-quality interior finishing."
   },
   "jobs": {
     "listTitle": "Open jobs",
@@ -244,7 +254,8 @@
     "recommendedTitle": "Recommended for you",
     "allJobsTitle": "All open jobs",
     "loadMore": "Show more ({count})",
-    "posted": "Job posted"
+    "posted": "Job posted",
+    "anyPrefecture": "All"
   },
   "applications": {
     "title": "My applications",

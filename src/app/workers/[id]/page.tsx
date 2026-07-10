@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import { Avatar } from "@/components/Avatar";
@@ -9,12 +9,14 @@ import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
 import { DetailSkeleton, ErrorText, Skeleton } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { prefectureLabel } from "@/lib/prefectures";
 import { useAsync } from "@/lib/useAsync";
 
 function WorkerProfileView() {
   const p = useTranslations("profile");
   const ob = useTranslations("onboarding");
   const rt = useTranslations("reviews");
+  const locale = useLocale();
   const { id } = useParams<{ id: string }>();
   const { api, me } = useAuth();
   const profile = useAsync(() => api.worker(id), [id]);
@@ -55,7 +57,7 @@ function WorkerProfileView() {
         {(w.prefecture || w.area) && (
           <ProfileRow
             label={p("region")}
-            value={[w.prefecture, w.area].filter(Boolean).join(" / ")}
+            value={[prefectureLabel(w.prefecture, locale), w.area].filter(Boolean).join(" / ")}
           />
         )}
         {w.current_employer && (
@@ -103,6 +105,9 @@ function WorkerProfileView() {
                   trade: h.trade || "—",
                   years: h.years,
                 })}
+                {h.description && (
+                  <p className="text-xs text-gray-500">{h.description}</p>
+                )}
               </li>
             ))}
           </ul>

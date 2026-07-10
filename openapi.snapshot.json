@@ -5964,6 +5964,12 @@
             "minimum": 0.0,
             "title": "Years",
             "default": 0
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Description",
+            "default": ""
           }
         },
         "type": "object",

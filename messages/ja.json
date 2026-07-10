@@ -157,7 +157,9 @@
     "resetHint": "SMSで電話番号を確認し、新しいパスワードを設定します。",
     "newPasswordLabel": "新しいパスワード",
     "resetSubmit": "パスワードを再設定",
-    "forgotPassword": "パスワードをお忘れですか？"
+    "forgotPassword": "パスワードをお忘れですか？",
+    "roleWorkerDesc": "現場の仕事を探して応募する方",
+    "roleContractorDesc": "求人を掲載して職人を募集する方"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",
@@ -173,7 +175,7 @@
     "trades": "職種",
     "selectTrades": "職種を選択",
     "otherTrade": "その他の職種を追加",
-    "tools": "保有工具（カンマ区切り）",
+    "tools": "保有工具",
     "fullName": "氏名",
     "nameKana": "ふりがな",
     "email": "メールアドレス",
@@ -185,10 +187,9 @@
     "whTrade": "職種",
     "whYears": "年数",
     "addWorkHistory": "職歴を追加",
-    "qualifications": "資格（カンマ区切り）",
-    "skills": "スキル（カンマ区切り）",
+    "qualifications": "資格",
+    "skills": "スキル",
     "bio": "自己紹介",
-    "yearsExperience": "経験年数",
     "hasInsurance": "労災保険に加入済み",
     "visaExpiry": "在留期限",
     "companyName": "会社名",
@@ -201,7 +202,16 @@
     "photoId": "顔写真付き身分証",
     "submitted": "登録しました。審査をお待ちください。",
     "pendingReview": "審査中です。承認までお待ちください。",
-    "yourSubmission": "登録内容の確認"
+    "yourSubmission": "登録内容の確認",
+    "toolsPlaceholder": "例: インパクトドライバー、丸ノコ",
+    "qualificationsPlaceholder": "例: 技能士2級、玉掛け",
+    "skillsPlaceholder": "例: 型枠、墨出し",
+    "whSummary": "作業内容（概要）",
+    "whSummaryPlaceholder": "例: 都内マンションの内装仕上げを担当。造作・ボード貼りが得意です。",
+    "workHistoryHint": "経験年数は職歴の年数から自動で計算されます。",
+    "selectPrefecture": "選択してください",
+    "areaPlaceholder": "例: 23区内、横浜市周辺",
+    "bioPlaceholder": "例: 大工歴10年。内装仕上げが得意で、丁寧な作業を心がけています。"
   },
   "jobs": {
     "listTitle": "募集中の求人",
@@ -244,7 +254,8 @@
     "recommendedTitle": "あなたへのおすすめ",
     "allJobsTitle": "すべての求人",
     "loadMore": "もっと見る（{count}）",
-    "posted": "求人を投稿しました"
+    "posted": "求人を投稿しました",
+    "anyPrefecture": "すべて"
   },
   "applications": {
     "title": "応募状況",

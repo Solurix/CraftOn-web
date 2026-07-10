@@ -32,7 +32,6 @@ function LoginPage() {
   const [mode, setMode] = useState<Mode>(initialMode);
   // Signup starts by choosing a role — that is the first decision, before details.
   const [role, setRole] = useState<Role | null>(null);
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -49,7 +48,6 @@ function LoginPage() {
 
   const reset = () => {
     setRole(null);
-    setName("");
     setUsername("");
     setEmail("");
     setPhone("");
@@ -84,9 +82,10 @@ function LoginPage() {
       // Signup: OTP proves phone ownership, then we register the credentials.
       const { needsSignup } = await loginWithPhone(phone, code);
       if (needsSignup && role) {
+        // No display name asked at signup — it's derived from the profile
+        // (company name / worker name) and editable later in settings.
         await completeSignup({
           user_type: role,
-          display_name: name,
           username,
           email,
           password,
@@ -192,16 +191,47 @@ function LoginPage() {
 
         {/* Sign up: choose role FIRST, before entering any details. */}
         {mode === "signup" && !role ? (
-          <div className="card space-y-3">
-            <h1 className="text-lg font-bold">{t("chooseRole")}</h1>
-            <div className="flex flex-col gap-2">
-              <button className="btn-primary" onClick={() => setRole("worker")}>
-                {t("roleWorker")}
-              </button>
-              <button className="btn-secondary" onClick={() => setRole("contractor")}>
-                {t("roleContractor")}
-              </button>
-            </div>
+          <div className="space-y-3">
+            <h2 className="font-semibold">{t("chooseRole")}</h2>
+            {/* Two self-explanatory role cards instead of bare buttons. */}
+            <button
+              type="button"
+              className="card card-hover flex w-full items-center gap-3 text-left"
+              onClick={() => setRole("worker")}
+            >
+              <span
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-soft text-xl"
+                aria-hidden
+              >
+                🔨
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{t("roleWorker")}</span>
+                <span className="block text-sm text-gray-500">{t("roleWorkerDesc")}</span>
+              </span>
+              <span className="ml-auto text-gray-300" aria-hidden>
+                ›
+              </span>
+            </button>
+            <button
+              type="button"
+              className="card card-hover flex w-full items-center gap-3 text-left"
+              onClick={() => setRole("contractor")}
+            >
+              <span
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-soft text-xl"
+                aria-hidden
+              >
+                🏗️
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{t("roleContractor")}</span>
+                <span className="block text-sm text-gray-500">{t("roleContractorDesc")}</span>
+              </span>
+              <span className="ml-auto text-gray-300" aria-hidden>
+                ›
+              </span>
+            </button>
           </div>
         ) : (
           <>
@@ -289,19 +319,9 @@ function LoginPage() {
                 </>
               ) : (
                 <>
-                  {/* Signup: collect identity + credentials, then verify phone by SMS. */}
-                  <div>
-                    <label className="field-label" htmlFor="name">
-                      {t("displayName")}
-                    </label>
-                    <input
-                      id="name"
-                      className="field-input"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </div>
+                  {/* Signup: collect credentials only; the public display name
+                      comes from the profile (worker/company name) and can be
+                      changed later in settings. */}
                   <div>
                     <label className="field-label" htmlFor="username">
                       {t("usernameLabel")}
@@ -362,7 +382,7 @@ function LoginPage() {
                     <button
                       type="button"
                       className="btn-primary w-full"
-                      disabled={!name || !username || !email || !phone || !password}
+                      disabled={!username || !email || !phone || !password}
                       onClick={() => setCodeSent(true)}
                     >
                       {t("sendCode")}

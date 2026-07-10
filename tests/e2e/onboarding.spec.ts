@@ -25,7 +25,7 @@ test("contractor can sign up and onboard", async ({ page, context }) => {
   await page.getByRole("button", { name: "Sign up as a contractor" }).click();
 
   // Registration details, then verify the phone by SMS (only step needing OTP).
-  await page.getByLabel("Display name").fill("E2E Builder");
+  // No display name at signup — it defaults to the company name from onboarding.
   await page.getByLabel("Username").fill(`e2e_${stamp}`);
   await page.getByLabel("Email").fill(`e2e_${stamp}@example.com`);
   await page.getByLabel("Phone number").fill(phone);

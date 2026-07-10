@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { DevicesCard } from "@/components/DevicesCard";
 import { PhotoManager } from "@/components/PhotoManager";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
@@ -140,7 +141,7 @@ function ContractorSettings({ me }: { me: Me }) {
         <input className="field-input" value={form.contact_person} onChange={(e) => set("contact_person", e.target.value)} />
       </Field>
       <Field label={t("prefecture")}>
-        <input className="field-input" value={form.prefecture} onChange={(e) => set("prefecture", e.target.value)} />
+        <PrefectureSelect value={form.prefecture} onChange={(v) => set("prefecture", v)} />
       </Field>
       <Field label={t("address")}>
         <input className="field-input" value={form.address} onChange={(e) => set("address", e.target.value)} />

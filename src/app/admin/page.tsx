@@ -80,8 +80,8 @@ function UsersTab() {
               !item.contractor_profile;
             return (
               <li key={item.user.id} className="card space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
                     {href ? (
                       <Link href={href} className="link">
                         {item.user.display_name}
@@ -93,7 +93,9 @@ function UsersTab() {
                       {item.user.user_type} · {item.user.phone_number}
                     </p>
                   </div>
-                  <StatusBadge status={item.user.status} />
+                  <div className="shrink-0">
+                    <StatusBadge status={item.user.status} />
+                  </div>
                 </div>
                 {item.worker_profile && (
                   <p className="text-xs text-gray-600">
@@ -114,7 +116,7 @@ function UsersTab() {
                   <p className="text-xs text-amber-700">{t("awaitingOnboarding")}</p>
                 )}
                 {item.user.user_type !== "admin" && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       className="btn-primary"
                       disabled={awaitingOnboarding}
@@ -158,8 +160,8 @@ function JobsTab() {
     <ul className="space-y-3">
       {jobs.data.map((job) => (
         <li key={job.id} className="card">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">{job.trades.join(", ")}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-medium [overflow-wrap:anywhere]">{job.trades.join(", ")}</span>
             <StatusBadge status={job.status} />
           </div>
           <p className="text-sm text-gray-600">
@@ -201,8 +203,8 @@ function MatchingsTab() {
         <ul className="space-y-3">
           {matchings.data.map((mt) => (
             <li key={mt.id} className="card">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium [overflow-wrap:anywhere]">
                   {mt.worker_display_name} → {mt.contractor_company_name}
                 </span>
                 <StatusBadge status={mt.status} />
@@ -301,11 +303,11 @@ function AdminsTab() {
       <form onSubmit={create} className="card space-y-2">
         <h2 className="font-semibold">{t("addAdmin")}</h2>
         <div className="flex flex-wrap items-end gap-2">
-          <label className="flex-1">
+          <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("displayName")}</span>
             <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
-          <label className="flex-1">
+          <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("usernameLabel")}</span>
             <input
               className="field-input"
@@ -315,7 +317,7 @@ function AdminsTab() {
               required
             />
           </label>
-          <label className="flex-1">
+          <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("emailLabel")}</span>
             <input
               className="field-input"
@@ -326,7 +328,7 @@ function AdminsTab() {
               required
             />
           </label>
-          <label className="flex-1">
+          <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("phoneLabel")}</span>
             <input
               className="field-input"
@@ -336,7 +338,7 @@ function AdminsTab() {
               required
             />
           </label>
-          <label className="flex-1">
+          <label className="min-w-[9rem] flex-1">
             <span className="field-label">{auth("passwordLabel")}</span>
             <input
               className="field-input"
@@ -405,15 +407,15 @@ function DebugTab() {
       <h2 className="font-semibold">{t("seedTitle")}</h2>
       <p className="text-xs text-amber-700">{t("seedWarning")}</p>
       <div className="flex flex-wrap items-end gap-2">
-        <label className="flex-1">
+        <label className="min-w-[9rem] flex-1">
           <span className="field-label">{t("seedWorkers")}</span>
           <input type="number" min={0} className="field-input" value={workers} onChange={(e) => setWorkers(Number(e.target.value))} />
         </label>
-        <label className="flex-1">
+        <label className="min-w-[9rem] flex-1">
           <span className="field-label">{t("seedContractors")}</span>
           <input type="number" min={0} className="field-input" value={contractors} onChange={(e) => setContractors(Number(e.target.value))} />
         </label>
-        <label className="flex-1">
+        <label className="min-w-[9rem] flex-1">
           <span className="field-label">{t("seedJobs")}</span>
           <input type="number" min={0} className="field-input" value={jobs} onChange={(e) => setJobs(Number(e.target.value))} />
         </label>
@@ -548,20 +550,24 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-4">
-      <nav className="flex gap-2 border-b border-gray-200 pb-2 text-sm">
-        {tabs.map((x) => (
-          <button
-            key={x.id}
-            onClick={() => setTab(x.id)}
-            className={
-              tab === x.id
-                ? "rounded-full bg-brand px-3 py-1 text-white"
-                : "rounded-full px-3 py-1 text-gray-600 hover:bg-gray-100"
-            }
-          >
-            {x.label}
-          </button>
-        ))}
+      {/* More tabs than a phone is wide: scroll the strip inside its own
+          container so the page body never overflows horizontally. */}
+      <nav className="-mx-4 overflow-x-auto border-b border-gray-200 px-4 pb-2">
+        <div className="flex w-max gap-2 text-sm">
+          {tabs.map((x) => (
+            <button
+              key={x.id}
+              onClick={() => setTab(x.id)}
+              className={
+                tab === x.id
+                  ? "shrink-0 whitespace-nowrap rounded-full bg-brand px-3 py-1 font-medium text-white"
+                  : "shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-gray-600 hover:bg-gray-100"
+              }
+            >
+              {x.label}
+            </button>
+          ))}
+        </div>
       </nav>
       {tab === "users" && <UsersTab />}
       {tab === "jobs" && <JobsTab />}

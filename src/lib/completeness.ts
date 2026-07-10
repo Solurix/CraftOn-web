@@ -17,7 +17,9 @@ export function workerCompleteness(p: WorkerProfile): Completeness {
   return summarize([
     [!!p.full_name, "fullName"],
     [p.trades.length > 0, "trades"],
-    [p.years_experience > 0, "experience"],
+    // The standalone years input is gone; experience now comes from the work
+    // history (the API derives years_experience from it).
+    [p.years_experience > 0 || p.work_history.length > 0, "experience"],
     [!!p.prefecture, "location"],
     [p.skills.length > 0, "skills"],
     [p.qualifications.length > 0, "qualifications"],

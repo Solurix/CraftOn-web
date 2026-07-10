@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 
 import { JobTemplates, type JobTemplate } from "@/components/JobTemplates";
 import { RequireAuth } from "@/components/RequireAuth";
+import { PrefectureSelect } from "@/components/PrefectureSelect";
 import { ErrorText, Spinner } from "@/components/ui";
 import { useToast } from "@/components/Toast";
 import type { Job } from "@/lib/api/models";
@@ -210,7 +211,7 @@ function PostJobForm() {
         </Field>
       </div>
       <Field label={ob("prefecture")}>
-        <input className="field-input" value={form.prefecture} onChange={(e) => set("prefecture", e.target.value)} required />
+        <PrefectureSelect value={form.prefecture} onChange={(v) => set("prefecture", v)} required />
       </Field>
       <div className="flex gap-2">
         <Field label={t("wage")}>

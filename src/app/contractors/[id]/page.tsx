@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import { Avatar } from "@/components/Avatar";
@@ -8,11 +8,13 @@ import { ProfileRow, ReviewList } from "@/components/profile";
 import { RequireAuth } from "@/components/RequireAuth";
 import { DetailSkeleton, ErrorText, Skeleton } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { prefectureLabel } from "@/lib/prefectures";
 import { useAsync } from "@/lib/useAsync";
 
 function ContractorProfileView() {
   const p = useTranslations("profile");
   const ob = useTranslations("onboarding");
+  const locale = useLocale();
   const rt = useTranslations("reviews");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
@@ -33,7 +35,7 @@ function ContractorProfileView() {
           </h1>
         </div>
         <ProfileRow label={p("company")} value={c.company_name} />
-        <ProfileRow label={ob("prefecture")} value={c.prefecture} />
+        <ProfileRow label={ob("prefecture")} value={prefectureLabel(c.prefecture, locale)} />
         <ProfileRow label={p("trust")} value={`★ ${Number(c.rating).toFixed(1)}`} />
         {c.bio && (
           <div>
