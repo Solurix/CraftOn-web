@@ -10,6 +10,7 @@ import { PhoneInput } from "@/components/PhoneInput";
 import { useToast } from "@/components/Toast";
 import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { isValidNationalNumber, splitPhone } from "@/lib/phone";
 
 type Mode = "login" | "signup" | "reset";
@@ -121,7 +122,7 @@ function LoginPage() {
         goAfterLogin(needsSignup);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "error");
+      setError(humanizeError(err, common("networkError")));
     } finally {
       setBusy(false);
     }

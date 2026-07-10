@@ -20,3 +20,14 @@ export function formatDate(iso: string): string {
 export function formatTime(t: string): string {
   return t.slice(0, 5); // HH:MM
 }
+
+// Render a shift's time range. Night shifts store end <= start meaning "ends
+// the next day"; display them in the 24+ convention common on Japanese sites
+// (21:00–29:00 = finishes 5:00 the next morning).
+export function formatTimeRange(start: string, end: string): string {
+  const s = formatTime(start);
+  const e = formatTime(end);
+  if (e > s) return `${s}–${e}`;
+  const endHour = Number(end.slice(0, 2)) + 24;
+  return `${s}–${endHour}:${end.slice(3, 5)}`;
+}

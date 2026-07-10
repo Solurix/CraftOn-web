@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { WorkerOnboarding, WorkerProfile } from "@/lib/api/models";
 import { COMMON_TRADES } from "@/lib/trades";
 import { PrefectureSelect } from "./PrefectureSelect";
+import { TagInput } from "./TagInput";
 
 export type WorkHistoryRow = {
   company: string;
@@ -13,26 +14,31 @@ export type WorkHistoryRow = {
   description: string;
 };
 
+// A picker option for the trade catalog (value = canonical stored name_ja,
+// label = localized display). Falls back to COMMON_TRADES when the catalog
+// hasn't loaded.
+export type TradeOption = { value: string; label: string };
+
 // Controlled form state shared by the onboarding form and the profile editor.
-// Array-ish text fields (tools/qualifications/skills) are kept comma-separated
-// for editing and split on submit.
 export type WorkerFormValue = {
   display_name: string;
-  full_name: string;
+  family_name: string;
+  given_name: string;
+  middle_name: string;
   name_kana: string;
   email: string;
   nationality: string; // "JP" or another 2-letter code
   worker_class: "employee" | "freelance";
-  trades: string[]; // selected common-trade chips only
-  trades_other: string; // raw free-text for custom trades (merged on submit)
-  tools: string;
+  trades: string[]; // selected catalog-trade chips only
+  trades_other: string[]; // custom trades (merged on submit)
+  tools: string[];
   current_employer: string;
   current_employer_public: boolean;
   prefecture: string;
   area: string;
   work_history: WorkHistoryRow[];
-  qualifications: string;
-  skills: string;
+  qualifications: string[];
+  skills: string[];
   bio: string;
   years_experience: number;
   has_insurance: boolean;
@@ -42,21 +48,23 @@ export type WorkerFormValue = {
 export function emptyWorkerForm(displayName = ""): WorkerFormValue {
   return {
     display_name: displayName,
-    full_name: "",
+    family_name: "",
+    given_name: "",
+    middle_name: "",
     name_kana: "",
     email: "",
     nationality: "JP",
     worker_class: "employee",
     trades: [],
-    trades_other: "",
-    tools: "",
+    trades_other: [],
+    tools: [],
     current_employer: "",
     current_employer_public: false,
     prefecture: "",
     area: "",
     work_history: [],
-    qualifications: "",
-    skills: "",
+    qualifications: [],
+    skills: [],
     bio: "",
     years_experience: 0,
     has_insurance: false,
@@ -67,22 +75,22 @@ export function emptyWorkerForm(displayName = ""): WorkerFormValue {
 export function workerFormFromProfile(
   displayName: string,
   wp: WorkerProfile,
+  catalogValues: readonly string[] = COMMON_TRADES,
 ): WorkerFormValue {
-  const csv = (a: string[] | null | undefined) => (a ?? []).join(", ");
   return {
     display_name: displayName,
-    full_name: wp.full_name ?? "",
+    // Legacy profiles predate the structured parts — surface the stored
+    // full_name in the family field so nothing silently disappears.
+    family_name: wp.family_name ?? wp.full_name ?? "",
+    given_name: wp.given_name ?? "",
+    middle_name: wp.middle_name ?? "",
     name_kana: wp.name_kana ?? "",
     email: wp.email ?? "",
     nationality: wp.nationality ?? "JP",
     worker_class: wp.worker_class as "employee" | "freelance",
-    trades: (wp.trades ?? []).filter((t) =>
-      (COMMON_TRADES as readonly string[]).includes(t),
-    ),
-    trades_other: (wp.trades ?? [])
-      .filter((t) => !(COMMON_TRADES as readonly string[]).includes(t))
-      .join(", "),
-    tools: csv(wp.tools),
+    trades: (wp.trades ?? []).filter((t) => catalogValues.includes(t)),
+    trades_other: (wp.trades ?? []).filter((t) => !catalogValues.includes(t)),
+    tools: wp.tools ?? [],
     current_employer: wp.current_employer ?? "",
     current_employer_public: wp.current_employer_public ?? false,
     prefecture: wp.prefecture ?? "",
@@ -93,8 +101,8 @@ export function workerFormFromProfile(
       years: w.years ?? 0,
       description: w.description ?? "",
     })),
-    qualifications: csv(wp.qualifications),
-    skills: csv(wp.skills),
+    qualifications: wp.qualifications ?? [],
+    skills: wp.skills ?? [],
     bio: wp.bio ?? "",
     years_experience: wp.years_experience ?? 0,
     has_insurance: wp.has_insurance,
@@ -102,8 +110,6 @@ export function workerFormFromProfile(
   };
 }
 
-// Build the API payload from the form. Shared by onboarding (WorkerOnboarding)
-// and PATCH (WorkerUpdate) — both accept this superset of keys.
 // True when the nationality choice is complete: Japan, or a non-JP 2-letter code.
 export function isWorkerFormValid(v: WorkerFormValue): boolean {
   return (
@@ -111,14 +117,12 @@ export function isWorkerFormValid(v: WorkerFormValue): boolean {
   );
 }
 
+// Build the API payload from the form. Shared by onboarding (WorkerOnboarding)
+// and PATCH (WorkerUpdate) — both accept this superset of keys.
 export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
-  // Accept both ASCII and Japanese commas (、) plus the middle dot (・) —
-  // Japanese users rarely type "," in an IME.
-  const csv = (s: string) =>
-    s.split(/[,、・]/).map((x) => x.trim()).filter(Boolean);
   const isJp = v.nationality.toUpperCase() === "JP";
-  // Merge chip-selected common trades with the free-text custom ones (deduped).
-  const trades = [...new Set([...v.trades, ...csv(v.trades_other)])];
+  // Merge chip-selected catalog trades with the custom ones (deduped).
+  const trades = [...new Set([...v.trades, ...v.trades_other])];
   const workHistory = v.work_history
     .filter((w) => w.company.trim() || w.description.trim())
     .map((w) => ({
@@ -140,8 +144,10 @@ export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
     nationality: isJp ? "JP" : v.nationality.toUpperCase().slice(0, 2),
     worker_class: v.worker_class,
     trades,
-    tools: csv(v.tools),
-    full_name: v.full_name || null,
+    tools: v.tools,
+    family_name: v.family_name.trim() || null,
+    given_name: v.given_name.trim() || null,
+    middle_name: v.middle_name.trim() || null,
     name_kana: v.name_kana || null,
     email: v.email || null,
     current_employer: v.current_employer || null,
@@ -149,8 +155,8 @@ export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
     prefecture: v.prefecture || null,
     area: v.area || null,
     work_history: workHistory,
-    qualifications: csv(v.qualifications),
-    skills: csv(v.skills),
+    qualifications: v.qualifications,
+    skills: v.skills,
     bio: v.bio || null,
     years_experience: historyYears > 0 ? historyYears : Number(v.years_experience) || 0,
     has_insurance: v.has_insurance,
@@ -172,14 +178,26 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function WorkerProfileFields({
   value,
   onChange,
+  tradeOptions,
+  registration = false,
 }: {
   value: WorkerFormValue;
   onChange: (patch: Partial<WorkerFormValue>) => void;
+  // Catalog trades from GET /trades (localized labels). Falls back to the
+  // built-in list while loading / offline.
+  tradeOptions?: TradeOption[];
+  // Registration shows only the essentials; work history, qualifications,
+  // skills, tools and bio are added later from profile settings.
+  registration?: boolean;
 }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
   const v = value;
   const isJp = v.nationality.toUpperCase() === "JP";
+  const options: TradeOption[] =
+    tradeOptions && tradeOptions.length > 0
+      ? tradeOptions
+      : COMMON_TRADES.map((x) => ({ value: x, label: x }));
 
   const toggleTrade = (trade: string) => {
     const has = v.trades.includes(trade);
@@ -194,11 +212,35 @@ export function WorkerProfileFields({
 
   return (
     <div className="space-y-3">
-      <Field label={t("fullName")}>
+      {/* Name, split into last / first (+ optional middle). */}
+      <div className="flex gap-2">
+        <div className="min-w-0 flex-1">
+          <Field label={t("lastName")}>
+            <input
+              className="field-input"
+              autoComplete="family-name"
+              value={v.family_name}
+              onChange={(e) => onChange({ family_name: e.target.value })}
+            />
+          </Field>
+        </div>
+        <div className="min-w-0 flex-1">
+          <Field label={t("firstName")}>
+            <input
+              className="field-input"
+              autoComplete="given-name"
+              value={v.given_name}
+              onChange={(e) => onChange({ given_name: e.target.value })}
+            />
+          </Field>
+        </div>
+      </div>
+      <Field label={t("middleName")}>
         <input
           className="field-input"
-          value={v.full_name}
-          onChange={(e) => onChange({ full_name: e.target.value })}
+          autoComplete="additional-name"
+          value={v.middle_name}
+          onChange={(e) => onChange({ middle_name: e.target.value })}
         />
       </Field>
       <Field label={t("nameKana")}>
@@ -283,15 +325,15 @@ export function WorkerProfileFields({
         </div>
       </fieldset>
 
-      {/* Trades: guided multi-select + free-text additions. */}
+      {/* Trades: guided multi-select from the admin-managed catalog + custom chips. */}
       <fieldset>
         <legend className="field-label">{t("selectTrades")}</legend>
         <div className="flex flex-wrap gap-2 text-sm">
-          {COMMON_TRADES.map((tr) => (
+          {options.map((tr) => (
             <label
-              key={tr}
+              key={tr.value}
               className={`cursor-pointer rounded-full border px-3 py-1 ${
-                v.trades.includes(tr)
+                v.trades.includes(tr.value)
                   ? "border-brand bg-brand/10 text-brand"
                   : "border-gray-200 text-gray-600"
               }`}
@@ -299,19 +341,20 @@ export function WorkerProfileFields({
               <input
                 type="checkbox"
                 className="sr-only"
-                checked={v.trades.includes(tr)}
-                onChange={() => toggleTrade(tr)}
+                checked={v.trades.includes(tr.value)}
+                onChange={() => toggleTrade(tr.value)}
               />
-              {tr}
+              {tr.label}
             </label>
           ))}
         </div>
-        <input
-          className="field-input mt-2"
-          placeholder={t("otherTrade")}
-          value={v.trades_other}
-          onChange={(e) => onChange({ trades_other: e.target.value })}
-        />
+        <div className="mt-2">
+          <TagInput
+            value={v.trades_other}
+            onChange={(trades_other) => onChange({ trades_other })}
+            placeholder={t("otherTrade")}
+          />
+        </div>
       </fieldset>
 
       <Field label={t("currentEmployer")}>
@@ -354,106 +397,115 @@ export function WorkerProfileFields({
         </div>
       </div>
 
-      {/* Work history: repeatable rows with a free-text summary. The summary
-          replaces the old standalone years-of-experience field. */}
-      <fieldset className="space-y-2">
-        <legend className="field-label">{t("workHistory")}</legend>
-        <p className="text-xs text-gray-400">{t("workHistoryHint")}</p>
-        {v.work_history.map((w, i) => (
-          <div key={i} className="space-y-2 rounded-lg border border-gray-200 p-3">
-            <div className="flex flex-wrap gap-2">
-              <input
-                className="field-input min-w-[8rem] flex-1"
-                placeholder={t("whCompany")}
-                value={w.company}
-                onChange={(e) => setWorkRow(i, { company: e.target.value })}
-              />
-              <input
-                className="field-input min-w-[6rem] flex-1"
-                placeholder={t("whTrade")}
-                value={w.trade}
-                onChange={(e) => setWorkRow(i, { trade: e.target.value })}
-              />
-              <label className="flex items-center gap-1 text-sm text-gray-500">
-                <input
-                  type="number"
-                  min={0}
-                  className="field-input w-16"
-                  aria-label={t("whYears")}
-                  value={w.years}
-                  onChange={(e) => setWorkRow(i, { years: Number(e.target.value) })}
+      {registration ? (
+        <p className="rounded-lg bg-brand-soft px-3 py-2 text-xs text-brand-dark">
+          {t("completeLater")}
+        </p>
+      ) : (
+        <>
+          {/* Work history: repeatable rows with a free-text summary. The summary
+              replaces the old standalone years-of-experience field. */}
+          <fieldset className="space-y-2">
+            <legend className="field-label">{t("workHistory")}</legend>
+            <p className="text-xs text-gray-400">{t("workHistoryHint")}</p>
+            {v.work_history.map((w, i) => (
+              <div key={i} className="space-y-2 rounded-lg border border-gray-200 p-3">
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    className="field-input min-w-[8rem] flex-1"
+                    placeholder={t("whCompany")}
+                    value={w.company}
+                    onChange={(e) => setWorkRow(i, { company: e.target.value })}
+                  />
+                  <input
+                    className="field-input min-w-[6rem] flex-1"
+                    placeholder={t("whTrade")}
+                    value={w.trade}
+                    onChange={(e) => setWorkRow(i, { trade: e.target.value })}
+                  />
+                  <label className="flex items-center gap-1 text-sm text-gray-500">
+                    <input
+                      type="number"
+                      min={0}
+                      className="field-input w-16"
+                      aria-label={t("whYears")}
+                      value={w.years}
+                      onChange={(e) => setWorkRow(i, { years: Number(e.target.value) })}
+                    />
+                    {t("whYears")}
+                  </label>
+                </div>
+                <textarea
+                  className="field-input"
+                  rows={2}
+                  placeholder={t("whSummaryPlaceholder")}
+                  aria-label={t("whSummary")}
+                  value={w.description}
+                  onChange={(e) => setWorkRow(i, { description: e.target.value })}
                 />
-                {t("whYears")}
-              </label>
-            </div>
-            <textarea
-              className="field-input"
-              rows={2}
-              placeholder={t("whSummaryPlaceholder")}
-              aria-label={t("whSummary")}
-              value={w.description}
-              onChange={(e) => setWorkRow(i, { description: e.target.value })}
-            />
+                <button
+                  type="button"
+                  className="text-xs text-red-600"
+                  onClick={() =>
+                    onChange({ work_history: v.work_history.filter((_, j) => j !== i) })
+                  }
+                >
+                  {common("remove")}
+                </button>
+              </div>
+            ))}
             <button
               type="button"
-              className="text-xs text-red-600"
+              className="link text-sm"
               onClick={() =>
-                onChange({ work_history: v.work_history.filter((_, j) => j !== i) })
+                onChange({
+                  work_history: [
+                    ...v.work_history,
+                    { company: "", trade: "", years: 0, description: "" },
+                  ],
+                })
               }
             >
-              {common("remove")}
+              + {t("addWorkHistory")}
             </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className="link text-sm"
-          onClick={() =>
-            onChange({
-              work_history: [
-                ...v.work_history,
-                { company: "", trade: "", years: 0, description: "" },
-              ],
-            })
-          }
-        >
-          + {t("addWorkHistory")}
-        </button>
-      </fieldset>
+          </fieldset>
 
-      <Field label={t("qualifications")}>
-        <input
-          className="field-input"
-          placeholder={t("qualificationsPlaceholder")}
-          value={v.qualifications}
-          onChange={(e) => onChange({ qualifications: e.target.value })}
-        />
-      </Field>
-      <Field label={t("skills")}>
-        <input
-          className="field-input"
-          placeholder={t("skillsPlaceholder")}
-          value={v.skills}
-          onChange={(e) => onChange({ skills: e.target.value })}
-        />
-      </Field>
-      <Field label={t("tools")}>
-        <input
-          className="field-input"
-          placeholder={t("toolsPlaceholder")}
-          value={v.tools}
-          onChange={(e) => onChange({ tools: e.target.value })}
-        />
-      </Field>
-      <Field label={t("bio")}>
-        <textarea
-          className="field-input"
-          rows={3}
-          placeholder={t("bioPlaceholder")}
-          value={v.bio}
-          onChange={(e) => onChange({ bio: e.target.value })}
-        />
-      </Field>
+          <fieldset>
+            <legend className="field-label">{t("qualifications")}</legend>
+            <TagInput
+              value={v.qualifications}
+              onChange={(qualifications) => onChange({ qualifications })}
+              placeholder={t("qualificationsPlaceholder")}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="field-label">{t("skills")}</legend>
+            <TagInput
+              value={v.skills}
+              onChange={(skills) => onChange({ skills })}
+              placeholder={t("skillsPlaceholder")}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="field-label">{t("tools")}</legend>
+            <TagInput
+              value={v.tools}
+              onChange={(tools) => onChange({ tools })}
+              placeholder={t("toolsPlaceholder")}
+            />
+          </fieldset>
+          <Field label={t("bio")}>
+            <textarea
+              className="field-input"
+              rows={3}
+              placeholder={t("bioPlaceholder")}
+              value={v.bio}
+              onChange={(e) => onChange({ bio: e.target.value })}
+            />
+          </Field>
+        </>
+      )}
+
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"

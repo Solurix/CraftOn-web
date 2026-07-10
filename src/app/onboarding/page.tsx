@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -15,11 +15,16 @@ import {
   type WorkerFormValue,
 } from "@/components/WorkerProfileFields";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
+import { tradeOptionsFor } from "@/lib/trades";
+import { useAsync } from "@/lib/useAsync";
 
 function WorkerForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
+  const locale = useLocale();
   const { api } = useAuth();
+  const catalog = useAsync(() => api.trades().catch(() => []), []);
   // No display-name prefill: signup no longer asks for one, and the API
   // derives it from the profile (worker name) on first onboarding.
   const [form, setForm] = useState<WorkerFormValue>(() => emptyWorkerForm());
@@ -51,7 +56,7 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
       });
       onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "error");
+      setError(humanizeError(err, common("networkError")));
     } finally {
       setBusy(false);
     }
@@ -60,7 +65,14 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} className="card space-y-4">
       <h1 className="text-lg font-bold">{t("workerTitle")}</h1>
-      <WorkerProfileFields value={form} onChange={patch} />
+      {/* Registration keeps only the essentials — work history, skills and the
+          rest are added later from profile settings. */}
+      <WorkerProfileFields
+        value={form}
+        onChange={patch}
+        registration
+        tradeOptions={tradeOptionsFor(catalog.data, locale)}
+      />
       {nonJp && (
         <div className="flex gap-2 rounded-md bg-amber-50 p-3">
           <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_front")}>
@@ -111,7 +123,7 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
       });
       onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "error");
+      setError(humanizeError(err, common("networkError")));
     } finally {
       setBusy(false);
     }

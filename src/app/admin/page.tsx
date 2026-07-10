@@ -6,13 +6,14 @@ import { useState } from "react";
 
 import { PhoneInput } from "@/components/PhoneInput";
 import { RequireAuth } from "@/components/RequireAuth";
+import { useToast } from "@/components/Toast";
 import { ErrorText, Spinner, StatusBadge } from "@/components/ui";
 import type { VettingItem } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
-import { formatDate, formatTime, formatYen } from "@/lib/format";
+import { formatDate, formatTimeRange, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
-type Tab = "users" | "jobs" | "matchings" | "devices" | "admins" | "debug" | "config";
+type Tab = "users" | "jobs" | "matchings" | "trades" | "devices" | "admins" | "debug" | "config";
 
 function profileHref(item: VettingItem): string | null {
   // Only link to a profile page that actually exists. A user who signed up but
@@ -167,7 +168,7 @@ function JobsTab() {
           </div>
           <p className="text-sm text-gray-600">
             {job.contractor_company_name} · {job.prefecture} · {job.work_date} ·{" "}
-            {formatTime(job.start_time)}–{formatTime(job.end_time)} · {formatYen(job.daily_wage)} ·{" "}
+            {formatTimeRange(job.start_time, job.end_time)} · {formatYen(job.daily_wage)} ·{" "}
             {j("headcount")} {job.headcount}
           </p>
         </li>
@@ -223,6 +224,163 @@ function MatchingsTab() {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+
+function TradesTab() {
+  const t = useTranslations("admin");
+  const { api } = useAuth();
+  const toast = useToast();
+  const trades = useAsync(() => api.adminTrades(), []);
+  const custom = useAsync(() => api.customTrades(), []);
+  const [ja, setJa] = useState("");
+  const [en, setEn] = useState("");
+  const [error, setError] = useState("");
+  // Per-custom-value merge target (trade id).
+  const [target, setTarget] = useState<Record<string, string>>({});
+
+  const run = async (fn: () => Promise<unknown>) => {
+    setError("");
+    try {
+      await fn();
+      trades.reload();
+      custom.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "error");
+    }
+  };
+
+  const create = (e: React.FormEvent) => {
+    e.preventDefault();
+    void run(async () => {
+      await api.createTrade({ name_ja: ja, name_en: en });
+      setJa("");
+      setEn("");
+    });
+  };
+
+  const merge = (name: string) => {
+    const into = target[name];
+    if (!into) return;
+    void run(async () => {
+      const res = await api.mergeTrade(name, into);
+      toast.success(
+        t("mergeDone", {
+          name: res.canonical_name,
+          workers: res.workers_updated,
+          jobs: res.jobs_updated,
+        }),
+      );
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <form onSubmit={create} className="card space-y-2">
+        <h2 className="font-semibold">{t("addTrade")}</h2>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="min-w-[9rem] flex-1">
+            <span className="field-label">{t("tradeJa")}</span>
+            <input className="field-input" value={ja} onChange={(e) => setJa(e.target.value)} required />
+          </label>
+          <label className="min-w-[9rem] flex-1">
+            <span className="field-label">{t("tradeEn")}</span>
+            <input className="field-input" value={en} onChange={(e) => setEn(e.target.value)} required />
+          </label>
+          <button className="btn-primary" disabled={!ja.trim() || !en.trim()}>
+            {t("addTrade")}
+          </button>
+        </div>
+      </form>
+      <ErrorText message={error} />
+
+      {trades.loading ? (
+        <Spinner />
+      ) : (
+        <ul className="card divide-y divide-gray-100">
+          {(trades.data ?? []).map((tr) => (
+            <li key={tr.id} className="flex items-center justify-between gap-2 py-2">
+              <div className="min-w-0 [overflow-wrap:anywhere]">
+                <span className="font-medium">{tr.name_ja}</span>
+                <span className="ml-2 text-sm text-gray-500">{tr.name_en}</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={tr.active}
+                aria-label={tr.name_ja}
+                onClick={() => run(() => api.updateTrade(tr.id, { active: !tr.active }))}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                  tr.active ? "bg-brand" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                    tr.active ? "translate-x-5" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Free-text values users typed that aren't in the catalog: merge them
+          into a canonical trade or promote them to a new one. */}
+      <div className="card space-y-2">
+        <h2 className="font-semibold">{t("customTrades")}</h2>
+        <p className="text-xs text-gray-500">{t("customTradesHint")}</p>
+        {custom.loading ? (
+          <Spinner />
+        ) : (custom.data ?? []).length === 0 ? (
+          <p className="py-2 text-sm text-gray-500">{t("noCustomTrades")}</p>
+        ) : (
+          <ul className="space-y-2">
+            {(custom.data ?? []).map((c) => (
+              <li key={c.name} className="rounded-lg border border-gray-200 p-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium [overflow-wrap:anywhere]">{c.name}</span>
+                  <span className="text-xs text-gray-500">
+                    {t("customUsage", { workers: c.worker_count, jobs: c.job_count })}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <select
+                    className="field-input min-w-0 flex-1"
+                    aria-label={t("mergeInto")}
+                    value={target[c.name] ?? ""}
+                    onChange={(e) => setTarget((m) => ({ ...m, [c.name]: e.target.value }))}
+                  >
+                    <option value="">{t("mergeInto")}</option>
+                    {(trades.data ?? []).map((tr) => (
+                      <option key={tr.id} value={tr.id}>
+                        {tr.name_ja} / {tr.name_en}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    disabled={!target[c.name]}
+                    onClick={() => merge(c.name)}
+                  >
+                    {t("merge")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost btn-sm"
+                    onClick={() => run(() => api.createTrade({ name_ja: c.name, name_en: c.name }))}
+                  >
+                    {t("promote")}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -537,6 +695,7 @@ function AdminDashboard() {
     { id: "users", label: t("tabUsers") },
     { id: "jobs", label: t("tabJobs") },
     { id: "matchings", label: t("tabMatchings") },
+    { id: "trades", label: t("tabTrades") },
     { id: "devices", label: t("tabDevices") },
     { id: "admins", label: t("tabAdmins") },
     { id: "debug", label: t("tabDebug") },
@@ -567,6 +726,7 @@ function AdminDashboard() {
       {tab === "users" && <UsersTab />}
       {tab === "jobs" && <JobsTab />}
       {tab === "matchings" && <MatchingsTab />}
+      {tab === "trades" && <TradesTab />}
       {tab === "devices" && <DevicesTab />}
       {tab === "admins" && <AdminsTab />}
       {tab === "debug" && <DebugTab />}

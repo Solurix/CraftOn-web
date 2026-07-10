@@ -34,3 +34,7 @@ export type Notification = S["NotificationOut"];
 export type WorkHistory = S["WorkHistoryOut"];
 export type Login = S["LoginOut"];
 export type Device = S["DeviceOut"];
+export type Trade = S["TradeOut"];
+export type CustomTrade = S["CustomTradeOut"];
+export type TradeMergeResult = S["TradeMergeOut"];
+export type JobPhoto = S["JobPhotoOut"];

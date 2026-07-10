@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -23,17 +23,34 @@ import {
   workerFormToPayload,
   type WorkerFormValue,
 } from "@/components/WorkerProfileFields";
-import type { Me } from "@/lib/api/models";
+import type { Me, Trade } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
+import { tradeOptionsFor } from "@/lib/trades";
+import { useAsync } from "@/lib/useAsync";
 
 function WorkerSettings({ me }: { me: Me }) {
+  // Load the trade catalog first: the form init needs it to split stored
+  // trades into catalog chips vs custom tags.
+  const { api } = useAuth();
+  const catalog = useAsync(() => api.trades().catch(() => []), []);
+  if (catalog.loading) return null;
+  return <WorkerSettingsForm me={me} catalog={catalog.data ?? []} />;
+}
+
+function WorkerSettingsForm({ me, catalog }: { me: Me; catalog: Trade[] }) {
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
   const common = useTranslations("common");
+  const locale = useLocale();
   const { api, refresh } = useAuth();
   const toast = useToast();
   const [form, setForm] = useState<WorkerFormValue>(() =>
-    workerFormFromProfile(me.user.display_name, me.worker_profile!),
+    workerFormFromProfile(
+      me.user.display_name,
+      me.worker_profile!,
+      catalog.map((t) => t.name_ja),
+    ),
   );
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +66,7 @@ function WorkerSettings({ me }: { me: Me }) {
       setSaved(true);
       toast.success(p("saved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -70,7 +87,11 @@ function WorkerSettings({ me }: { me: Me }) {
           onChange={(e) => patch({ display_name: e.target.value })}
         />
       </Field>
-      <WorkerProfileFields value={form} onChange={patch} />
+      <WorkerProfileFields
+        value={form}
+        onChange={patch}
+        tradeOptions={tradeOptionsFor(catalog, locale)}
+      />
       <button className="btn-primary w-full" disabled={!isWorkerFormValid(form)}>
         {common("save")}
       </button>

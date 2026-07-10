@@ -106,7 +106,8 @@
     "remove": "Remove",
     "add": "Add",
     "skipToContent": "Skip to content",
-    "offline": "You are offline. Some actions may not work."
+    "offline": "You are offline. Some actions may not work.",
+    "networkError": "Could not reach the server. Check your connection and try again."
   },
   "nav": {
     "jobs": "Jobs",
@@ -217,7 +218,11 @@
     "workHistoryHint": "Your total experience is calculated from the years below.",
     "selectPrefecture": "Select…",
     "areaPlaceholder": "e.g. Tokyo 23 wards, around Yokohama",
-    "bioPlaceholder": "e.g. 10 years as a carpenter; careful, high-quality interior finishing."
+    "bioPlaceholder": "e.g. 10 years as a carpenter; careful, high-quality interior finishing.",
+    "lastName": "Last name",
+    "firstName": "First name",
+    "middleName": "Middle name(s) (optional)",
+    "completeLater": "Work history, qualifications, skills, tools and your bio can be added any time from profile settings after registration."
   },
   "jobs": {
     "listTitle": "Open jobs",
@@ -261,7 +266,9 @@
     "allJobsTitle": "All open jobs",
     "loadMore": "Show more ({count})",
     "posted": "Job posted",
-    "anyPrefecture": "All"
+    "anyPrefecture": "All",
+    "nextDayTime": "{time} (next day {next})",
+    "nightShiftHint": "For night shifts, enter the end time as 24+ hours (e.g. 21:00–29:00 = finishes 5:00 next morning)."
   },
   "applications": {
     "title": "My applications",
@@ -420,7 +427,19 @@
     "seedDone": "Created {workers} workers, {contractors} contractors, {jobs} jobs.",
     "markFeePaid": "Mark fee paid",
     "company": "Company",
-    "worker": "Worker"
+    "worker": "Worker",
+    "tabTrades": "Trades",
+    "addTrade": "Add trade",
+    "tradeJa": "Name (Japanese)",
+    "tradeEn": "Name (English)",
+    "customTrades": "User-entered trades",
+    "customTradesHint": "Free-text trades that aren't in the catalog. Merge them into an existing trade or promote them to a new one.",
+    "customUsage": "{workers} workers · {jobs} jobs",
+    "mergeInto": "Merge into…",
+    "merge": "Merge",
+    "promote": "Promote to trade",
+    "mergeDone": "Merged into “{name}” ({workers} workers, {jobs} jobs updated).",
+    "noCustomTrades": "No unregistered trades."
   },
   "status": {
     "pending": "Pending",
@@ -506,7 +525,9 @@
     "dateRequired": "Choose a work date.",
     "datePast": "The work date cannot be in the past.",
     "wagePositive": "Daily wage must be greater than zero.",
-    "headcountMin": "Headcount must be at least 1."
+    "headcountMin": "Headcount must be at least 1.",
+    "endAfterStart": "End time must be after the start time. For overnight shifts use 24+ hours (e.g. 29:00).",
+    "shiftTooLong": "A shift cannot be longer than 24 hours."
   },
   "photos": {
     "title": "Work photos",
@@ -515,7 +536,9 @@
     "empty": "No photos yet.",
     "uploading": "Uploading…",
     "added": "Photo added",
-    "pending": "In review"
+    "pending": "In review",
+    "jobPhotos": "Site photos",
+    "reuseHint": "Tap an uploaded photo to reuse it (＋ to add a new one)."
   },
   "legal": {
     "terms": "Terms",

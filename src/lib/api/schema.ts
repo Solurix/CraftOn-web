@@ -498,6 +498,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/jobs/{job_id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Job Photos
+         * @description Signed read URLs for a posting's attached photos. Any approved user who
+         *     can see the job can see its photos (unlike private documents, which stay
+         *     owner/admin-only).
+         */
+        get: operations["job_photos_api_v1_jobs__job_id__photos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/jobs/{job_id}/apply": {
         parameters: {
             query?: never;
@@ -907,6 +929,100 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/trades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Trades
+         * @description Active trades for the pickers. Available to any signed-in user (the
+         *     onboarding form runs before approval).
+         */
+        get: operations["list_trades_api_v1_trades_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin List Trades */
+        get: operations["admin_list_trades_api_v1_admin_trades_get"];
+        put?: never;
+        /** Admin Create Trade */
+        post: operations["admin_create_trade_api_v1_admin_trades_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trades/{trade_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Admin Update Trade */
+        patch: operations["admin_update_trade_api_v1_admin_trades__trade_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/trades/custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin Custom Trades
+         * @description Free-text trade values users invented (not in the catalog), with usage
+         *     counts — the merge worklist.
+         */
+        get: operations["admin_custom_trades_api_v1_admin_trades_custom_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trades/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Merge Trade */
+        post: operations["admin_merge_trade_api_v1_admin_trades_merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/vetting/queue": {
         parameters: {
             query?: never;
@@ -1298,6 +1414,18 @@ export interface components {
             rating: string;
         };
         /**
+         * CustomTradeOut
+         * @description A free-text trade value found on profiles/jobs that isn't in the catalog.
+         */
+        CustomTradeOut: {
+            /** Name */
+            name: string;
+            /** Worker Count */
+            worker_count: number;
+            /** Job Count */
+            job_count: number;
+        };
+        /**
          * DebugSeedIn
          * @description How many random records to create (debug/non-prod only).
          */
@@ -1483,6 +1611,8 @@ export interface components {
             headcount: number;
             /** Notes */
             notes?: string | null;
+            /** Photo Doc Ids */
+            photo_doc_ids?: string[];
         };
         /** JobOut */
         JobOut: {
@@ -1527,6 +1657,8 @@ export interface components {
             headcount: number;
             /** Notes */
             notes: string | null;
+            /** Photo Doc Ids */
+            photo_doc_ids: string[];
             status: components["schemas"]["JobStatus"];
             /**
              * Created At
@@ -1538,6 +1670,19 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /**
+         * JobPhotoOut
+         * @description A posting photo: document reference + short-lived signed read URL.
+         */
+        JobPhotoOut: {
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Read Url */
+            read_url: string;
         };
         /**
          * JobStatus
@@ -1566,6 +1711,8 @@ export interface components {
             headcount?: number | null;
             /** Notes */
             notes?: string | null;
+            /** Photo Doc Ids */
+            photo_doc_ids?: string[] | null;
         };
         /**
          * LoginIn
@@ -1848,6 +1995,79 @@ export interface components {
              */
             suspend: boolean;
         };
+        /** TradeCreateIn */
+        TradeCreateIn: {
+            /** Name Ja */
+            name_ja: string;
+            /** Name En */
+            name_en: string;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /**
+         * TradeMergeIn
+         * @description Merge a free-text trade value into a catalog trade: every occurrence on
+         *     worker profiles and jobs is rewritten to the catalog trade's canonical
+         *     name (deduplicated).
+         */
+        TradeMergeIn: {
+            /** From Name */
+            from_name: string;
+            /**
+             * Into Trade Id
+             * Format: uuid
+             */
+            into_trade_id: string;
+        };
+        /** TradeMergeOut */
+        TradeMergeOut: {
+            /** Workers Updated */
+            workers_updated: number;
+            /** Jobs Updated */
+            jobs_updated: number;
+            /** Canonical Name */
+            canonical_name: string;
+        };
+        /** TradeOut */
+        TradeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name Ja */
+            name_ja: string;
+            /** Name En */
+            name_en: string;
+            /** Active */
+            active: boolean;
+            /** Sort Order */
+            sort_order: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** TradeUpdateIn */
+        TradeUpdateIn: {
+            /** Name Ja */
+            name_ja?: string | null;
+            /** Name En */
+            name_en?: string | null;
+            /** Active */
+            active?: boolean | null;
+            /** Sort Order */
+            sort_order?: number | null;
+        };
         /** UnreadCountOut */
         UnreadCountOut: {
             /** Count */
@@ -2024,6 +2244,12 @@ export interface components {
             years_experience: number;
             /** Full Name */
             full_name?: string | null;
+            /** Family Name */
+            family_name?: string | null;
+            /** Given Name */
+            given_name?: string | null;
+            /** Middle Name */
+            middle_name?: string | null;
             /** Name Kana */
             name_kana?: string | null;
             /** Email */
@@ -2082,6 +2308,12 @@ export interface components {
             years_experience: number;
             /** Full Name */
             full_name: string | null;
+            /** Family Name */
+            family_name: string | null;
+            /** Given Name */
+            given_name: string | null;
+            /** Middle Name */
+            middle_name: string | null;
             /** Name Kana */
             name_kana: string | null;
             /** Email */
@@ -2133,6 +2365,12 @@ export interface components {
             years_experience?: number | null;
             /** Full Name */
             full_name?: string | null;
+            /** Family Name */
+            family_name?: string | null;
+            /** Given Name */
+            given_name?: string | null;
+            /** Middle Name */
+            middle_name?: string | null;
             /** Name Kana */
             name_kana?: string | null;
             /** Email */
@@ -3315,6 +3553,55 @@ export interface operations {
             };
         };
     };
+    job_photos_api_v1_jobs__job_id__photos_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobPhotoOut"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     apply_to_job_api_v1_jobs__job_id__apply_post: {
         parameters: {
             query?: never;
@@ -4388,6 +4675,212 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeviceOut"][];
+                };
+            };
+        };
+    };
+    list_trades_api_v1_trades_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeOut"][];
+                };
+            };
+        };
+    };
+    admin_list_trades_api_v1_admin_trades_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeOut"][];
+                };
+            };
+        };
+    };
+    admin_create_trade_api_v1_admin_trades_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TradeCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeOut"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_update_trade_api_v1_admin_trades__trade_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                trade_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TradeUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeOut"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_custom_trades_api_v1_admin_trades_custom_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomTradeOut"][];
+                };
+            };
+        };
+    };
+    admin_merge_trade_api_v1_admin_trades_merge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TradeMergeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeMergeOut"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

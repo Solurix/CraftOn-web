@@ -7,6 +7,7 @@ import { useToast } from "@/components/Toast";
 import { Skeleton } from "@/components/ui";
 import type { DocumentOut } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { useAsync } from "@/lib/useAsync";
 
 // Upload + view your own work photos (doc type `job_photo`). Bytes go straight to
@@ -15,7 +16,7 @@ import { useAsync } from "@/lib/useAsync";
 // docs/06 + BLOCKERS.md §1.8 for public portfolio display).
 const DOC_TYPE = "job_photo";
 
-function Thumb({ id }: { id: string }) {
+export function PhotoThumb({ id }: { id: string }) {
   const { api } = useAuth();
   const { data, loading } = useAsync(() => api.documentViewUrl(id), [id]);
   const [broken, setBroken] = useState(false);
@@ -42,6 +43,7 @@ function Thumb({ id }: { id: string }) {
 
 export function PhotoManager() {
   const t = useTranslations("photos");
+  const common = useTranslations("common");
   const toast = useToast();
   const { api } = useAuth();
   const { data, loading, reload } = useAsync(() => api.myDocuments(), []);
@@ -72,7 +74,7 @@ export function PhotoManager() {
       toast.success(t("added"));
       reload();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "error");
+      toast.error(humanizeError(err, common("networkError")));
     } finally {
       setBusy(false);
     }
@@ -111,7 +113,7 @@ export function PhotoManager() {
         <div className="grid grid-cols-3 gap-2">
           {photos.map((d) => (
             <div key={d.id} className="relative">
-              <Thumb id={d.id} />
+              <PhotoThumb id={d.id} />
               {d.review_status === "pending" && (
                 <span className="absolute left-1 top-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
                   {t("pending")}

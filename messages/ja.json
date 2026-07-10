@@ -106,7 +106,8 @@
     "remove": "削除",
     "add": "追加",
     "skipToContent": "本文へスキップ",
-    "offline": "オフラインです。一部の操作ができない場合があります。"
+    "offline": "オフラインです。一部の操作ができない場合があります。",
+    "networkError": "サーバーに接続できませんでした。通信環境をご確認のうえ、もう一度お試しください。"
   },
   "nav": {
     "jobs": "求人",
@@ -217,7 +218,11 @@
     "workHistoryHint": "経験年数は職歴の年数から自動で計算されます。",
     "selectPrefecture": "選択してください",
     "areaPlaceholder": "例: 23区内、横浜市周辺",
-    "bioPlaceholder": "例: 大工歴10年。内装仕上げが得意で、丁寧な作業を心がけています。"
+    "bioPlaceholder": "例: 大工歴10年。内装仕上げが得意で、丁寧な作業を心がけています。",
+    "lastName": "姓",
+    "firstName": "名",
+    "middleName": "ミドルネーム（任意）",
+    "completeLater": "職歴・資格・スキル・保有工具・自己紹介は、登録後にプロフィール設定からいつでも追加できます。"
   },
   "jobs": {
     "listTitle": "募集中の求人",
@@ -261,7 +266,9 @@
     "allJobsTitle": "すべての求人",
     "loadMore": "もっと見る（{count}）",
     "posted": "求人を投稿しました",
-    "anyPrefecture": "すべて"
+    "anyPrefecture": "すべて",
+    "nextDayTime": "{time}（翌{next}）",
+    "nightShiftHint": "夜勤は終了時刻を24時以降で入力してください（例: 21:00〜29:00 = 翌朝5:00終了）。"
   },
   "applications": {
     "title": "応募状況",
@@ -420,7 +427,19 @@
     "seedDone": "職人{workers}名、工務店{contractors}社、求人{jobs}件を作成しました。",
     "markFeePaid": "手数料を受領済みに",
     "company": "会社",
-    "worker": "職人"
+    "worker": "職人",
+    "tabTrades": "職種",
+    "addTrade": "職種を追加",
+    "tradeJa": "名称（日本語）",
+    "tradeEn": "名称（英語）",
+    "customTrades": "ユーザー入力の職種",
+    "customTradesHint": "カタログにない自由入力の職種です。既存の職種に統合するか、新しい職種として登録できます。",
+    "customUsage": "職人 {workers} · 求人 {jobs}",
+    "mergeInto": "統合先を選択",
+    "merge": "統合",
+    "promote": "職種として登録",
+    "mergeDone": "「{name}」に統合しました（職人 {workers}件・求人 {jobs}件を更新）。",
+    "noCustomTrades": "未登録の職種はありません。"
   },
   "status": {
     "pending": "審査中",
@@ -506,7 +525,9 @@
     "dateRequired": "作業日を選択してください。",
     "datePast": "作業日は過去の日付にできません。",
     "wagePositive": "日当は0より大きくしてください。",
-    "headcountMin": "募集人数は1人以上にしてください。"
+    "headcountMin": "募集人数は1人以上にしてください。",
+    "endAfterStart": "終了時刻は開始時刻より後にしてください。夜勤は24時以降（例: 29:00）で入力できます。",
+    "shiftTooLong": "勤務時間は24時間以内にしてください。"
   },
   "photos": {
     "title": "作業写真",
@@ -515,7 +536,9 @@
     "empty": "写真はまだありません。",
     "uploading": "アップロード中…",
     "added": "写真を追加しました",
-    "pending": "確認中"
+    "pending": "確認中",
+    "jobPhotos": "現場写真",
+    "reuseHint": "アップロード済みの写真をタップして再利用できます（＋で新規追加）。"
   },
   "legal": {
     "terms": "利用規約",

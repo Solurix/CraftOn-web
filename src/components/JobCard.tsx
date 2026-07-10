@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 
 import type { Job } from "@/lib/api/models";
-import { formatTime, formatYen } from "@/lib/format";
+import { formatTimeRange, formatYen } from "@/lib/format";
 import { prefectureLabel } from "@/lib/prefectures";
 import { SaveJobButton } from "./SaveJobButton";
 import { StatusBadge } from "./ui";
@@ -47,7 +47,7 @@ export function JobCard({
           <span className="text-gray-300" aria-hidden>
             ·
           </span>
-          {formatTime(job.start_time)}–{formatTime(job.end_time)}
+          {formatTimeRange(job.start_time, job.end_time)}
         </p>
         <p className="mt-2 text-base font-bold text-brand">
           {formatYen(job.daily_wage)}

@@ -15,7 +15,7 @@ import { useToast } from "@/components/Toast";
 import { BackLink, EmptyState, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import type { Applicant } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
-import { formatTime, formatYen } from "@/lib/format";
+import { formatTimeRange, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
 type Sort = "trust" | "recent" | "favorites";
@@ -95,8 +95,8 @@ function JobApplicants() {
           <StatusBadge status={job.data.status} />
         </div>
         <p className="text-sm text-gray-600">
-          {job.data.prefecture} · {job.data.work_date} · {formatTime(job.data.start_time)}–
-          {formatTime(job.data.end_time)} · {formatYen(job.data.daily_wage)}
+          {job.data.prefecture} · {job.data.work_date} ·{" "}
+          {formatTimeRange(job.data.start_time, job.data.end_time)} · {formatYen(job.data.daily_wage)}
         </p>
         <Link
           href={`/post-job?from=${job.data.id}`}
