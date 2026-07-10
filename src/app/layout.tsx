@@ -13,13 +13,21 @@ export const metadata: Metadata = {
   title: "CRAFT-ON",
   description: "建設現場のスポットマッチング — CRAFT-ON",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "CRAFT-ON" },
+  appleWebApp: { capable: true, title: "CRAFT-ON", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0a66c2",
   width: "device-width",
   initialScale: 1,
+  // iOS: stop Safari from zooming the whole page when an input is focused.
+  // Pinch zoom still works (iOS ignores maximum-scale for user gestures since
+  // v10), so accessibility is preserved. Belt-and-braces with the 16px form
+  // font rule in globals.css.
+  maximumScale: 1,
+  // Draw edge-to-edge in standalone/PWA mode; safe-area insets are handled in
+  // AppShell (header) and BottomNav.
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

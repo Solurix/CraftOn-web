@@ -331,7 +331,9 @@ export function WorkerProfileFields({
       </label>
 
       <div className="flex gap-2">
-        <div className="flex-1">
+        {/* min-w-0 so the select's longest option can't widen the row past
+            the viewport on small screens. */}
+        <div className="min-w-0 flex-1">
           <Field label={t("prefecture")}>
             <PrefectureSelect
               value={v.prefecture}
@@ -340,7 +342,7 @@ export function WorkerProfileFields({
             />
           </Field>
         </div>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <Field label={t("area")}>
             <input
               className="field-input"

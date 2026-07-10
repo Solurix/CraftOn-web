@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const role = me?.user.user_type as Role | undefined;
 
   return (
-    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-24">
+    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-[calc(6rem+env(safe-area-inset-bottom))]">
       <a href="#main-content" className="skip-link">
         {common("skipToContent")}
       </a>
@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
           <LanguageSwitcher />
           {me && <NotificationBell />}
