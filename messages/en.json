@@ -164,7 +164,8 @@
     "usernameInvalid": "Username must be 3–64 characters: letters, numbers, . _ -",
     "emailInvalid": "Enter a valid email address.",
     "phoneInvalid": "Enter a valid phone number: pick the country code, then digits only.",
-    "passwordTooShort": "Password must be at least {min} characters."
+    "passwordTooShort": "Password must be at least {min} characters.",
+    "phoneAlreadyRegistered": "This phone number already has an account — you have been signed in to it."
   },
   "onboarding": {
     "workerTitle": "Worker profile",
@@ -368,9 +369,7 @@
     "tools": "Tools",
     "company": "Company",
     "trust": "Trust score",
-    "setPassword": "Set a password",
-    "setPasswordHint": "Sign in faster next time without an SMS code (8+ characters).",
-    "passwordSaved": "Password saved.",
+    "passwordSaved": "Password changed.",
     "region": "Region",
     "employer": "Current employer",
     "career": "Work history",
@@ -379,7 +378,9 @@
     "skills": "Skills",
     "account": "Account",
     "accountSaved": "Account updated",
-    "photos": "Work photos"
+    "photos": "Work photos",
+    "changePassword": "Change password",
+    "changePasswordHint": "Change the password you use to log in (8+ characters)."
   },
   "admin": {
     "vettingTitle": "Pending review",

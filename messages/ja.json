@@ -164,7 +164,8 @@
     "usernameInvalid": "ユーザー名は3〜64文字の半角英数字と . _ - が使えます。",
     "emailInvalid": "メールアドレスの形式が正しくありません。",
     "phoneInvalid": "電話番号が正しくありません。国番号を選び、番号を数字で入力してください。",
-    "passwordTooShort": "パスワードは{min}文字以上で入力してください。"
+    "passwordTooShort": "パスワードは{min}文字以上で入力してください。",
+    "phoneAlreadyRegistered": "この電話番号にはすでにアカウントがあります。そのアカウントにログインしました。"
   },
   "onboarding": {
     "workerTitle": "職人プロフィール登録",
@@ -368,9 +369,7 @@
     "tools": "保有工具",
     "company": "会社",
     "trust": "信頼スコア",
-    "setPassword": "パスワードを設定",
-    "setPasswordHint": "次回からSMSコードなしですばやくログイン（8文字以上）。",
-    "passwordSaved": "パスワードを保存しました。",
+    "passwordSaved": "パスワードを変更しました。",
     "region": "地域",
     "employer": "現在の勤め先",
     "career": "職歴",
@@ -379,7 +378,9 @@
     "skills": "スキル",
     "account": "アカウント",
     "accountSaved": "アカウントを更新しました",
-    "photos": "作業写真"
+    "photos": "作業写真",
+    "changePassword": "パスワードを変更",
+    "changePasswordHint": "ログインに使うパスワードを変更します（8文字以上）。"
   },
   "admin": {
     "vettingTitle": "審査待ち",

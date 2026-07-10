@@ -193,8 +193,8 @@ function SetPasswordCard() {
 
   return (
     <form onSubmit={submit} className="card space-y-2">
-      <h2 className="font-semibold">{p("setPassword")}</h2>
-      <p className="text-xs text-gray-500">{p("setPasswordHint")}</p>
+      <h2 className="font-semibold">{p("changePassword")}</h2>
+      <p className="text-xs text-gray-500">{p("changePasswordHint")}</p>
       <input
         type="password"
         className="field-input"
@@ -204,7 +204,7 @@ function SetPasswordCard() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button className="btn-primary w-full" disabled={password.length < 8}>
-        {p("setPassword")}
+        {p("changePassword")}
       </button>
       {saved && <p className="text-sm text-green-700">{p("passwordSaved")}</p>}
       <ErrorText message={error} />

@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { PhoneInput } from "@/components/PhoneInput";
+import { useToast } from "@/components/Toast";
 import { ErrorText, Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import { isValidNationalNumber, splitPhone } from "@/lib/phone";
@@ -42,6 +43,7 @@ function LoginPage() {
     accounts,
   } = useAuth();
   const router = useRouter();
+  const toast = useToast();
 
   const [mode, setMode] = useState<Mode>(initialMode);
   // Signup starts by choosing a role — that is the first decision, before details.
@@ -113,7 +115,9 @@ function LoginPage() {
         });
         router.replace("/onboarding");
       } else {
-        // Phone already has an account → straight in.
+        // The phone already has an account: OTP proved ownership, so we sign
+        // into it — but say so instead of silently ignoring the signup form.
+        if (needsSignup === false) toast.info(t("phoneAlreadyRegistered"));
         goAfterLogin(needsSignup);
       }
     } catch (err) {
