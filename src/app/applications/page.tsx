@@ -7,11 +7,13 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
 import { EmptyState, ErrorText, PageHeader, SkeletonList, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { useAsync } from "@/lib/useAsync";
 
 function MyApplications() {
   const t = useTranslations("applications");
   const jobs = useTranslations("jobs");
+  const common = useTranslations("common");
   const { api } = useAuth();
   const toast = useToast();
   const { data, loading, error, reload } = useAsync(() => api.myApplications(), []);
@@ -22,7 +24,7 @@ function MyApplications() {
       toast.success(t("withdrawn"));
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "error");
+      toast.error(humanizeError(e, common("networkError")));
     }
   };
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 
 // Header account chip + dropdown: shows the current account and lets the user
 // switch to another remembered account (one tap in fake mode), add a new one,
@@ -48,7 +49,7 @@ export function AccountMenu() {
       setOpen(false);
       router.replace(needsSignup ? "/onboarding" : "/");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      setError(humanizeError(e, common("networkError")));
     } finally {
       setBusy(false);
     }

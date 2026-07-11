@@ -138,7 +138,7 @@ function ContractorSettings({ me }: { me: Me }) {
       setSaved(true);
       toast.success(p("saved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -189,6 +189,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function SetPasswordCard() {
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
+  const common = useTranslations("common");
   const { api, refresh } = useAuth();
   const toast = useToast();
   const [password, setPassword] = useState("");
@@ -206,7 +207,7 @@ function SetPasswordCard() {
       setSaved(true);
       toast.success(p("passwordSaved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -253,7 +254,7 @@ function AccountSettingsCard({ me }: { me: Me }) {
       await refresh();
       toast.success(p("accountSaved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }

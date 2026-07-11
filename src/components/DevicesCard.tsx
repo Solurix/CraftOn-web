@@ -8,6 +8,7 @@ import { ErrorText, Spinner } from "@/components/ui";
 import { useToast } from "@/components/Toast";
 import { useAuth } from "@/lib/auth/context";
 import { getDeviceId } from "@/lib/device";
+import { humanizeError } from "@/lib/errorMessage";
 import { formatDate } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
@@ -16,6 +17,7 @@ import { useAsync } from "@/lib/useAsync";
 // or end the session on this device (log out here).
 export function DevicesCard() {
   const t = useTranslations("devices");
+  const common = useTranslations("common");
   const { api, logout } = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -32,7 +34,7 @@ export function DevicesCard() {
       toast.success(t("ended"));
       reload();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setRevokeError(msg);
       toast.error(msg);
     } finally {
@@ -55,7 +57,7 @@ export function DevicesCard() {
       toast.success(t("ended"));
       reload();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setRevokeError(msg);
       toast.error(msg);
     } finally {

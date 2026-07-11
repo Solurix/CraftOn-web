@@ -15,6 +15,7 @@ import { useToast } from "@/components/Toast";
 import { BackLink, EmptyState, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import type { Applicant } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { formatTimeRange, formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
@@ -24,6 +25,7 @@ function JobApplicants() {
   const t = useTranslations("applications");
   const ob = useTranslations("onboarding");
   const nav = useTranslations("nav");
+  const common = useTranslations("common");
   const { id } = useParams<{ id: string }>();
   const { api } = useAuth();
   const toast = useToast();
@@ -41,7 +43,7 @@ function JobApplicants() {
       toast.success(t("confirmed"));
       router.push(`/matchings/${m.id}`);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -52,7 +54,7 @@ function JobApplicants() {
       await api.rejectApplication(applicationId);
       apps.reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "error");
+      toast.error(humanizeError(e, common("networkError")));
     }
   };
 
