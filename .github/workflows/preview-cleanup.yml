@@ -1,8 +1,8 @@
 name: preview-cleanup
 
-# Tear down a PR's web preview: remove the tag, then delete its revisions. No
-# database is involved. Runs on PR close; workflow_dispatch lets the owner reclaim
-# a leaked preview by number from the Actions tab.
+# Tear down a PR's web preview: delete the standalone `crafton-web-dev-pr<N>`
+# service. No database is involved. Runs on PR close; workflow_dispatch lets the
+# owner reclaim a leaked preview by number from the Actions tab.
 
 on:
   pull_request_target:
@@ -23,7 +23,7 @@ jobs:
     env:
       PROJECT_ID: crafton-dev-500709
       REGION: asia-northeast1
-      SERVICE: crafton-web-dev
+      BASE_SERVICE: crafton-web-dev
       WIF_PROVIDER: projects/784671749504/locations/global/workloadIdentityPools/github-actions/providers/github
       DEPLOYER_SA: crafton-deployer@crafton-dev-500709.iam.gserviceaccount.com
       PR: ${{ github.event.inputs.pr_number || github.event.number }}
@@ -36,26 +36,10 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      # The tag must be removed before its revision can be deleted.
-      - name: Remove preview tag
+      # Delete the whole standalone preview service (revisions and all). Best-effort
+      # so a re-run on an already-clean PR still succeeds.
+      - name: Delete preview service
         run: |
-          gcloud run services update-traffic "$SERVICE" \
-            --project "$PROJECT_ID" --region "$REGION" \
-            --remove-tags "pr${PR}" --quiet || echo "no tag pr${PR}"
-
-      # Cloud Run refuses to delete a service's *latest-created* revision
-      # (FAILED_PRECONDITION); if this preview was the last deploy, its revision
-      # lingers until a newer deploy supersedes it. Harmless — untagged, no traffic,
-      # scales to zero — so this step is best-effort and never fails the job.
-      - name: Delete preview revisions
-        run: |
-          revs=$(gcloud run revisions list --service "$SERVICE" \
-            --project "$PROJECT_ID" --region "$REGION" \
-            --filter="metadata.name ~ ^${SERVICE}-pr${PR}-" \
-            --format='value(metadata.name)')
-          if [ -z "$revs" ]; then echo "no revisions for pr${PR}"; fi
-          for r in $revs; do
-            echo "deleting revision $r"
-            gcloud run revisions delete "$r" \
-              --project "$PROJECT_ID" --region "$REGION" --quiet || true
-          done
+          gcloud run services delete "${BASE_SERVICE}-pr${PR}" \
+            --project "$PROJECT_ID" --region "$REGION" --quiet \
+            || echo "service ${BASE_SERVICE}-pr${PR} already gone"

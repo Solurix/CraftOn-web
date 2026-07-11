@@ -77,8 +77,12 @@ jobs:
           docker push "$IMAGE:dev"
           docker push "$IMAGE:${GITHUB_SHA}"
 
+      # Deploy the image and scrub any stray preview label. Web previews are now
+      # separate `crafton-web-dev-pr<N>` services and can't leak config here; this is
+      # a cheap belt-and-suspenders symmetric with the API deploy.
       - name: Deploy to Cloud Run
         run: |
           gcloud run services update "$SERVICE" \
             --project "$PROJECT_ID" --region "$REGION" \
-            --image "$IMAGE:dev"
+            --image "$IMAGE:dev" \
+            --remove-labels preview-pr
