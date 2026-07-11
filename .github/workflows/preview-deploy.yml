@@ -3,19 +3,29 @@ name: preview-deploy
 # Per-PR preview environment for the web app.
 #
 # Each PR gets a --no-traffic --tag pr<N> revision of crafton-web-dev whose image
-# is baked (NEXT_PUBLIC_* are inlined at build time) to point at the shared live
-# crafton-api-dev URL — a web-only PR doesn't change the API, so it previews against
-# dev. No database is involved. Prod (the live revision) is never touched.
+# is baked (NEXT_PUBLIC_* are inlined at build time) with an API base URL. By default
+# that is the shared live crafton-api-dev URL — a web-only PR doesn't change the API,
+# so it previews against dev. No database is involved. Prod (the live revision) is
+# never touched.
+#
+# Opt-in API pairing: a coordinated api+web change can preview end-to-end by pointing
+# this web preview at a specific crafton-api PREVIEW instead of the live API. Declare
+# the API PR number with either an `api-pr-<N>` label or a line `api-pr: <N>` in the
+# PR description; the build then bakes https://pr<N>---<api-host> (falling back to the
+# live API if that preview isn't reachable). See crafton-infra docs/12.
 #
 # Trust model: pull_request_target runs this from `main` so a PR can't rewrite the
 # credentialed steps; CODEOWNERS gates the workflow + Dockerfile. PR code executes
-# only inside `docker build` and at preview runtime. Fork PRs are skipped.
+# only inside `docker build` and at preview runtime. Fork PRs are skipped. The PR
+# body/labels are untrusted, so the pairing hint is parsed in a github-script sandbox,
+# never interpolated into a shell.
 #
 # NOTE: because this runs from `main`, pipeline changes only take effect after merge.
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    # `edited` so changing the api-pr hint in the PR body repoints without a new push.
+    types: [opened, synchronize, reopened, edited]
 
 concurrency:
   group: preview-web-${{ github.event.number }}
@@ -64,20 +74,78 @@ jobs:
       - name: Compute identifiers
         run: |
           SHORT_SHA="${HEAD_SHA::7}"
+          # The revision suffix must be unique per run: `edited` events re-deploy at an
+          # unchanged head sha, and Cloud Run rejects a reused --revision-suffix. The run
+          # id + attempt make it unique while keeping the stable pr<N> tag (so the preview
+          # URL never changes) and the crafton-web-dev-pr<N>- prefix that preview-cleanup
+          # matches. The image tag stays keyed on the sha (a re-bake just overwrites it).
           {
             echo "TAG=pr${PR}"
-            echo "REV_SUFFIX=pr${PR}-${SHORT_SHA}"
+            echo "REV_SUFFIX=pr${PR}-${SHORT_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
             echo "IMAGE_TAG=${IMAGE}:pr${PR}-${SHORT_SHA}"
           } >> "$GITHUB_ENV"
 
-      - name: Resolve live API URL
-        run: |
-          url=$(gcloud run services describe "$API_SERVICE" \
-            --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
-          if [ -z "$url" ]; then echo "API service not found"; exit 1; fi
-          echo "API_BASE_URL=$url" >> "$GITHUB_ENV"
+      - name: Resolve paired API PR (label or PR body)
+        id: pair
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Opt-in pairing: a web PR can preview against a specific crafton-api
+            // preview instead of the shared live API. Declared via either an
+            // `api-pr-<N>` label or a line `api-pr: <N>` in the PR body. Body/labels
+            // are untrusted input, so parse them here (sandboxed) — never in a shell.
+            const pr = context.payload.pull_request || {};
+            const labels = (pr.labels || []).map(l => (l && l.name) || '');
+            let num = '';
+            for (const name of labels) {
+              const m = /^api-pr-(\d+)$/.exec(name.trim());
+              if (m) { num = m[1]; break; }
+            }
+            if (!num && pr.body) {
+              const m = /^\s*api-pr:\s*#?(\d+)\s*$/im.exec(pr.body);
+              if (m) num = m[1];
+            }
+            core.setOutput('api_pr', num);
+            core.info(num
+              ? `Paired API PR requested: pr${num}`
+              : 'No api-pr hint; will bake the shared live API.');
 
-      # NEXT_PUBLIC_* are inlined at build time, so the preview API URL must be baked.
+      - name: Resolve API URL (paired preview or live)
+        env:
+          API_PR: ${{ steps.pair.outputs.api_pr }}
+        run: |
+          live=$(gcloud run services describe "$API_SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          if [ -z "$live" ]; then echo "API service not found"; exit 1; fi
+
+          if [ -n "$API_PR" ]; then
+            candidate="https://pr${API_PR}---${live#https://}"
+            echo "Requested paired API preview: $candidate"
+            ok=""
+            # The api preview may still be warming (or not deployed yet); poll briefly.
+            for i in $(seq 1 12); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$candidate/openapi.json" || echo 000)
+              if [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; then ok=1; break; fi
+              sleep 5
+            done
+            if [ -n "$ok" ]; then
+              api_base="$candidate"; paired=true
+              echo "Using paired API preview pr${API_PR}."
+            else
+              api_base="$live"; paired=false
+              echo "::warning::api-pr ${API_PR} preview not reachable; baking the live API instead."
+            fi
+          else
+            api_base="$live"; paired=false
+            echo "Using shared live API."
+          fi
+          {
+            echo "API_BASE_URL=$api_base"
+            echo "API_PAIRED=$paired"
+            echo "API_PR=$API_PR"
+          } >> "$GITHUB_ENV"
+
+      # NEXT_PUBLIC_* are inlined at build time, so the API URL (live or paired) must be baked.
       - name: Build & push preview image
         run: |
           docker build --platform=linux/amd64 --provenance=false \
@@ -123,21 +191,32 @@ jobs:
         env:
           WEB_URL: ${{ env.WEB_URL }}
           API_BASE_URL: ${{ env.API_BASE_URL }}
+          API_PAIRED: ${{ env.API_PAIRED }}
+          API_PR: ${{ env.API_PR }}
           TAG: ${{ env.TAG }}
           REV_SUFFIX: ${{ env.REV_SUFFIX }}
         with:
           script: |
             const marker = '<!-- crafton-preview-web -->';
-            const { WEB_URL, API_BASE_URL, TAG, REV_SUFFIX } = process.env;
+            const { WEB_URL, API_BASE_URL, API_PAIRED, API_PR, TAG, REV_SUFFIX } = process.env;
             const pr = context.issue.number;
+            const paired = API_PAIRED === 'true';
+            const apiLine = paired
+              ? `- **API (baked):** ${API_BASE_URL} — paired preview \`pr${API_PR}\``
+              : `- **API (baked):** ${API_BASE_URL} — shared live dev API`;
+            const footer = paired
+              ? `Baked against the crafton-api preview \`pr${API_PR}\`. Torn down automatically when this PR closes.`
+              : (API_PR
+                  ? `⚠️ Requested API preview \`pr${API_PR}\` wasn't reachable, so this baked the **shared live** dev API. Re-run once the API preview is up (push a commit, or re-edit the PR body). Torn down automatically when this PR closes.`
+                  : 'Points at the **shared live** dev API. Add `api-pr: <N>` to the PR description to pair with a crafton-api preview. Torn down automatically when this PR closes.');
             const body = [
               marker,
               '### 🖥️ Web preview',
               `- **URL:** ${WEB_URL}`,
-              `- **API (baked):** ${API_BASE_URL}`,
+              apiLine,
               `- **Revision:** \`${REV_SUFFIX}\` — no-traffic, tag \`${TAG}\``,
               '',
-              'Points at the shared dev API. Torn down automatically when this PR closes.',
+              footer,
             ].join('\n');
             const { data: comments } = await github.rest.issues.listComments({
               ...context.repo, issue_number: pr,
