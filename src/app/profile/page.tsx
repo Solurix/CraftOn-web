@@ -7,6 +7,7 @@ import { useState } from "react";
 import { DevicesCard } from "@/components/DevicesCard";
 import { PhotoManager } from "@/components/PhotoManager";
 import { PrefectureSelect } from "@/components/PrefectureSelect";
+import { ResidenceCardSection } from "@/components/ResidenceCardSection";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
@@ -91,6 +92,9 @@ function WorkerSettingsForm({ me, catalog }: { me: Me; catalog: Trade[] }) {
         value={form}
         onChange={patch}
         tradeOptions={tradeOptionsFor(catalog, locale)}
+        // Non-JP workers can re-upload rejected/missing residence documents
+        // here; saving the form PATCHes the new doc ids to /workers/me.
+        residenceDocsSlot={<ResidenceCardSection value={form} onChange={patch} />}
       />
       <button className="btn-primary w-full" disabled={!isWorkerFormValid(form)}>
         {common("save")}

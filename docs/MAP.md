@@ -29,10 +29,10 @@ task needs them): `docs/BLOCKERS.md` (~150 KB backend feature specs),
 | `page.tsx` | Home: `Landing` logged-out, dashboard/redirect logged-in |
 | `login/page.tsx` | Login / signup / password reset, role chooser, recent accounts (largest page, ~490 lines) |
 | `onboarding/page.tsx` | Worker & contractor profile-completion forms |
-| `profile/page.tsx` | Settings: worker/contractor edit, photos, account, password, devices |
-| `post-job/page.tsx` | Contractor job-posting form (drafts + templates); pure helpers in `post-job/jobForm.ts` |
+| `profile/page.tsx` | Settings: worker/contractor edit (incl. residence-card re-upload for non-JP workers), photos, account, password, devices |
+| `post-job/page.tsx` | Contractor job post/edit form (`?from=<id>` duplicate, `?edit=<id>` edit — edits PATCH only changed fields; drafts + templates for new posts); pure helpers in `post-job/jobForm.ts` |
 | `jobs/page.tsx`, `jobs/[id]/page.tsx` | Job search/list with filters; job detail + apply |
-| `my-jobs/page.tsx`, `my-jobs/[id]/page.tsx` | Contractor's postings; posting detail + applicants |
+| `my-jobs/page.tsx`, `my-jobs/[id]/page.tsx` | Contractor's postings; posting detail + applicants + edit/duplicate actions |
 | `applications/page.tsx` | Worker's applications list |
 | `matchings/page.tsx`, `matchings/[id]/page.tsx` | Matchings list; detail with chat, check-in/out, completion, review |
 | `history/page.tsx` | Worker's completed work + monthly earnings |
@@ -44,7 +44,7 @@ task needs them): `docs/BLOCKERS.md` (~150 KB backend feature specs),
 
 ## `src/components/`
 - Shell/nav/PWA: `AppShell`, `RequireAuth`, `BottomNav`, `AccountMenu`, `LanguageSwitcher`, `ThemeToggle`, `NotificationBell`, `InstallPrompt`, `OfflineBanner`, `ServiceWorkerRegistrar`
-- Feature widgets: `Avatar`, `JobCard`, `SaveJobButton`, `FavoriteWorkerButton`, `SavedSearches`, `JobTemplates`, `JobPhotoPicker`, `PhotoManager`, `TagInput`, `PhoneInput`, `PrefectureSelect`, `QuickReplies`, `ProfileCompleteness`, `ProfileSubmissionSummary`, `VisaStatusBanner`, `Toast`, `DevicesCard`, `Landing`, `LegalPage`
+- Feature widgets: `Avatar`, `JobCard`, `SaveJobButton`, `FavoriteWorkerButton`, `SavedSearches`, `JobTemplates`, `JobPhotoPicker`, `PhotoManager`, `ResidenceCardSection` (non-JP residence-card status + re-upload in profile settings), `TagInput`, `PhoneInput`, `PrefectureSelect`, `QuickReplies`, `ProfileCompleteness`, `ProfileSubmissionSummary`, `VisaStatusBanner`, `Toast`, `DevicesCard`, `Landing`, `LegalPage`
 - `ui.tsx` — shared primitives: `Spinner`, `ErrorText`, skeletons, `EmptyState`, `PageHeader`, `StatusBadge`, `BackLink`, `ToggleSwitch`
 - `profile.tsx` — `ProfileRow`, `ReviewList`
 - `WorkerProfileFields.tsx` — worker profile form component (form model lives in `src/lib/workerForm.ts`, re-exported here)
@@ -56,7 +56,7 @@ task needs them): `docs/BLOCKERS.md` (~150 KB backend feature specs),
 | `api/models.ts` | Hand-picked type aliases re-exported from `schema.ts` |
 | `api/request.ts` | Transport: `request<T>()`, `ApiError`, `AUTH_EXPIRED_EVENT`, base URL |
 | `api/client.ts` | `ApiClient` — the only way to call the API (one method per endpoint) |
-| `auth/context.tsx` | `AuthProvider` / `useAuth`: session + token lifecycle, account switching |
+| `auth/context.tsx` | `AuthProvider` / `useAuth`: session + token lifecycle, account switching; refreshes `me` on focus/visibility (30s throttle) and polls while status is pending |
 | `auth/accounts.ts` | Remembered-accounts localStorage store |
 | `auth/fakeToken.ts` | Dev/CI fake OTP token (matches API's fake verifier) |
 | `workerForm.ts` | Worker profile form model: types + to/from-payload converters |

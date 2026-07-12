@@ -28,8 +28,6 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
   // No display-name prefill: signup no longer asks for one, and the API
   // derives it from the profile (worker name) on first onboarding.
   const [form, setForm] = useState<WorkerFormValue>(() => emptyWorkerForm());
-  const [frontId, setFrontId] = useState<string | null>(null);
-  const [backId, setBackId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -40,8 +38,9 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
     const ticket = await api.uploadUrl(side);
     // In dev/fake mode we skip the actual PUT; the storage_path is registrable.
     const doc = await api.registerDocument(side, ticket.storage_path);
-    if (side === "residence_card_front") setFrontId(doc.id);
-    else setBackId(doc.id);
+    // The doc id lives in the form model; workerFormToPayload sends it along.
+    if (side === "residence_card_front") patch({ residence_card_front_doc_id: doc.id });
+    else patch({ residence_card_back_doc_id: doc.id });
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -49,11 +48,7 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError("");
     try {
-      await api.onboardWorker({
-        ...workerFormToPayload(form),
-        residence_card_front_doc_id: frontId,
-        residence_card_back_doc_id: backId,
-      });
+      await api.onboardWorker(workerFormToPayload(form));
       onDone();
     } catch (err) {
       setError(humanizeError(err, common("networkError")));
@@ -76,11 +71,11 @@ function WorkerForm({ onDone }: { onDone: () => void }) {
       {nonJp && (
         <div className="flex gap-2 rounded-md bg-amber-50 p-3">
           <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_front")}>
-            {frontId ? "✓ " : ""}
+            {form.residence_card_front_doc_id ? "✓ " : ""}
             {t("residenceCardFront")}
           </button>
           <button type="button" className="btn-secondary" onClick={() => uploadCard("residence_card_back")}>
-            {backId ? "✓ " : ""}
+            {form.residence_card_back_doc_id ? "✓ " : ""}
             {t("residenceCardBack")}
           </button>
         </div>

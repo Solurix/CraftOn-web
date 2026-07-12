@@ -100,12 +100,16 @@ function JobApplicants() {
           {job.data.prefecture} · {job.data.work_date} ·{" "}
           {formatTimeRange(job.data.start_time, job.data.end_time)} · {formatYen(job.data.daily_wage)}
         </p>
-        <Link
-          href={`/post-job?from=${job.data.id}`}
-          className="btn-secondary btn-sm mt-1"
-        >
-          {t("duplicateJob")}
-        </Link>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {job.data.status === "open" && (
+            <Link href={`/post-job?edit=${job.data.id}`} className="btn-secondary btn-sm">
+              {t("editJob")}
+            </Link>
+          )}
+          <Link href={`/post-job?from=${job.data.id}`} className="btn-secondary btn-sm">
+            {t("duplicateJob")}
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-2">

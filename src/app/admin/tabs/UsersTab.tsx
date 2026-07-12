@@ -29,6 +29,8 @@ export function UsersTab() {
   const [userType, setUserType] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  // Optional per-user rejection reason, keyed by user id (sent with Reject).
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const users = useAsync(
     () => api.adminUsers({ user_type: userType || undefined, status: status || undefined }),
     [userType, status],
@@ -107,14 +109,28 @@ export function UsersTab() {
                     {item.contractor_profile.company_name} · {item.contractor_profile.prefecture}
                   </p>
                 )}
-                <p className="text-xs text-gray-400">
-                  {t("documents")}: {item.documents.length}
-                </p>
+                {/* Per-document review status so a rejected document is visible
+                    at a glance (not just a count). */}
+                <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-400">
+                  <span>
+                    {t("documents")}
+                    {item.documents.length === 0 ? `: ${item.documents.length}` : ":"}
+                  </span>
+                  {item.documents.map((d) => (
+                    <span
+                      key={d.id}
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 py-0.5 pl-2 pr-0.5 text-gray-600"
+                    >
+                      {t(`docTypes.${d.doc_type}` as never)}
+                      <StatusBadge status={d.review_status} />
+                    </span>
+                  ))}
+                </div>
                 {awaitingOnboarding && (
                   <p className="text-xs text-amber-700">{t("awaitingOnboarding")}</p>
                 )}
                 {item.user.user_type !== "admin" && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       className="btn-primary"
                       disabled={awaitingOnboarding}
@@ -122,7 +138,18 @@ export function UsersTab() {
                     >
                       {t("approve")}
                     </button>
-                    <button className="btn-danger" onClick={() => run(() => api.rejectUser(item.user.id, "rejected"))}>
+                    <button
+                      className="btn-danger"
+                      onClick={() =>
+                        // Send the typed reason; empty → omit (no hardcoded text).
+                        run(() =>
+                          api.rejectUser(
+                            item.user.id,
+                            (reasons[item.user.id] ?? "").trim() || undefined,
+                          ),
+                        )
+                      }
+                    >
                       {t("reject")}
                     </button>
                     <button
@@ -131,8 +158,17 @@ export function UsersTab() {
                         run(() => api.suspendUser(item.user.id, item.user.status !== "suspended"))
                       }
                     >
-                      {t("suspend")}
+                      {item.user.status === "suspended" ? t("unsuspend") : t("suspend")}
                     </button>
+                    <input
+                      className="field-input min-w-[10rem] flex-1 text-sm"
+                      placeholder={t("rejectReasonPlaceholder")}
+                      aria-label={t("rejectReasonPlaceholder")}
+                      value={reasons[item.user.id] ?? ""}
+                      onChange={(e) =>
+                        setReasons((r) => ({ ...r, [item.user.id]: e.target.value }))
+                      }
+                    />
                   </div>
                 )}
               </li>

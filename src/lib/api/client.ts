@@ -16,6 +16,7 @@ import type {
   Job,
   JobCreate,
   JobPhoto,
+  JobUpdate,
   Login,
   Matching,
   Me,
@@ -173,6 +174,9 @@ export class ApiClient {
   }
   createJob(body: JobCreate) {
     return request<Job>("/jobs", { method: "POST", body, token: this.token });
+  }
+  updateJob(id: string, body: JobUpdate) {
+    return request<Job>(`/jobs/${id}`, { method: "PATCH", body, token: this.token });
   }
   cancelJob(id: string) {
     return request<Job>(`/jobs/${id}/cancel`, { method: "POST", token: this.token });

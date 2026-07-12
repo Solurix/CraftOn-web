@@ -40,6 +40,11 @@ export type WorkerFormValue = {
   years_experience: number;
   has_insurance: boolean;
   visa_expiry_date: string;
+  // Set only when a new residence-card image was uploaded in this form session
+  // (onboarding or profile re-upload); null = unchanged, and the payload then
+  // omits the field so a PATCH never clobbers the stored document link.
+  residence_card_front_doc_id: string | null;
+  residence_card_back_doc_id: string | null;
 };
 
 export function emptyWorkerForm(displayName = ""): WorkerFormValue {
@@ -66,6 +71,8 @@ export function emptyWorkerForm(displayName = ""): WorkerFormValue {
     years_experience: 0,
     has_insurance: false,
     visa_expiry_date: "",
+    residence_card_front_doc_id: null,
+    residence_card_back_doc_id: null,
   };
 }
 
@@ -104,6 +111,9 @@ export function workerFormFromProfile(
     years_experience: wp.years_experience ?? 0,
     has_insurance: wp.has_insurance,
     visa_expiry_date: wp.visa_expiry_date ?? "",
+    // Start null (= unchanged); only a fresh upload in this session sets them.
+    residence_card_front_doc_id: null,
+    residence_card_back_doc_id: null,
   };
 }
 
@@ -158,5 +168,13 @@ export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
     years_experience: historyYears > 0 ? historyYears : Number(v.years_experience) || 0,
     has_insurance: v.has_insurance,
     visa_expiry_date: !isJp && v.visa_expiry_date ? v.visa_expiry_date : null,
+    // Only send document links that were (re)uploaded in this session — an
+    // absent key leaves the server's stored link untouched on PATCH.
+    ...(v.residence_card_front_doc_id
+      ? { residence_card_front_doc_id: v.residence_card_front_doc_id }
+      : {}),
+    ...(v.residence_card_back_doc_id
+      ? { residence_card_back_doc_id: v.residence_card_back_doc_id }
+      : {}),
   };
 }

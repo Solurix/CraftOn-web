@@ -252,6 +252,9 @@
     "applied": "Applied",
     "postTitle": "Post a job",
     "create": "Post",
+    "editTitle": "Edit job",
+    "saveChanges": "Save changes",
+    "updated": "Job updated",
     "outOfArea": "Outside the service area. Please join the waitlist.",
     "detailTitle": "Job detail",
     "save": "Save job",
@@ -281,6 +284,7 @@
     "trust": "Trust score",
     "emptyHint": "Browse open jobs and apply — your applications will show up here.",
     "duplicateJob": "Duplicate this job",
+    "editJob": "Edit this job",
     "sortApplicants": "Sort applicants",
     "sortTrust": "Highest rated",
     "sortRecent": "Most recent",
@@ -387,7 +391,13 @@
     "accountSaved": "Account updated",
     "photos": "Work photos",
     "changePassword": "Change password",
-    "changePasswordHint": "Change the password you use to log in (8+ characters)."
+    "changePasswordHint": "Change the password you use to log in (8+ characters).",
+    "residenceTitle": "Residence card / visa documents",
+    "residenceMissing": "Not uploaded",
+    "residenceUpload": "Upload",
+    "residenceReupload": "Re-upload",
+    "residenceRejected": "This document was rejected. Please upload a new image.",
+    "residenceUploaded": "New image uploaded — save your profile to submit it for review."
   },
   "admin": {
     "vettingTitle": "Pending review",
@@ -439,7 +449,17 @@
     "merge": "Merge",
     "promote": "Promote to trade",
     "mergeDone": "Merged into “{name}” ({workers} workers, {jobs} jobs updated).",
-    "noCustomTrades": "No unregistered trades."
+    "noCustomTrades": "No unregistered trades.",
+    "unsuspend": "Unsuspend",
+    "rejectReasonPlaceholder": "Rejection reason (optional)",
+    "docTypes": {
+      "photo_id": "Photo ID",
+      "residence_card_front": "Residence card (front)",
+      "residence_card_back": "Residence card (back)",
+      "qualification": "Qualification",
+      "insurance_proof": "Insurance proof",
+      "job_photo": "Work photo"
+    }
   },
   "status": {
     "pending": "Pending",

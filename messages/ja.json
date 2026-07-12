@@ -252,6 +252,9 @@
     "applied": "応募済み",
     "postTitle": "求人を投稿",
     "create": "投稿する",
+    "editTitle": "求人を編集",
+    "saveChanges": "変更を保存",
+    "updated": "求人を更新しました",
     "outOfArea": "対象エリア外です。順番待ちにご登録ください。",
     "detailTitle": "求人詳細",
     "save": "求人を保存",
@@ -281,6 +284,7 @@
     "trust": "信頼スコア",
     "emptyHint": "募集中の求人に応募すると、ここに表示されます。",
     "duplicateJob": "この求人を複製",
+    "editJob": "この求人を編集",
     "sortApplicants": "応募者を並び替え",
     "sortTrust": "評価が高い順",
     "sortRecent": "新着順",
@@ -387,7 +391,13 @@
     "accountSaved": "アカウントを更新しました",
     "photos": "作業写真",
     "changePassword": "パスワードを変更",
-    "changePasswordHint": "ログインに使うパスワードを変更します（8文字以上）。"
+    "changePasswordHint": "ログインに使うパスワードを変更します（8文字以上）。",
+    "residenceTitle": "在留カード・在留資格書類",
+    "residenceMissing": "未提出",
+    "residenceUpload": "アップロード",
+    "residenceReupload": "再アップロード",
+    "residenceRejected": "この書類は却下されました。新しい画像をアップロードしてください。",
+    "residenceUploaded": "新しい画像をアップロードしました。プロフィールを保存すると審査に提出されます。"
   },
   "admin": {
     "vettingTitle": "審査待ち",
@@ -439,7 +449,17 @@
     "merge": "統合",
     "promote": "職種として登録",
     "mergeDone": "「{name}」に統合しました（職人 {workers}件・求人 {jobs}件を更新）。",
-    "noCustomTrades": "未登録の職種はありません。"
+    "noCustomTrades": "未登録の職種はありません。",
+    "unsuspend": "停止を解除",
+    "rejectReasonPlaceholder": "却下理由（任意）",
+    "docTypes": {
+      "photo_id": "顔写真付き身分証",
+      "residence_card_front": "在留カード（表）",
+      "residence_card_back": "在留カード（裏）",
+      "qualification": "資格証明",
+      "insurance_proof": "保険加入証明",
+      "job_photo": "作業写真"
+    }
   },
   "status": {
     "pending": "審査中",

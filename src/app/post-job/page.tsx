@@ -18,10 +18,12 @@ import { tradeOptionsFor } from "@/lib/trades";
 import { useAsync } from "@/lib/useAsync";
 import {
   DEFAULTS,
+  diffJobForm,
   END_TIME_CHOICES,
   jobToForm,
   minutes,
   normalizeForm,
+  toApiEndTime,
   type JobForm,
 } from "./jobForm";
 
@@ -37,9 +39,13 @@ function PostJobForm() {
   const router = useRouter();
   const params = useSearchParams();
   const fromId = params.get("from");
+  const editId = params.get("edit");
+  const isEdit = editId !== null;
 
   const v = useTranslations("validation");
   const [form, setForm] = useState<JobForm>(DEFAULTS);
+  // Edit mode: the loaded job as a form, to diff against on submit.
+  const [original, setOriginal] = useState<JobForm | null>(null);
   const [restored, setRestored] = useState(false);
   const [error, setError] = useState("");
   const [attempted, setAttempted] = useState(false);
@@ -59,10 +65,14 @@ function PostJobForm() {
   const endMin = minutes(form.end_time); // 0..36h scale
   const allTrades = [...form.trades, ...form.trades_other];
 
+  // Editing must not force a date change on a near/past job when the user is
+  // only touching other fields — skip datePast while work_date is unchanged.
+  const dateUnchanged = isEdit && original !== null && form.work_date === original.work_date;
+
   const issues: string[] = [];
   if (allTrades.length === 0) issues.push(v("tradesRequired"));
   if (!form.work_date) issues.push(v("dateRequired"));
-  else if (form.work_date < todayTokyo) issues.push(v("datePast"));
+  else if (form.work_date < todayTokyo && !dateUnchanged) issues.push(v("datePast"));
   if (endMin <= startMin) issues.push(v("endAfterStart"));
   else if (endMin - startMin > 24 * 60) issues.push(v("shiftTooLong"));
   if (!(Number(form.daily_wage) > 0)) issues.push(v("wagePositive"));
@@ -71,18 +81,23 @@ function PostJobForm() {
   const set = (k: keyof JobForm, val: JobForm[keyof JobForm]) =>
     setForm((f) => ({ ...f, [k]: val }));
 
-  // On mount: prefill from a job being duplicated, or restore an autosaved draft.
+  // On mount: prefill from a job being edited or duplicated, or restore an
+  // autosaved draft (drafts are for new posts only).
   useEffect(() => {
     let cancelled = false;
+    const loadId = editId ?? fromId;
     (async () => {
-      if (fromId) {
+      if (loadId) {
         try {
           const [job, trades] = await Promise.all([
-            api.job(fromId),
+            api.job(loadId),
             api.trades().catch(() => []),
           ]);
-          if (!cancelled)
-            setForm(jobToForm(job, trades.map((x) => x.name_ja)));
+          if (!cancelled) {
+            const loaded = jobToForm(job, trades.map((x) => x.name_ja), editId !== null);
+            setForm(loaded);
+            if (editId !== null) setOriginal(loaded);
+          }
         } catch {
           /* fall back to defaults */
         }
@@ -98,13 +113,14 @@ function PostJobForm() {
     return () => {
       cancelled = true;
     };
-  }, [fromId, api]);
+  }, [fromId, editId, api]);
 
-  // Autosave the in-progress form so a dropped session isn't lost.
+  // Autosave the in-progress form so a dropped session isn't lost. Edits are
+  // not drafts — never let them clobber a new-post draft.
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated.current || isEdit) return;
     writeJSON(KEY.jobDraft, form);
-  }, [form]);
+  }, [form, isEdit]);
 
   const discardDraft = () => {
     writeJSON(KEY.jobDraft, null);
@@ -144,21 +160,24 @@ function PostJobForm() {
       setAttempted(true);
       return;
     }
+    if (isEdit && original === null) return; // job not loaded yet — nothing to diff
     setBusy(true);
     setError("");
     try {
-      // 24+ end times wrap to the real clock time; the API stores end <= start
-      // as "ends the next day".
-      const endH = Number(form.end_time.slice(0, 2));
-      const apiEnd =
-        endH >= 24
-          ? `${String(endH - 24).padStart(2, "0")}:${form.end_time.slice(3, 5)}`
-          : form.end_time;
+      if (isEdit && editId !== null && original !== null) {
+        // Send ONLY what changed: unchanged core terms must not trip the
+        // server's terms lock. The 409 rule messages arrive localized.
+        const payload = diffJobForm(form, original);
+        if (Object.keys(payload).length > 0) await api.updateJob(editId, payload);
+        toast.success(t("updated"));
+        router.push(`/my-jobs/${editId}`);
+        return;
+      }
       const job = await api.createJob({
         trades: allTrades,
         work_date: form.work_date,
         start_time: `${form.start_time}:00`,
-        end_time: `${apiEnd}:00`,
+        end_time: `${toApiEndTime(form.end_time)}:00`,
         prefecture: form.prefecture,
         area: form.area || null,
         address: form.address || null,
@@ -191,7 +210,9 @@ function PostJobForm() {
 
   return (
     <form onSubmit={submit} className="card space-y-3">
-      <h1 className="text-lg font-bold tracking-tight sm:text-xl">{t("postTitle")}</h1>
+      <h1 className="text-lg font-bold tracking-tight sm:text-xl">
+        {isEdit ? t("editTitle") : t("postTitle")}
+      </h1>
 
       {restored && (
         <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
@@ -306,7 +327,7 @@ function PostJobForm() {
         </ul>
       )}
       <button className="btn-primary w-full" disabled={busy}>
-        {busy ? common("loading") : t("create")}
+        {busy ? common("loading") : isEdit ? t("saveChanges") : t("create")}
       </button>
       <ErrorText message={error} />
     </form>

@@ -32,6 +32,7 @@ export function WorkerProfileFields({
   onChange,
   tradeOptions,
   registration = false,
+  residenceDocsSlot,
 }: {
   value: WorkerFormValue;
   onChange: (patch: Partial<WorkerFormValue>) => void;
@@ -41,6 +42,10 @@ export function WorkerProfileFields({
   // Registration shows only the essentials; work history, qualifications,
   // skills, tools and bio are added later from profile settings.
   registration?: boolean;
+  // Rendered inside the non-JP visa section, right after the expiry field —
+  // the profile editor injects the API-aware residence-card upload UI here so
+  // this component stays a pure form.
+  residenceDocsSlot?: React.ReactNode;
 }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
@@ -149,14 +154,17 @@ export function WorkerProfileFields({
       </fieldset>
 
       {!isJp && (
-        <Field label={t("visaExpiry")}>
-          <input
-            type="date"
-            className="field-input"
-            value={v.visa_expiry_date}
-            onChange={(e) => onChange({ visa_expiry_date: e.target.value })}
-          />
-        </Field>
+        <>
+          <Field label={t("visaExpiry")}>
+            <input
+              type="date"
+              className="field-input"
+              value={v.visa_expiry_date}
+              onChange={(e) => onChange({ visa_expiry_date: e.target.value })}
+            />
+          </Field>
+          {residenceDocsSlot}
+        </>
       )}
 
       {/* Worker class: radio. */}
