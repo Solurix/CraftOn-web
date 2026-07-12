@@ -114,16 +114,17 @@ export function ResidenceCardSection({
     setError("");
     try {
       const ticket = await api.uploadUrl(side, file.type || "image/jpeg");
-      // Bytes go straight to storage via the signed URL. In dev (fake storage)
-      // the host isn't reachable; still register so the flow works end-to-end.
-      try {
-        await fetch(ticket.upload_url, {
+      // Bytes go straight to storage via the signed URL. On real storage the
+      // PUT must succeed before registering — a card record with no image
+      // behind it can't be reviewed. Dev/preview fake storage (unreachable
+      // host by design) skips the PUT so the flow stays demoable.
+      if (!ticket.upload_url.includes("fake-storage.local")) {
+        const put = await fetch(ticket.upload_url, {
           method: ticket.method,
           headers: ticket.headers,
           body: file,
         });
-      } catch {
-        /* best-effort byte upload; real GCS succeeds in prod */
+        if (!put.ok) throw new Error(common("networkError"));
       }
       const doc = await api.registerDocument(side, ticket.storage_path);
       onChange({ [SIDE_TO_FIELD[side]]: doc.id });

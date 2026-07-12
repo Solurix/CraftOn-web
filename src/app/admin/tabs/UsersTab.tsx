@@ -78,6 +78,9 @@ export function UsersTab() {
               item.user.user_type !== "admin" &&
               !item.worker_profile &&
               !item.contractor_profile;
+            const vettingDocs = item.documents.filter(
+              (d) => d.doc_type !== "job_photo",
+            );
             return (
               <li key={item.user.id} className="card space-y-2">
                 <div className="flex items-start justify-between gap-2">
@@ -110,13 +113,14 @@ export function UsersTab() {
                   </p>
                 )}
                 {/* Per-document review status so a rejected document is visible
-                    at a glance (not just a count). */}
+                    at a glance (not just a count). Work photos are post-moderated
+                    (not part of vetting), so they're left out of this list. */}
                 <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-400">
                   <span>
                     {t("documents")}
-                    {item.documents.length === 0 ? `: ${item.documents.length}` : ":"}
+                    {vettingDocs.length === 0 ? `: ${vettingDocs.length}` : ":"}
                   </span>
-                  {item.documents.map((d) => (
+                  {vettingDocs.map((d) => (
                     <span
                       key={d.id}
                       className="inline-flex items-center gap-1 rounded-full border border-gray-200 py-0.5 pl-2 pr-0.5 text-gray-600"

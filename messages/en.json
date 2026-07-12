@@ -556,9 +556,9 @@
     "empty": "No photos yet.",
     "uploading": "Uploading…",
     "added": "Photo added",
-    "pending": "In review",
     "jobPhotos": "Site photos",
-    "reuseHint": "Tap an uploaded photo to reuse it (＋ to add a new one)."
+    "reuseHint": "Tap an uploaded photo to reuse it (＋ to add a new one).",
+    "hidden": "Hidden"
   },
   "legal": {
     "terms": "Terms",
