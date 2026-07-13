@@ -2,167 +2,19 @@
 
 import { useTranslations } from "next-intl";
 
-import type { WorkerOnboarding, WorkerProfile } from "@/lib/api/models";
 import { COMMON_TRADES } from "@/lib/trades";
+import type {
+  TradeOption,
+  WorkerFormValue,
+  WorkHistoryRow,
+} from "@/lib/workerForm";
 import { PrefectureSelect } from "./PrefectureSelect";
 import { TagInput } from "./TagInput";
 
-export type WorkHistoryRow = {
-  company: string;
-  trade: string;
-  years: number;
-  description: string;
-};
-
-// A picker option for the trade catalog (value = canonical stored name_ja,
-// label = localized display). Falls back to COMMON_TRADES when the catalog
-// hasn't loaded.
-export type TradeOption = { value: string; label: string };
-
-// Controlled form state shared by the onboarding form and the profile editor.
-export type WorkerFormValue = {
-  display_name: string;
-  family_name: string;
-  given_name: string;
-  middle_name: string;
-  name_kana: string;
-  email: string;
-  nationality: string; // "JP" or another 2-letter code
-  worker_class: "employee" | "freelance";
-  trades: string[]; // selected catalog-trade chips only
-  trades_other: string[]; // custom trades (merged on submit)
-  tools: string[];
-  current_employer: string;
-  current_employer_public: boolean;
-  prefecture: string;
-  area: string;
-  work_history: WorkHistoryRow[];
-  qualifications: string[];
-  skills: string[];
-  bio: string;
-  years_experience: number;
-  has_insurance: boolean;
-  visa_expiry_date: string;
-};
-
-export function emptyWorkerForm(displayName = ""): WorkerFormValue {
-  return {
-    display_name: displayName,
-    family_name: "",
-    given_name: "",
-    middle_name: "",
-    name_kana: "",
-    email: "",
-    nationality: "JP",
-    worker_class: "employee",
-    trades: [],
-    trades_other: [],
-    tools: [],
-    current_employer: "",
-    current_employer_public: false,
-    prefecture: "",
-    area: "",
-    work_history: [],
-    qualifications: [],
-    skills: [],
-    bio: "",
-    years_experience: 0,
-    has_insurance: false,
-    visa_expiry_date: "",
-  };
-}
-
-export function workerFormFromProfile(
-  displayName: string,
-  wp: WorkerProfile,
-  catalogValues: readonly string[] = COMMON_TRADES,
-): WorkerFormValue {
-  return {
-    display_name: displayName,
-    // Legacy profiles predate the structured parts — surface the stored
-    // full_name in the family field so nothing silently disappears.
-    family_name: wp.family_name ?? wp.full_name ?? "",
-    given_name: wp.given_name ?? "",
-    middle_name: wp.middle_name ?? "",
-    name_kana: wp.name_kana ?? "",
-    email: wp.email ?? "",
-    nationality: wp.nationality ?? "JP",
-    worker_class: wp.worker_class as "employee" | "freelance",
-    trades: (wp.trades ?? []).filter((t) => catalogValues.includes(t)),
-    trades_other: (wp.trades ?? []).filter((t) => !catalogValues.includes(t)),
-    tools: wp.tools ?? [],
-    current_employer: wp.current_employer ?? "",
-    current_employer_public: wp.current_employer_public ?? false,
-    prefecture: wp.prefecture ?? "",
-    area: wp.area ?? "",
-    work_history: (wp.work_history ?? []).map((w) => ({
-      company: w.company ?? "",
-      trade: w.trade ?? "",
-      years: w.years ?? 0,
-      description: w.description ?? "",
-    })),
-    qualifications: wp.qualifications ?? [],
-    skills: wp.skills ?? [],
-    bio: wp.bio ?? "",
-    years_experience: wp.years_experience ?? 0,
-    has_insurance: wp.has_insurance,
-    visa_expiry_date: wp.visa_expiry_date ?? "",
-  };
-}
-
-// True when the nationality choice is complete: Japan, or a non-JP 2-letter code.
-export function isWorkerFormValid(v: WorkerFormValue): boolean {
-  return (
-    v.nationality.toUpperCase() === "JP" || v.nationality.trim().length === 2
-  );
-}
-
-// Build the API payload from the form. Shared by onboarding (WorkerOnboarding)
-// and PATCH (WorkerUpdate) — both accept this superset of keys.
-export function workerFormToPayload(v: WorkerFormValue): WorkerOnboarding {
-  const isJp = v.nationality.toUpperCase() === "JP";
-  // Merge chip-selected catalog trades with the custom ones (deduped).
-  const trades = [...new Set([...v.trades, ...v.trades_other])];
-  const workHistory = v.work_history
-    .filter((w) => w.company.trim() || w.description.trim())
-    .map((w) => ({
-      company: w.company.trim(),
-      trade: w.trade.trim(),
-      years: Number(w.years) || 0,
-      description: w.description.trim(),
-    }));
-  // The dedicated years-of-experience input is gone (redundant with the work
-  // history); derive the total from the history when it has any years.
-  const historyYears = workHistory.reduce((sum, w) => sum + w.years, 0);
-  return {
-    // Blank means "not chosen" — the API then keeps/derives a sensible default
-    // (worker's name) instead of persisting an empty display name.
-    display_name: v.display_name || null,
-    // Never coerce a blank "Other" nationality to JP — the form blocks submit
-    // until a 2-letter code is entered (isWorkerFormValid), so the visa gate
-    // can't be bypassed.
-    nationality: isJp ? "JP" : v.nationality.toUpperCase().slice(0, 2),
-    worker_class: v.worker_class,
-    trades,
-    tools: v.tools,
-    family_name: v.family_name.trim() || null,
-    given_name: v.given_name.trim() || null,
-    middle_name: v.middle_name.trim() || null,
-    name_kana: v.name_kana || null,
-    email: v.email || null,
-    current_employer: v.current_employer || null,
-    current_employer_public: v.current_employer_public,
-    prefecture: v.prefecture || null,
-    area: v.area || null,
-    work_history: workHistory,
-    qualifications: v.qualifications,
-    skills: v.skills,
-    bio: v.bio || null,
-    years_experience: historyYears > 0 ? historyYears : Number(v.years_experience) || 0,
-    has_insurance: v.has_insurance,
-    visa_expiry_date: !isJp && v.visa_expiry_date ? v.visa_expiry_date : null,
-  };
-}
+// The form model (types + helpers) lives in @/lib/workerForm; re-export it so
+// existing importers of this module keep working unchanged.
+export * from "@/lib/workerForm";
+export type { TradeOption, WorkerFormValue, WorkHistoryRow };
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   // Wrap the control inside the <label> so the field is programmatically named
@@ -180,6 +32,7 @@ export function WorkerProfileFields({
   onChange,
   tradeOptions,
   registration = false,
+  residenceDocsSlot,
 }: {
   value: WorkerFormValue;
   onChange: (patch: Partial<WorkerFormValue>) => void;
@@ -189,6 +42,10 @@ export function WorkerProfileFields({
   // Registration shows only the essentials; work history, qualifications,
   // skills, tools and bio are added later from profile settings.
   registration?: boolean;
+  // Rendered inside the non-JP visa section, right after the expiry field —
+  // the profile editor injects the API-aware residence-card upload UI here so
+  // this component stays a pure form.
+  residenceDocsSlot?: React.ReactNode;
 }) {
   const t = useTranslations("onboarding");
   const common = useTranslations("common");
@@ -297,14 +154,17 @@ export function WorkerProfileFields({
       </fieldset>
 
       {!isJp && (
-        <Field label={t("visaExpiry")}>
-          <input
-            type="date"
-            className="field-input"
-            value={v.visa_expiry_date}
-            onChange={(e) => onChange({ visa_expiry_date: e.target.value })}
-          />
-        </Field>
+        <>
+          <Field label={t("visaExpiry")}>
+            <input
+              type="date"
+              className="field-input"
+              value={v.visa_expiry_date}
+              onChange={(e) => onChange({ visa_expiry_date: e.target.value })}
+            />
+          </Field>
+          {residenceDocsSlot}
+        </>
       )}
 
       {/* Worker class: radio. */}

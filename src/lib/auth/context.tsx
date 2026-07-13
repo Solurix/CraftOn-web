@@ -118,6 +118,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", onStorage);
   }, [fetchMe]);
 
+  // Extracted so the effect below can key on the status string itself (the
+  // exhaustive-deps rule rejects member expressions in the deps array).
+  const meStatus = me?.user.status;
+
+  // Keep `me` fresh without a hard reload: refetch on window focus /
+  // visibilitychange (throttled to once per 30s so the two firing together
+  // don't double-fetch), and, while the account is still pending, poll every
+  // 30s so an admin approval flips "under review" screens automatically.
+  useEffect(() => {
+    if (!token) return;
+    const REFRESH_MS = 30_000;
+    // Start the throttle window now: this effect (re)mounts right after a
+    // successful fetch (hydrate/login/status change), so an immediate
+    // focus/visibility event shouldn't refetch again.
+    let last = Date.now();
+    const refetch = () => {
+      last = Date.now();
+      void fetchMe(token);
+    };
+    const onWake = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - last < REFRESH_MS) return;
+      refetch();
+    };
+    window.addEventListener("focus", onWake);
+    document.addEventListener("visibilitychange", onWake);
+    // Only pending accounts poll; approved/suspended rely on focus refresh.
+    const interval =
+      meStatus === "pending" ? window.setInterval(refetch, REFRESH_MS) : undefined;
+    return () => {
+      window.removeEventListener("focus", onWake);
+      document.removeEventListener("visibilitychange", onWake);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
+  }, [token, meStatus, fetchMe]);
+
   // The API client fires this on a 401 to an authenticated request (e.g. this
   // device was revoked) — drop the session so the app falls back to /login.
   useEffect(() => {

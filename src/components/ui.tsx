@@ -127,6 +127,37 @@ export function PageHeader({
   );
 }
 
+// Accessible on/off toggle rendered as a pill switch. `shrink-0` keeps it from
+// being squeezed when placed inside a flex row next to long labels.
+export function ToggleSwitch({
+  checked,
+  onClick,
+  "aria-label": ariaLabel,
+}: {
+  checked: boolean;
+  onClick: () => void;
+  "aria-label": string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+        checked ? "bg-brand" : "bg-gray-300"
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+          checked ? "translate-x-5" : "translate-x-0.5"
+        }`}
+      />
+    </button>
+  );
+}
+
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   approved: "bg-green-100 text-green-800",

@@ -33,6 +33,8 @@ messages/{ja,en}.json  UI catalogs (keep keys in parity)
 public/                manifest.webmanifest, sw.js, icons
 tests/                 Vitest; tests/e2e Playwright
 ```
+Per-file index: **`docs/MAP.md`** (what lives where, what's generated/large,
+where to change what) — read it before searching the tree.
 
 ## Conventions
 - **No hardcoded user-facing strings** — everything via next-intl keys; add to

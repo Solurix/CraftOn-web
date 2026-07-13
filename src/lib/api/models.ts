@@ -12,6 +12,7 @@ export type WorkerPublic = S["WorkerPublicOut"];
 export type ContractorPublic = S["ContractorPublicOut"];
 export type Job = S["JobOut"];
 export type JobCreate = S["JobCreate"];
+export type JobUpdate = S["JobUpdate"];
 export type Application = S["ApplicationOut"];
 export type Applicant = S["ApplicantOut"];
 export type Matching = S["MatchingOut"];

@@ -59,16 +59,18 @@ export function PhotoManager() {
     setBusy(true);
     try {
       const ticket = await api.uploadUrl(DOC_TYPE, file.type || "image/jpeg");
-      // Upload the bytes directly to storage. In dev (fake storage) the host
-      // isn't reachable; we still register so the record/flow works.
-      try {
-        await fetch(ticket.upload_url, {
+      // Upload the bytes directly to storage. Registering a photo whose bytes
+      // never landed would create a blank gallery entry, so on real storage the
+      // PUT must succeed. Only dev/preview fake storage (an unreachable host by
+      // design) skips the byte upload so the flow stays demoable.
+      const isFakeStorage = ticket.upload_url.includes("fake-storage.local");
+      if (!isFakeStorage) {
+        const put = await fetch(ticket.upload_url, {
           method: ticket.method,
           headers: ticket.headers,
           body: file,
         });
-      } catch {
-        /* best-effort byte upload; real GCS succeeds in prod */
+        if (!put.ok) throw new Error(common("networkError"));
       }
       await api.registerDocument(DOC_TYPE, ticket.storage_path);
       toast.success(t("added"));
@@ -114,9 +116,11 @@ export function PhotoManager() {
           {photos.map((d) => (
             <div key={d.id} className="relative">
               <PhotoThumb id={d.id} />
-              {d.review_status === "pending" && (
-                <span className="absolute left-1 top-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
-                  {t("pending")}
+              {/* Photos are post-moderated: no per-photo approval exists, so the
+                  only state worth flagging is one an admin removed. */}
+              {d.review_status === "rejected" && (
+                <span className="absolute left-1 top-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800">
+                  {t("hidden")}
                 </span>
               )}
             </div>

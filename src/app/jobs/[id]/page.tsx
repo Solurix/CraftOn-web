@@ -10,6 +10,7 @@ import { SaveJobButton } from "@/components/SaveJobButton";
 import { useToast } from "@/components/Toast";
 import { BackLink, DetailSkeleton, ErrorText, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { formatTimeRange, formatYen } from "@/lib/format";
 import { prefectureLabel } from "@/lib/prefectures";
 import { useAsync } from "@/lib/useAsync";
@@ -17,6 +18,7 @@ import { useAsync } from "@/lib/useAsync";
 function JobDetail() {
   const t = useTranslations("jobs");
   const ph = useTranslations("photos");
+  const common = useTranslations("common");
   const locale = useLocale();
   const nav = useTranslations("nav");
   const { id } = useParams<{ id: string }>();
@@ -53,7 +55,7 @@ function JobDetail() {
       setApplied(true);
       toast.success(t("applied"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setApplyError(msg);
       toast.error(msg);
     } finally {

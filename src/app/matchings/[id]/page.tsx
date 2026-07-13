@@ -11,11 +11,13 @@ import { useToast } from "@/components/Toast";
 import { BackLink, DetailSkeleton, ErrorText, Skeleton, StatusBadge } from "@/components/ui";
 import { useAuth } from "@/lib/auth/context";
 import type { Matching } from "@/lib/api/models";
+import { humanizeError } from "@/lib/errorMessage";
 import { formatYen } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
 function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: string; onChanged: () => void }) {
   const t = useTranslations("matchings");
+  const common = useTranslations("common");
   const { api } = useAuth();
   const toast = useToast();
   const [error, setError] = useState("");
@@ -27,7 +29,7 @@ function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: st
       if (successMsg) toast.success(successMsg);
       onChanged();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -81,6 +83,7 @@ function Lifecycle({ matching, role, onChanged }: { matching: Matching; role: st
 
 function ChatPanel({ matchingId }: { matchingId: string }) {
   const t = useTranslations("chat");
+  const common = useTranslations("common");
   const { api, me } = useAuth();
   const toast = useToast();
   const { data, loading, reload } = useAsync(() => api.messages(matchingId), [matchingId]);
@@ -96,7 +99,7 @@ function ChatPanel({ matchingId }: { matchingId: string }) {
       setText("");
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "error");
+      toast.error(humanizeError(e, common("networkError")));
     } finally {
       setBusy(false);
     }
@@ -156,6 +159,7 @@ function ChatPanel({ matchingId }: { matchingId: string }) {
 
 function ReviewPanel({ matchingId, onDone }: { matchingId: string; onDone: () => void }) {
   const t = useTranslations("reviews");
+  const common = useTranslations("common");
   const { api } = useAuth();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -170,7 +174,7 @@ function ReviewPanel({ matchingId, onDone }: { matchingId: string; onDone: () =>
       setDone(true);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "error");
+      setError(humanizeError(e, common("networkError")));
     }
   };
 

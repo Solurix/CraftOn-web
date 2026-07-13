@@ -45,14 +45,16 @@ export function JobPhotoPicker({
     setBusy(true);
     try {
       const ticket = await api.uploadUrl(DOC_TYPE, file.type || "image/jpeg");
-      try {
-        await fetch(ticket.upload_url, {
+      // On real storage the byte upload must succeed before registering —
+      // otherwise the job would reference a blank photo. Only dev/preview fake
+      // storage (unreachable host by design) skips the PUT.
+      if (!ticket.upload_url.includes("fake-storage.local")) {
+        const put = await fetch(ticket.upload_url, {
           method: ticket.method,
           headers: ticket.headers,
           body: file,
         });
-      } catch {
-        /* best-effort byte upload; real GCS succeeds in prod */
+        if (!put.ok) throw new Error(common("networkError"));
       }
       const doc = await api.registerDocument(DOC_TYPE, ticket.storage_path);
       onChange([...selected, doc.id]); // a fresh upload is meant for this job

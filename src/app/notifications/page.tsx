@@ -8,12 +8,14 @@ import { useToast } from "@/components/Toast";
 import { EmptyState, ErrorText, PageHeader, SkeletonList } from "@/components/ui";
 import type { Notification } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/context";
+import { humanizeError } from "@/lib/errorMessage";
 import { formatDate } from "@/lib/format";
 import { emitNotificationsChanged } from "@/lib/notifications";
 import { useAsync } from "@/lib/useAsync";
 
 function Inbox() {
   const t = useTranslations("notifications");
+  const common = useTranslations("common");
   const { api } = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -46,7 +48,7 @@ function Inbox() {
       toast.success(t("allRead"));
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "error");
+      toast.error(humanizeError(e, common("networkError")));
     }
   };
 

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { DevicesCard } from "@/components/DevicesCard";
 import { PhotoManager } from "@/components/PhotoManager";
 import { PrefectureSelect } from "@/components/PrefectureSelect";
+import { ResidenceCardSection } from "@/components/ResidenceCardSection";
 import { ProfileCompleteness } from "@/components/ProfileCompleteness";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToast } from "@/components/Toast";
@@ -91,6 +92,9 @@ function WorkerSettingsForm({ me, catalog }: { me: Me; catalog: Trade[] }) {
         value={form}
         onChange={patch}
         tradeOptions={tradeOptionsFor(catalog, locale)}
+        // Non-JP workers can re-upload rejected/missing residence documents
+        // here; saving the form PATCHes the new doc ids to /workers/me.
+        residenceDocsSlot={<ResidenceCardSection value={form} onChange={patch} />}
       />
       <button className="btn-primary w-full" disabled={!isWorkerFormValid(form)}>
         {common("save")}
@@ -138,7 +142,7 @@ function ContractorSettings({ me }: { me: Me }) {
       setSaved(true);
       toast.success(p("saved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -189,6 +193,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function SetPasswordCard() {
   const p = useTranslations("profile");
   const auth = useTranslations("auth");
+  const common = useTranslations("common");
   const { api, refresh } = useAuth();
   const toast = useToast();
   const [password, setPassword] = useState("");
@@ -206,7 +211,7 @@ function SetPasswordCard() {
       setSaved(true);
       toast.success(p("passwordSaved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
@@ -253,7 +258,7 @@ function AccountSettingsCard({ me }: { me: Me }) {
       await refresh();
       toast.success(p("accountSaved"));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+      const msg = humanizeError(e, common("networkError"));
       setError(msg);
       toast.error(msg);
     }
