@@ -1,3 +1,8 @@
+> ⚠️ **This repository has moved.** CRAFT-ON is now a single **monorepo** at
+> [`Solurix/CraftOn-infra`](https://github.com/Solurix/CraftOn-infra)
+> (see `docs/adr/0010-monorepo.md`). This repo is a **read-only archive** — all
+> new work happens in the monorepo, under `web/`. Its git history stays here.
+
 # crafton-web
 
 Web/PWA frontend for **CRAFT-ON** — on-demand spot matching for construction
